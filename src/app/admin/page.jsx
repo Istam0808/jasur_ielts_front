@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import "./styles/style_admin.scss";
 
-// Имитация: правильные данные для входа (только frontend).
+// Demo: valid credentials (frontend only).
 const MOCK_LOGIN = "admin";
 const MOCK_PASSWORD = "admin";
 
@@ -19,11 +19,11 @@ export default function AdminLoginPage() {
     setError("");
 
     if (login.trim() !== MOCK_LOGIN || password !== MOCK_PASSWORD) {
-      setError("Неверный логин или пароль");
+      setError("Invalid login or password");
       return;
     }
 
-    // Имитация успешного входа: сохраняем в sessionStorage и переходим в админку.
+    // Demo: save to sessionStorage and redirect to admin panel.
     if (typeof window !== "undefined") {
       sessionStorage.setItem("adminAuth", "true");
     }
@@ -33,12 +33,12 @@ export default function AdminLoginPage() {
   return (
     <div className="admin-login">
       <div className="admin-login__card">
-        <h1 className="admin-login__title">Вход в админку</h1>
-        <p className="admin-login__subtitle">Jasur IELTS — панель администратора</p>
+        <h1 className="admin-login__title">Admin login</h1>
+        <p className="admin-login__subtitle">Jasur IELTS — admin panel</p>
 
         <form className="admin-login__form" onSubmit={handleSubmit} noValidate>
           <label className="admin-login__label" htmlFor="admin-login">
-            Логин
+            Login
           </label>
           <input
             id="admin-login"
@@ -46,13 +46,13 @@ export default function AdminLoginPage() {
             className="admin-login__input"
             value={login}
             onChange={(e) => setLogin(e.target.value)}
-            placeholder="Введите логин"
+            placeholder="Enter login"
             autoComplete="username"
             autoFocus
           />
 
           <label className="admin-login__label" htmlFor="admin-password">
-            Пароль
+            Password
           </label>
           <input
             id="admin-password"
@@ -60,14 +60,14 @@ export default function AdminLoginPage() {
             className="admin-login__input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Введите пароль"
+            placeholder="Enter password"
             autoComplete="current-password"
           />
 
           {error && <p className="admin-login__error" role="alert">{error}</p>}
 
           <button type="submit" className="admin-login__btn">
-            Войти
+            Sign in
           </button>
         </form>
       </div>

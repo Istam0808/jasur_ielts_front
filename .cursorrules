@@ -1,3 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
 ######################################################################
 # Cursor Workspace Rules — jasur_ielts_front
 # Purpose: Ensure consistent, professional-grade delivery across code,
@@ -16,12 +21,14 @@ src/firebase/**          # Firebase config — when added
 src/hooks/**             # Custom hooks — when added
 src/store/**             # State management — when added
 src/utils/**             # Utilities — when added
+src/i18n/**              # Internationalization — when added
 src/old-components/**    # Legacy components — when added
 public/**                # Public assets
 src/middleware.js        # Next.js middleware — when added
 
 ## Libraries & Key Files
 **/*embla*.{js,jsx,ts,tsx}      # Embla carousel
+**/*i18n*.{js,jsx,ts,tsx}       # i18next
 **/*firebase*.{js,jsx,ts,tsx}   # Firebase
 *.config.{js,mjs,ts}            # Config files
 next.config.mjs                 # Next.js config
@@ -37,7 +44,8 @@ jsconfig.json                   # JS config
 3) Follow the existing architecture and naming conventions.
 4) Ship accessible, mobile-first, and performant experiences by default.
 5) Use the latest stable best practices; remove deprecated patterns.
-6) Always provide meaningful loading, empty, and error states.
+6) For new UI work, design for internationalization (i18n) from the start.
+7) Always provide meaningful loading, empty, and error states.
 
 ######################################################################
 # React & Next.js Conventions
@@ -81,6 +89,15 @@ jsconfig.json                   # JS config
 - Typography: -apple-system, BlinkMacSystemFont
 - Gestures: avoid conflicts with iOS system gestures
 - PWA: include web manifest, iOS meta tags, and app icons
+
+######################################################################
+# Internationalization (i18n)
+######################################################################
+1) Translations are namespaced in src/i18n/locales/{en,ru,uz}/ with consistent files across languages (e.g., common.json, home.json, etc.) when i18n is added.
+2) Always pass the correct namespace to useTranslation('namespace') in components.
+3) Reuse existing translation keys; do not add duplicates. If a key is truly new, add it to all supported languages.
+4) When translating, translate the entire file; be careful with academic terms and their professional accuracy in the target language.
+5) UI copy and layout must anticipate text expansion and RTL when relevant.
 
 ######################################################################
 # Accessibility, UX, and SEO

@@ -1,0 +1,21 @@
+@use "../../../style/__settings" as s;
+
+// -----------------------------------------------------------------------------
+// Admin theme settings: dark mode colors.
+// Used by style_admin.scss when .admin-dashboard has data-theme="dark".
+// -----------------------------------------------------------------------------
+
+// Dark mode palette for admin panel
+$admin-dark-bg: #0f0f0f;
+$admin-dark-surface: #1a1a1a;
+$admin-dark-surface-strong: #242424;
+$admin-dark-border: rgba(255, 255, 255, 0.12);
+$admin-dark-text: #f5f5f5;
+$admin-dark-text-muted: rgba(255, 255, 255, 0.7);
+$admin-dark-nav-hover: #2d2d2d;
+$admin-dark-table-header: #2d2d2d;
+$admin-dark-placeholder-bg: #2d2d2d;
+$admin-dark-input-bg: #1a1a1a;
+$admin-dark-overlay: rgba(0, 0, 0, 0.6);
+$admin-dark-modal-bg: #1a1a1a;
+$admin-dark-modal-border: rgba(255, 255, 255, 0.15);
