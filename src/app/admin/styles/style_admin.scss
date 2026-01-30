@@ -1,0 +1,227 @@
+@use "../../../style/__settings" as s;
+
+@mixin container($max: 1120px) {
+  width: min(#{$max}, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@mixin button-base() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+// --- Страница входа /admin ---
+.admin-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: s.t(bg-page);
+}
+
+.admin-login__card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border: 2px solid s.t(border-on-light);
+  background: s.t(surface-strong);
+  box-shadow: s.t(shadow-1);
+  @include container(420px);
+}
+
+.admin-login__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: s.t(text-on-light);
+}
+
+.admin-login__subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: s.t(text-muted-on-light);
+}
+
+.admin-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-login__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: s.t(text-on-light);
+}
+
+.admin-login__input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid s.t(border-on-light);
+  background: s.t(surface);
+  color: s.t(text-on-light);
+  border-radius: 8px;
+  transition: border-color 160ms ease;
+}
+
+.admin-login__input::placeholder {
+  color: s.t(text-muted-on-light);
+}
+
+.admin-login__input:focus {
+  outline: none;
+  border-color: s.t(accent);
+}
+
+.admin-login__error {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: s.c(red);
+}
+
+.admin-login__btn {
+  margin-top: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border: 2px solid s.t(accent);
+  background: s.t(accent);
+  color: s.t(text-on-dark);
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 999px;
+  @include button-base();
+}
+
+.admin-login__btn:hover {
+  background: s.t(accent-hover);
+  border-color: s.t(accent-hover);
+  transform: translateY(-1px);
+}
+
+// --- Админ-панель /admin/user ---
+.admin-dashboard {
+  min-height: 100vh;
+  background: s.t(bg-page);
+}
+
+.admin-dashboard--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-dashboard__spinner {
+  font-size: 1rem;
+  color: s.t(text-muted-on-light);
+}
+
+.admin-dashboard__header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 2px solid s.t(border-on-light);
+  background: s.t(surface-strong);
+}
+
+.admin-dashboard__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  @include container();
+}
+
+.admin-dashboard__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: s.t(text-on-light);
+}
+
+.admin-dashboard__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-dashboard__link {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: s.t(text-muted-on-light);
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.admin-dashboard__link:hover {
+  color: s.t(accent);
+}
+
+.admin-dashboard__logout {
+  padding: 0.5rem 1rem;
+  border: 2px solid s.t(border-on-light);
+  background: transparent;
+  color: s.t(text-on-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 999px;
+  @include button-base();
+}
+
+.admin-dashboard__logout:hover {
+  border-color: s.t(accent);
+  color: s.t(accent);
+}
+
+.admin-dashboard__main {
+  padding: 2rem 0;
+  @include container();
+}
+
+.admin-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.admin-dashboard__card {
+  padding: 1.5rem;
+  border: 2px solid s.t(border-on-light);
+  background: s.t(surface-strong);
+  box-shadow: s.t(shadow-1);
+}
+
+.admin-dashboard__card-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: s.t(text-on-light);
+}
+
+.admin-dashboard__card-desc {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: s.t(text-muted-on-light);
+  line-height: 1.45;
+}
+
+.admin-dashboard__placeholder {
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: s.t(text-muted-on-light);
+  background: s.c(gray-200);
+  border-radius: 8px;
+  text-align: center;
+}

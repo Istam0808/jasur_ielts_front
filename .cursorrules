@@ -1,0 +1,166 @@
+######################################################################
+# Cursor Workspace Rules — jasur_ielts_front
+# Purpose: Ensure consistent, professional-grade delivery across code,
+# UX, performance, accessibility, and documentation.
+######################################################################
+
+## Repository Layout (authoritative paths)
+src/app/**               # Next.js App Router files
+src/components/**        # React components (JSX)
+src/components/common/** # Reusable common components
+src/components/Header/** # Header components
+src/style/**             # Global styles; design tokens in __settings.scss
+src/lib/**               # API client, backend config, utilities
+src/assets/**            # Static assets (images, fonts) — when added
+src/firebase/**          # Firebase config — when added
+src/hooks/**             # Custom hooks — when added
+src/store/**             # State management — when added
+src/utils/**             # Utilities — when added
+src/old-components/**    # Legacy components — when added
+public/**                # Public assets
+src/middleware.js        # Next.js middleware — when added
+
+## Libraries & Key Files
+**/*embla*.{js,jsx,ts,tsx}      # Embla carousel
+**/*firebase*.{js,jsx,ts,tsx}   # Firebase
+*.config.{js,mjs,ts}            # Config files
+next.config.mjs                 # Next.js config
+eslint.config.mjs               # ESLint config
+package.json                    # Dependencies
+jsconfig.json                   # JS config
+
+######################################################################
+# General Working Principles
+######################################################################
+1) Favor clarity and maintainability over cleverness.
+2) Keep components small, focused, and reusable; avoid duplicating logic.
+3) Follow the existing architecture and naming conventions.
+4) Ship accessible, mobile-first, and performant experiences by default.
+5) Use the latest stable best practices; remove deprecated patterns.
+6) Always provide meaningful loading, empty, and error states.
+
+######################################################################
+# React & Next.js Conventions
+######################################################################
+1) Use functional components with hooks.
+2) Follow App Router conventions in src/app/**.
+3) New components MUST be written in JSX (files .jsx) for project consistency.
+4) Co-locate component-specific styles using SCSS modules when appropriate.
+5) Add error boundaries where failure is possible and meaningful to isolate.
+6) Use react-icons for icons.
+7) Prefer modular, well-typed utilities in src/utils/** (or src/lib/** until utils exists).
+
+######################################################################
+# Styling (SCSS) Standards
+######################################################################
+1) Use SCSS modules and variables from src/style/__settings.scss; avoid CSS custom properties (var(...)) unless integrating third-party.
+2) Color and spacing must come from design tokens (c() for palette, t() for semantic tokens); for error/danger styling use semantic tokens from __settings.scss (e.g. $accent or a dedicated token when added).
+3) Modern Sass only:
+   - Import with @use/@forward (no @import).
+   - Replace deprecated color functions with sass:color (e.g., color.adjust($c, $lightness: 10%)).
+   - Use sass:math (e.g., math.div() for division).
+4) CRITICAL: Mixin positioning rule — ALWAYS place @include mixin-name at the END of other properties and BEFORE nested selectors:
+   - Correct: color: $primary; padding: 1rem; @include flex(); @include font-size(); .nested {}
+   - Wrong: @include flex(); color: $primary; padding: 1rem; .nested {}
+   - Wrong: color: $primary; .nested {} @include flex();
+   This ensures proper CSS cascade order and maintainable code structure.
+5) Avoid mixed declarations: do not place declarations after nested rules. If needed, either move declarations above or wrap in & {}. See:
+   https://sass-lang.com/documentation/breaking-changes/mixed-decls/
+6) Responsiveness:
+   - Cover all relevant breakpoints and use @media (max-width: ...px) { ... } for mobile-first overrides.
+7) Performance: prefer modern formats (WebP/AVIF) with appropriate fallbacks.
+
+######################################################################
+# iOS Compatibility Guidelines
+######################################################################
+- Responsive widths: 375px (iPhone SE), 390px (iPhone 12–14), 428px (Pro Max), 784px (iPad)
+- Touch targets: min 44x44px with 8px spacing
+- Safe areas: use env(safe-area-inset-*)
+- Accessibility: VoiceOver-friendly semantics and ARIA labels
+- Performance: Retina images (@2x, @3x) and WebP with fallbacks
+- Typography: -apple-system, BlinkMacSystemFont
+- Gestures: avoid conflicts with iOS system gestures
+- PWA: include web manifest, iOS meta tags, and app icons
+
+######################################################################
+# Accessibility, UX, and SEO
+######################################################################
+1) Comply with WCAG 2.1 AA where feasible. Ensure keyboard navigation and visible focus states.
+2) Provide descriptive labels, roles, and alt text. Avoid title-only tooltips.
+3) Maintain logical heading order and landmark regions.
+4) SEO: meaningful titles, meta tags, and structured data when applicable.
+5) Ensure adequate contrast ratios; respect reduced motion preferences.
+
+######################################################################
+# State Management & Data
+######################################################################
+1) Centralize cross-cutting state in src/store/**; keep local UI state within components/hooks.
+2) Memoize expensive computations and heavy lists; avoid unnecessary re-renders.
+3) Handle empty, loading, and error states consistently.
+
+######################################################################
+# Testing, Tooling, and Quality Gates
+######################################################################
+1) Keep unit/integration tests alongside or in src/tests/** as applicable.
+2) Fix introduced linter errors before concluding an implementation.
+3) Prefer deterministic tests; mock external services and network calls.
+4) Include visual testing artifacts under public/screenshots/** when helpful.
+
+######################################################################
+# Assets, Performance, and Delivery
+######################################################################
+1) Images: prefer WebP/AVIF with appropriate fallback; size for responsive breakpoints.
+2) Lazy-load non-critical components and assets. Defer long-running work.
+3) Use code-splitting and avoid shipping unused dependencies.
+4) Ensure CLS-safe image dimensions and stable layout.
+
+######################################################################
+# Quick Rules Recap
+######################################################################
+1) Functional components with hooks
+2) Next.js App Router conventions
+3) Modular, reusable components; avoid duplication (create shared utilities, e.g., shared LoadingSpinner)
+4) JSX for new components (files .jsx)
+5) SCSS modules with modern Sass (@use, sass:color, sass:math)
+6) Proper accessibility throughout
+7) Add error boundaries where appropriate
+8) SEO best practices
+9) Solid loading/empty/error states
+10) Predictable state management patterns
+11) Use react-icons for icons
+
+######################################################################
+# SASS Modernization Checklist (enforced)
+######################################################################
+- Legacy color functions → use sass:color (darken/lighten/saturate/desaturate deprecated)
+- Division / → math.div() or list separator
+- @import → @use/@forward
+- Avoid mixed declarations (see Styling Standards)
+- MANDATORY: Mixins must be positioned AFTER other properties and BEFORE nested selectors
+
+######################################################################
+# Ignore
+######################################################################
+.next/**, node_modules/**, .git/**, src/store/data
+
+######################################################################
+# Post-task Professional Enhancements
+######################################################################
+- After delivering any task, include a concise, value-adding suggestion for improving the feature further (UX, accessibility, performance, maintainability, or DX). These suggestions should be directly actionable and aligned with project standards.
+- Exact policy: "Always offer something related to the task after finishing it that could improve the created feature even more professional".
+
+######################################################################
+# Documentation Policy
+######################################################################
+- NEVER create markdown (.md) files when completing tasks unless explicitly requested by the user
+- DO NOT create summary files, documentation files, or README files automatically
+- Keep all task summaries, explanations, and suggestions in the chat interface only
+
+######################################################################
+# Professional UX Mindset
+######################################################################
+- Aim for world-class UX quality: intuitive flows, consistent visuals, fast interactions, and polished microcopy.
+- Default to mobile-first design with thoughtful breakpoints and touch ergonomics.
+- Prefer progressive enhancement and resilient components.
+
+USE ONLY BEST PRACTICES AND MOST RECENT TECHNOLOGIES

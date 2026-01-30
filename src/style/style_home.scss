@@ -1,4 +1,6 @@
 @use "./__settings" as s;
+@use "sass:meta";
+@use "sass:string";
 
 @mixin respond-max($bp) {
   @media (max-width: $bp) {
@@ -45,7 +47,7 @@
     box-shadow 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
-$stripe_stroke: str-slice(inspect(s.c(gray-900)), 2);
+$stripe_stroke: string.slice(meta.inspect(s.c(gray-900)), 2);
 
 :root {
   // База (светлая страница + тёмный hero).
