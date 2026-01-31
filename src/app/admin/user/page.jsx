@@ -29,6 +29,7 @@ export default function AdminUserPage() {
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [theme, setTheme] = useState(THEME_LIGHT);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [exitConfirmModalOpen, setExitConfirmModalOpen] = useState(false);
 
   const readyMachines = useMemo(
     () => DUMMY_MACHINES.filter((m) => m.ready_for_test),
@@ -64,6 +65,15 @@ export default function AdminUserPage() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [settingsModalOpen]);
 
+  useEffect(() => {
+    if (!exitConfirmModalOpen) return;
+    function handleEscape(e) {
+      if (e.key === "Escape") closeExitConfirmModal();
+    }
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [exitConfirmModalOpen]);
+
   function handleThemeChange(newTheme) {
     setTheme(newTheme);
     if (typeof window !== "undefined") {
@@ -75,7 +85,12 @@ export default function AdminUserPage() {
     setSettingsModalOpen(false);
   }
 
+  function closeExitConfirmModal() {
+    setExitConfirmModalOpen(false);
+  }
+
   function handleLogout() {
+    closeExitConfirmModal();
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("adminAuth");
     }
@@ -134,7 +149,7 @@ export default function AdminUserPage() {
             <button
               type="button"
               className="admin-dashboard__logout"
-              onClick={handleLogout}
+              onClick={() => setExitConfirmModalOpen(true)}
               aria-label="Log out"
             >
               Exit
@@ -142,6 +157,47 @@ export default function AdminUserPage() {
           </div>
         </div>
       </header>
+
+      {exitConfirmModalOpen && (
+        <div
+          className="admin-dashboard__modal-backdrop"
+          onClick={closeExitConfirmModal}
+          role="presentation"
+        >
+          <div
+            className="admin-dashboard__modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="exit-confirm-title"
+          >
+            <h2 id="exit-confirm-title" className="admin-dashboard__modal-title">
+              Leave account
+            </h2>
+            <p className="admin-dashboard__modal-text">
+              Are you sure you want to leave the account?
+            </p>
+            <div className="admin-dashboard__modal-actions">
+              <button
+                type="button"
+                className="admin-dashboard__btn-primary admin-dashboard__modal-confirm-btn"
+                onClick={handleLogout}
+                aria-label="Yes, leave account"
+              >
+                Yes, leave
+              </button>
+              <button
+                type="button"
+                className="admin-dashboard__modal-close"
+                onClick={closeExitConfirmModal}
+                aria-label="Cancel"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {settingsModalOpen && (
         <div
