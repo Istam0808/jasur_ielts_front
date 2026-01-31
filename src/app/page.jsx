@@ -33,37 +33,41 @@ export default function StudentLoginPage() {
           noValidate
           autoComplete="on"
         >
-          <label className="student-login__label" htmlFor="student-login">
-            Login
-          </label>
-          <input
-            id="student-login"
-            type="text"
-            className="student-login__input"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            placeholder="Enter your login"
-            autoComplete="username"
-            autoFocus
-            aria-required="true"
-            aria-invalid={!!error}
-            aria-describedby={error ? "student-login-error" : undefined}
-          />
+          <div className="student-login__field">
+            <label className="student-login__label" htmlFor="student-login">
+              Login
+            </label>
+            <input
+              id="student-login"
+              type="text"
+              className="student-login__input"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              placeholder="Enter your login"
+              autoComplete="username"
+              autoFocus
+              aria-required="true"
+              aria-invalid={!!error}
+              aria-describedby={error ? "student-login-error" : undefined}
+            />
+          </div>
 
-          <label className="student-login__label" htmlFor="student-password">
-            Password
-          </label>
-          <input
-            id="student-password"
-            type="password"
-            className="student-login__input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-            aria-required="true"
-            aria-invalid={!!error}
-          />
+          <div className="student-login__field">
+            <label className="student-login__label" htmlFor="student-password">
+              Password
+            </label>
+            <input
+              id="student-password"
+              type="password"
+              className="student-login__input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              aria-required="true"
+              aria-invalid={!!error}
+            />
+          </div>
 
           {error && (
             <p

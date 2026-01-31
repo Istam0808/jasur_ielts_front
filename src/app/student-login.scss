@@ -1,10 +1,5 @@
 @use "../style/__settings" as s;
 
-@mixin container($max: 420px) {
-  width: min(#{$max}, calc(100% - 2rem));
-  margin-inline: auto;
-}
-
 @mixin button-base() {
   display: inline-flex;
   align-items: center;
@@ -14,86 +9,109 @@
   font-weight: 650;
   letter-spacing: 0.01em;
   text-decoration: none;
+  -webkit-user-select: none;
   user-select: none;
   white-space: nowrap;
   transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease,
     box-shadow 160ms ease, color 160ms ease;
 }
 
-// --- Student login (mock test entry) ---
+// --- Student login: full-page, centered form (no card) ---
 .student-login {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  background: s.t(surface);
+  padding: 2rem 1.5rem;
+  background: s.t(surface-strong);
 }
 
 .student-login__card {
   width: 100%;
-  max-width: 420px;
-  padding: 2rem 2.25rem;
-  border: 2px solid s.t(border-on-light);
-  background: s.t(surface-strong);
-  border-radius: 20px;
-  box-shadow: s.t(shadow-1);
-  @include container(420px);
+  max-width: 400px;
+  margin-inline: auto;
+  padding: 0;
 }
 
 .student-login__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.6rem;
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: s.t(text-on-light);
+  text-align: center;
 }
 
 .student-login__subtitle {
-  margin: 0 0 1.75rem;
-  font-size: 0.95rem;
+  margin: 0 0 2rem;
+  font-size: 1rem;
   color: s.t(text-muted-on-light);
-  line-height: 1.45;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 32ch;
+  margin-inline: auto;
 }
 
 .student-login__form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.35rem;
+}
+
+.student-login__field {
+  position: relative;
 }
 
 .student-login__label {
   display: block;
-  margin-bottom: -0.5rem;
+  margin-bottom: 0.4rem;
   font-size: 0.9rem;
   font-weight: 650;
+  letter-spacing: 0.02em;
   color: s.t(text-on-light);
+  transition: color 220ms ease, letter-spacing 220ms ease, transform 220ms ease;
+}
+
+.student-login__field:focus-within .student-login__label {
+  color: s.t(accent);
+  letter-spacing: 0.08em;
+  transform: translateY(-1px);
 }
 
 .student-login__input {
   width: 100%;
-  padding: 0.9rem 1.15rem;
+  padding: 1rem 1.2rem;
   font-size: 1rem;
   line-height: 1.4;
+  letter-spacing: 0.01em;
   border: 2px solid s.t(border-on-light);
   background: s.t(surface);
   color: s.t(text-on-light);
-  border-radius: 12px;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  border-radius: 10px;
+  transition: border-color 220ms ease, box-shadow 220ms ease, letter-spacing 220ms ease,
+    background-color 220ms ease;
 }
 
 .student-login__input::placeholder {
   color: s.t(text-muted-on-light);
+  opacity: 1;
+  transition: opacity 220ms ease;
+}
+
+.student-login__input:focus::placeholder {
+  opacity: 0.4;
 }
 
 .student-login__input:hover {
-  border-color: s.c(gray-500);
+  border-color: s.c(gray-400);
 }
 
 .student-login__input:focus {
   outline: none;
   border-color: s.t(accent);
-  box-shadow: 0 0 0 3px rgba(s.c(red), 0.2);
+  box-shadow: 0 0 0 3px rgba(s.c(red), 0.25);
+  letter-spacing: 0.04em;
+  background-color: s.t(surface-strong);
 }
 
 .student-login__input:focus-visible {
@@ -104,19 +122,19 @@
   margin: 0;
   padding: 0.5rem 0;
   font-size: 0.9rem;
-  color: s.c(red);
+  color: s.c(red-2);
 }
 
 .student-login__btn {
-  margin-top: 0.35rem;
-  padding: 0.9rem 1.35rem;
+  margin-top: 0.5rem;
+  padding: 1rem 1.5rem;
   border: 2px solid s.t(accent);
   background: s.t(accent);
   color: s.t(text-on-dark);
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 10px;
   @include button-base();
 }
 
@@ -132,19 +150,24 @@
 }
 
 @media (max-width: 480px) {
-  .student-login__card {
-    padding: 1.5rem 1.25rem;
+  .student-login {
+    padding: 1.5rem 1rem;
   }
 
-  .student-login__title {
-    font-size: 1.4rem;
+  .student-login__subtitle {
+    margin-bottom: 1.5rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .student-login__label,
   .student-login__input,
   .student-login__btn {
     transition: none;
+  }
+
+  .student-login__field:focus-within .student-login__label {
+    transform: none;
   }
 
   .student-login__btn:hover {
