@@ -1,0 +1,153 @@
+@use "../style/__settings" as s;
+
+@mixin container($max: 420px) {
+  width: min(#{$max}, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+@mixin button-base() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, color 160ms ease;
+}
+
+// --- Student login (mock test entry) ---
+.student-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: s.t(surface);
+}
+
+.student-login__card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem 2.25rem;
+  border: 2px solid s.t(border-on-light);
+  background: s.t(surface-strong);
+  border-radius: 20px;
+  box-shadow: s.t(shadow-1);
+  @include container(420px);
+}
+
+.student-login__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: s.t(text-on-light);
+}
+
+.student-login__subtitle {
+  margin: 0 0 1.75rem;
+  font-size: 0.95rem;
+  color: s.t(text-muted-on-light);
+  line-height: 1.45;
+}
+
+.student-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.student-login__label {
+  display: block;
+  margin-bottom: -0.5rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: s.t(text-on-light);
+}
+
+.student-login__input {
+  width: 100%;
+  padding: 0.9rem 1.15rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  border: 2px solid s.t(border-on-light);
+  background: s.t(surface);
+  color: s.t(text-on-light);
+  border-radius: 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.student-login__input::placeholder {
+  color: s.t(text-muted-on-light);
+}
+
+.student-login__input:hover {
+  border-color: s.c(gray-500);
+}
+
+.student-login__input:focus {
+  outline: none;
+  border-color: s.t(accent);
+  box-shadow: 0 0 0 3px rgba(s.c(red), 0.2);
+}
+
+.student-login__input:focus-visible {
+  outline: none;
+}
+
+.student-login__error {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: s.c(red);
+}
+
+.student-login__btn {
+  margin-top: 0.35rem;
+  padding: 0.9rem 1.35rem;
+  border: 2px solid s.t(accent);
+  background: s.t(accent);
+  color: s.t(text-on-dark);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 12px;
+  @include button-base();
+}
+
+.student-login__btn:hover {
+  background: s.t(accent-hover);
+  border-color: s.t(accent-hover);
+  transform: translateY(-2px);
+  box-shadow: s.t(shadow-1);
+}
+
+.student-login__btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .student-login__card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .student-login__title {
+    font-size: 1.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-login__input,
+  .student-login__btn {
+    transition: none;
+  }
+
+  .student-login__btn:hover {
+    transform: none;
+  }
+}
