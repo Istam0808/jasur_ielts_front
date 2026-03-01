@@ -1,0 +1,118 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.passage-arrow-navigation {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0;
+    gap: $spacing-sm;
+
+    .passage-nav-right {
+        display: inline-flex;
+        gap: $spacing-sm;
+        position: relative;
+        z-index: 10;
+        bottom: 65px;
+        right: 15px;
+        background: $background-light;
+        padding: $spacing-xs;
+        border-radius: $border-radius-lg;
+        border: 1px solid $border-light;
+    }
+
+    .nav-arrow {
+        width: 44px;
+        height: 44px;
+        @include flex(row, center, center);
+        border-radius: $border-radius-full;
+        background: $neutral-100;
+        color: $text-primary;
+        border: 1px solid $neutral-300;
+        box-shadow: $shadow-sm;
+        transition: background $transition-fast, transform $transition-fast, border-color $transition-fast;
+
+        &:hover:not(.disabled) {
+            background: $neutral-200;
+            border-color: $border-hover;
+            transform: translateY(-1px);
+        }
+
+        &:active:not(.disabled) {
+            transform: translateY(0);
+        }
+
+        &.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: $neutral-100;
+            color: $neutral-400;
+            border-color: $neutral-300;
+            filter: saturate(0.6);
+        }
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    // Mobile spacing
+    @include respond-down('sm') {
+        margin: $spacing-sm 0;
+
+        .nav-arrow {
+            width: 44px;
+            height: 44px;
+        }
+    }
+}
+
+// Fixed variant (e.g., for fullscreen progress section)
+.fullscreen-passage-arrows {
+    position: absolute;
+    right: $spacing-lg;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+
+    .passage-arrow-navigation {
+        margin: 0;
+    }
+}
+
+// Removed conflicting absolute-positioned variant to ensure bottom placement visibility
+
+// iOS specific optimizations
+@supports (-webkit-touch-callout: none) {
+    .passage-arrow-navigation {
+        .nav-arrow {
+            // Ensure proper touch targets for iOS
+            min-height: 44px;
+            min-width: 44px;
+
+            // Completely remove hover and active effects for iOS
+            &:hover:not(.disabled) {
+                background: transparent;
+                border-color: color.adjust($border-light, $lightness: 8%);
+                color: $text-primary;
+                transform: none;
+                box-shadow: none;
+            }
+
+            &:active:not(.disabled) {
+                transform: none;
+                box-shadow: none;
+            }
+
+            svg {
+                transition: none;
+            }
+
+            &:hover:not(.disabled) svg {
+                transform: none;
+            }
+        }
+    }
+}

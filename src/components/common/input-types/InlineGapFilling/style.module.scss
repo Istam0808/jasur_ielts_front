@@ -1,0 +1,56 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+  @include common.field-wrapper;
+}
+
+.label {
+  @include common.field-label;
+}
+
+.paragraph {
+  background: common.$background-light;
+  padding: 12px;
+  border: 1px solid common.$control-border;
+  border-radius: common.$input-radius;
+}
+
+.text {
+  color: common.$text-primary;
+}
+
+:global(.fullscreen-mode) .paragraph {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+:global(.fullscreen-mode) .text,
+:global(.fullscreen-mode) .blank {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.blank {
+  @include common.form-control;
+  display: inline-block;
+  width: auto;
+  min-width: 120px;
+  height: auto;
+  padding: 6px 10px;
+  margin: 0 6px;
+  vertical-align: baseline;
+
+  &[data-invalid] {
+    border-color: common.$error-color;
+    box-shadow: 0 0 0 3px color.change(common.$error-color, $alpha: 0.12);
+  }
+}
+
+.hint {
+  @include common.field-hint;
+}
+
+.error {
+  @include common.field-error;
+}

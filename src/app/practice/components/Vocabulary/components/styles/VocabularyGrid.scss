@@ -1,0 +1,67 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+.vocabulary-grid {
+    display: grid;
+    gap: $spacing-lg; // Reduced gap
+    margin-bottom: $spacing-xxl;
+    padding: 0;
+
+    // Mobile-first: 1 column
+    grid-template-columns: 1fr;
+
+    // SM breakpoint and up
+    @include respond-to('sm') {
+        grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    }
+
+    // MD breakpoint and up
+    @include respond-to('md') {
+        grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+        gap: $spacing-xl; // A bit more space on larger screens
+    }
+
+    // LG breakpoint and up
+    @include respond-to('lg') {
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+
+    // Simplified: No longer need mode-specific grid overrides
+    // as cards now have a consistent height.
+
+    // Grid loading animation
+    &.loading {
+        .vocabulary-card {
+            opacity: 0;
+            animation: cardFadeIn 0.5s ease-out forwards;
+
+            @for $i from 1 through 12 {
+                &:nth-child(#{$i}) {
+                    animation-delay: #{$i * 0.07}s;
+                }
+            }
+        }
+    }
+}
+
+// Animation for card loading
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Improved responsive design for ultra-wide screens
+@include respond-to('xl') {
+    .vocabulary-grid {
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: $spacing-xl;
+    }
+}

@@ -1,0 +1,19 @@
+@use "base" as base;
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.question-fill-in-blank {
+    @include flex($align: center, $gap: $spacing-sm);
+
+    .blank-input {
+        border: none;
+        border-bottom: 2px solid $neutral-300;
+        width: 150px;
+        text-align: center;
+        @include base.input-base;
+
+        &:focus {
+            border-bottom-color: $primary-color;
+        }
+    }
+}

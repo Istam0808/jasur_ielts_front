@@ -1,0 +1,26 @@
+import { createIcon } from "./_factory";
+
+export const BsExclamationCircle = createIcon("BsExclamationCircle");
+export const BsTrophy = createIcon("BsTrophy");
+export const BsBook = createIcon("BsBook");
+export const BsArrowCounterclockwise = createIcon("BsArrowCounterclockwise");
+export const BsClock = createIcon("BsClock");
+export const BsCheckCircle = createIcon("BsCheckCircle");
+export const BsX = createIcon("BsX");
+export const BsEye = createIcon("BsEye");
+export const BsSpeedometer2 = createIcon("BsSpeedometer2");
+export const BsDownload = createIcon("BsDownload");
+export const BsCircle = createIcon("BsCircle");
+export const BsCheckCircleFill = createIcon("BsCheckCircleFill");
+export const BsCheckLg = createIcon("BsCheckLg");
+export const BsQuestionCircle = createIcon("BsQuestionCircle");
+export const BsPencilSquare = createIcon("BsPencilSquare");
+export const BsFileText = createIcon("BsFileText");
+export const BsTable = createIcon("BsTable");
+export const BsDiagram3 = createIcon("BsDiagram3");
+export const BsTags = createIcon("BsTags");
+export const BsArrowLeftRight = createIcon("BsArrowLeftRight");
+export const BsArrowsAngleExpand = createIcon("BsArrowsAngleExpand");
+export const BsListUl = createIcon("BsListUl");
+export const BsCardText = createIcon("BsCardText");
+export const BsFileEarmarkText = createIcon("BsFileEarmarkText");

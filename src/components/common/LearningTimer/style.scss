@@ -1,0 +1,360 @@
+@use "sass:math";
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+
+.learning-timer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: $background-light;
+  border: 1px solid $border-light;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  font-family: $body-font-family;
+  min-width: 200px;
+  
+  &__session,
+  &__daily {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm 0;
+    border-bottom: 1px solid $border-light;
+    
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+  
+  &__label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $text-secondary;
+    text-transform: capitalize;
+  }
+  
+  &__value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-primary;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.025em;
+  }
+  
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    background: color.adjust($success-color, $lightness: 95%);
+    border-radius: 6px;
+    margin-top: $spacing-sm;
+  }
+  
+  &__indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $success-color;
+    
+    &.active {
+      background: $success-color;
+      animation: pulse 2s infinite;
+    }
+  }
+  
+  &__status-text {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: color.adjust($success-color, $lightness: -20%);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+// Pulse animation for active indicator
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .learning-timer {
+    min-width: 180px;
+    padding: $spacing-sm;
+    
+    &__session,
+    &__daily {
+      padding: math.div($spacing-sm, 2) 0;
+    }
+    
+    &__label {
+      font-size: 0.8rem;
+    }
+    
+    &__value {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .learning-timer {
+    min-width: 160px;
+    
+    &__session,
+    &__daily {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: math.div($spacing-xs, 2);
+    }
+    
+    &__status {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: math.div($spacing-xs, 2);
+    }
+  }
+}
+
+// Dark theme support (if needed)
+@media (prefers-color-scheme: dark) {
+  .learning-timer {
+    background: $background-dark;
+    border-color: $border-dark;
+    
+    &__label {
+      color: $text-muted;
+    }
+    
+    &__value {
+      color: $text-light;
+    }
+    
+    &__status {
+      background: color.adjust($success-color, $lightness: -90%);
+    }
+    
+    &__status-text {
+      color: color.adjust($success-color, $lightness: 20%);
+    }
+  }
+}
+
+// Demo styles
+.learning-timer-demo {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  
+  .demo-header {
+    text-align: center;
+    margin-bottom: $spacing-xl;
+    
+    h2 {
+      color: $text-primary;
+      margin-bottom: $spacing-sm;
+    }
+    
+    p {
+      color: $text-secondary;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .demo-controls {
+    display: flex;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+    flex-wrap: wrap;
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      
+      label {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        cursor: pointer;
+        font-weight: 500;
+        color: $text-secondary;
+        
+        input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          accent-color: $primary-color;
+        }
+      }
+    }
+  }
+  
+  .demo-timer {
+    display: flex;
+    justify-content: center;
+    margin-bottom: $spacing-xl;
+  }
+  
+  .demo-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+    
+    .info-card {
+      background: $background-light;
+      border: 1px solid $border-light;
+      border-radius: 8px;
+      padding: $spacing-lg;
+      
+      h3 {
+        color: $text-primary;
+        margin-bottom: $spacing-md;
+        font-size: 1.1rem;
+      }
+      
+      p {
+        color: $text-secondary;
+        margin-bottom: $spacing-sm;
+        
+        strong {
+          color: $text-primary;
+        }
+      }
+      
+      ul {
+        color: $text-secondary;
+        padding-left: $spacing-md;
+        
+        li {
+          margin-bottom: $spacing-xs;
+        }
+      }
+      
+      .button-group {
+        display: flex;
+        gap: $spacing-sm;
+        flex-wrap: wrap;
+        
+        .btn {
+          padding: $spacing-sm $spacing-md;
+          border: none;
+          border-radius: 6px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          
+          &.btn-primary {
+            background: $primary-color;
+            color: white;
+            
+            &:hover:not(:disabled) {
+              background: color.adjust($primary-color, $lightness: -10%);
+            }
+            
+            &:disabled {
+              background: $border-medium;
+              cursor: not-allowed;
+            }
+          }
+          
+          &.btn-secondary {
+            background: $secondary-color;
+            color: white;
+            
+            &:hover:not(:disabled) {
+              background: color.adjust($secondary-color, $lightness: -10%);
+            }
+            
+            &:disabled {
+              background: $border-medium;
+              cursor: not-allowed;
+            }
+          }
+          
+          &.btn-outline {
+            background: transparent;
+            color: $primary-color;
+            border: 1px solid $primary-color;
+            
+            &:hover {
+              background: $primary-color;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .demo-activity {
+    background: $background-light;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    padding: $spacing-lg;
+    
+    h3 {
+      color: $text-primary;
+      margin-bottom: $spacing-sm;
+    }
+    
+    p {
+      color: $text-secondary;
+      margin-bottom: $spacing-md;
+    }
+    
+    .activity-area {
+      .activity-textarea {
+        width: 100%;
+        padding: $spacing-md;
+        border: 1px solid $border-light;
+        border-radius: 6px;
+        font-family: $body-font-family;
+        resize: vertical;
+        margin-bottom: $spacing-md;
+        
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+          box-shadow: 0 0 0 3px color.adjust($primary-color, $alpha: 0.1);
+        }
+      }
+      
+      .activity-buttons {
+        display: flex;
+        gap: $spacing-sm;
+        flex-wrap: wrap;
+      }
+    }
+  }
+}
+
+// Responsive demo
+@media (max-width: 768px) {
+  .learning-timer-demo {
+    padding: $spacing-md;
+    
+    .demo-controls {
+      flex-direction: column;
+      gap: $spacing-md;
+    }
+    
+    .demo-info {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+  }
+}

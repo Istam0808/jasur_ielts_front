@@ -1,0 +1,177 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+  position: relative;
+  width: 100%;
+  @include common.field-wrapper;
+}
+
+.label {
+  @include common.field-label;
+}
+
+.required {
+  color: common.$error-color;
+  margin-left: 4px;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: common.$spacing-sm;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  padding-right: calc(common.$spacing-lg + 6px);
+  transition: border-color common.$transition-fast, box-shadow common.$transition-fast, background-color common.$transition-fast;
+  @include common.form-control;
+
+  &[data-open] {
+    border-color: common.$control-border-focus;
+    @include common.focus-ring;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.valueText {
+  color: common.$text-primary;
+
+  &[data-placeholder] {
+    color: common.$placeholder-color;
+  }
+}
+
+.clear {
+  color: common.$neutral-500;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: background-color common.$transition-fast, color common.$transition-fast;
+
+  &:hover {
+    background: common.$neutral-100;
+    color: common.$text-secondary;
+  }
+}
+
+.chevron {
+  color: common.$neutral-600;
+  position: absolute;
+  right: 10px;
+  font-size: 18px;
+  transition: transform common.$transition-fast, color common.$transition-fast;
+
+  [data-open] & {
+    transform: rotate(180deg);
+    color: common.$text-secondary;
+  }
+}
+
+.list {
+  max-height: 40vh;
+  overflow: auto;
+  animation: dropdownFadeIn 140ms ease-out;
+  @include common.dropdown-panel;
+
+  // Ensure selected item retains its idle style when not hovered,
+  // regardless of sibling hover/focus states from other stylesheets
+  .option[data-selected]:not(:hover) {
+    background: color.mix(common.$primary-color, common.$background-light, 12%);
+    color: common.$primary-color;
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: common.$text-primary;
+  transition: background-color common.$transition-fast, color common.$transition-fast;
+  user-select: none;
+
+  // Non-selected interactive state
+  &:hover:not([data-selected]),
+  &[data-focused]:not([data-selected]) {
+    background: common.$neutral-200;
+    color: common.$text-primary;
+  }
+
+  // Selected (idle)
+  &[data-selected]:not([data-focused]) {
+    background: color.mix(common.$primary-color, common.$background-light, 12%);
+    color: common.$primary-color;
+  }
+
+  &:hover[data-selected] {
+    background: common.$primary-color;
+    color: common.$text-light;
+
+    .optionIcon {
+      color: common.$text-light;
+    }
+  }
+
+  // Disabled state
+  &[data-disabled] {
+    cursor: not-allowed;
+    color: common.$neutral-600;
+    background: common.$neutral-100;
+    opacity: 0.6;
+
+    &:hover {
+      background: common.$neutral-100;
+      color: common.$neutral-600;
+    }
+  }
+}
+
+.optionDisabled {
+  cursor: not-allowed;
+  color: common.$neutral-600;
+  background: common.$neutral-100;
+  opacity: 0.6;
+
+  &:hover {
+    background: common.$neutral-100;
+    color: common.$neutral-600;
+  }
+}
+
+.optionLabel {
+  flex: 1 1 auto;
+}
+
+.optionIcon {
+  color: common.$primary-color;
+  flex: 0 0 auto;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hint {
+  @include common.field-hint;
+}
+
+.error {
+  @include common.field-error;
+}

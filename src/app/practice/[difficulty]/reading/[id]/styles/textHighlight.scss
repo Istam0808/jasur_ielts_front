@@ -1,0 +1,197 @@
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use "sass:color";
+
+// Keyword Selection Feature Styles - Using accent color for highlights
+.selectable-word {
+    cursor: pointer;
+    transition: all $transition-fast;
+    border-radius: $border-radius-sm;
+    padding: 1px 2px;
+    display: inline-block;
+    position: relative;
+
+    &:hover {
+        background-color: color.adjust($accent-color, $lightness: 30%);
+        color: $text-primary;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba($accent-color, 0.2);
+    }
+
+    &.selected {
+        background-color: $accent-color;
+        color: $text-light;
+        font-weight: $font-weight-medium;
+        box-shadow: 0 2px 6px rgba($accent-color, 0.3);
+        transform: translateY(-1px);
+
+        &:hover {
+            background-color: color.adjust($accent-color, $lightness: -10%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba($accent-color, 0.4);
+        }
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// Text highlighting in passage - Real marker yellow for authentic highlighting
+.text-highlight {
+    background-color: $marker-yellow; // Authentic marker yellow
+    color: #000000; // Black text for maximum contrast
+    padding: 2px 4px;
+    border-radius: 2px; // Smaller radius for more authentic marker look
+    cursor: pointer;
+    transition: all $transition-fast;
+    font-weight: $font-weight-medium;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    border: none;
+    user-select: none; // Prevent text selection when clicking
+    pointer-events: auto; // Ensure clicks are captured
+    position: relative; // For better click handling
+    display: inline; // Ensure proper inline display
+    z-index: 1; // Ensure highlights are above other content
+
+    // CRITICAL FIX: Prevent highlighting in structural elements
+    &.passage-title,
+    &.section-header,
+    &.header-left,
+    &.header-right,
+    &.title-section {
+        background-color: transparent !important;
+        color: inherit !important;
+        cursor: default !important;
+        pointer-events: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+
+        &:hover {
+            background-color: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    }
+
+    &:hover {
+        background-color: $marker-yellow-light; // Predefined lighter yellow on hover
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        background-color: $marker-yellow-dark; // Predefined darker yellow when clicked
+        transform: translateY(0);
+    }
+}
+
+// Prevent highlighting in passage titles and structural elements
+.passage-title,
+.section-header,
+.header-left,
+.header-right,
+.title-section {
+    .text-highlight {
+        background-color: transparent !important;
+        color: inherit !important;
+        cursor: default !important;
+        pointer-events: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+
+        &:hover {
+            background-color: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    }
+}
+
+
+
+
+
+// Selected text notes section
+.selected-text-section {
+    background: $background-light;
+    padding: $spacing-lg;
+    border-radius: $border-radius-xl;
+    box-shadow: $shadow-md;
+    margin-bottom: $spacing-xl;
+    border: 1px solid $border-light;
+    animation: slideUp $transition-normal;
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-lg;
+
+        h3 {
+            font-size: $font-size-lg;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+
+            &::before {
+                content: '';
+                font-size: $font-size-base;
+            }
+        }
+    }
+}
+
+// Mobile responsive styles for text selection and notes
+@media (max-width: 784px) {
+    .selected-text-section {
+        padding: $spacing-md;
+        margin-bottom: $spacing-lg;
+
+        .section-header h3 {
+            font-size: $font-size-base;
+        }
+    }
+
+    .text-highlight {
+        padding: 2px 3px;
+        background-color: $marker-yellow; // Maintain marker yellow on mobile
+        color: #000000; // Keep black text for readability
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+            background-color: $marker-yellow-light; // Predefined lighter yellow on hover
+            transform: none; // Disable transform on mobile for better performance
+        }
+    }
+}
+
+// Tablet responsive styles
+@media (max-width: 1024px) and (min-width: 769px) {
+    .selected-text-section {
+        padding: $spacing-lg;
+
+        .notes-container {
+            display: flex !important;
+            flex-direction: column !important;
+            grid-template-columns: none !important;
+        }
+    }
+}
+
+// Animations
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

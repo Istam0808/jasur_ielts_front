@@ -1,0 +1,103 @@
+// Advanced Short Answer
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.advanced-short-answer-container {
+    .question-instruction {
+        @include question-instruction-style;
+    }
+
+    .questions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .question-item {
+            padding: 1rem;
+            border: 1px solid $border-light;
+            border-radius: 8px;
+            background: $background-light;
+
+            &.answered {
+                border-color: $primary-color;
+                background: color.adjust($primary-color, $lightness: 48%);
+            }
+
+            &.correct {
+                border-color: $success-color;
+                background: rgba($success-color, 0.02);
+                box-shadow: 0 2px 8px rgba($success-color, 0.1);
+            }
+
+            &.incorrect {
+                border-color: $danger-color;
+                background: rgba($danger-color, 0.02);
+                box-shadow: 0 2px 8px rgba($danger-color, 0.1);
+            }
+
+            .question-text {
+                @include question-texts-style;
+
+                .question-content {
+                    flex: 1;
+                    color: $text-primary;
+                    line-height: 1.4;
+                    margin-bottom: 0.25rem;
+                }
+            }
+
+            .answer-input-container {
+                position: relative;
+
+                .answer-input {
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 1px solid $border-medium;
+                    border-radius: 4px;
+                    background: $background-light;
+                    color: $text-primary;
+
+                    &:focus {
+                        outline: none;
+                        border-color: $primary-color;
+                    }
+
+                    &:disabled {
+                        background: $background-secondary;
+                        color: $text-muted;
+                    }
+                }
+
+                .input-feedback {
+                    margin-top: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+
+                    .feedback-icon {
+                        &.correct {
+                            color: $success-color;
+                        }
+
+                        &.incorrect {
+                            color: $danger-color;
+                        }
+                    }
+
+                    .correct-answer-hint {
+                        .correct-label {
+                            font-weight: 500;
+                            margin-right: 0.5rem;
+                        }
+
+                        .correct-text {
+                            color: $success-color;
+                            font-weight: 500;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

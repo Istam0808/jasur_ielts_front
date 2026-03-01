@@ -1,0 +1,1716 @@
+// Completion Questions
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.completion-question-container {
+    position: relative;
+    overflow: visible;
+
+    .question-instruction {
+        @include question-instruction-style;
+    }
+
+    .summary-completion {
+        background: $background-light;
+        border-radius: 12px;
+        border: 2px solid $border-light;
+        position: relative;
+        overflow: visible;
+
+        &.answered {
+            border-color: $primary-color;
+            background: color.adjust($primary-color, $lightness: 52%);
+        }
+
+        &.unanswered {
+            border-color: $border-light;
+        }
+
+
+        &.review-mode {
+            background: linear-gradient(135deg, color.adjust($background-primary, $lightness: 5%) 0%, $background-primary 100%);
+            border-color: $border-medium;
+        }
+
+        .summary-text {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            color: $text-primary;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+
+            // Enhanced typography for better readability
+            &::selection {
+                background: color.adjust($primary-color, $alpha: -0.8);
+                color: $text-primary;
+            }
+
+            // Professional paragraph spacing
+            p {
+                margin: 0 0 1rem 0;
+                text-indent: 0;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            .blank-container {
+                display: inline-block;
+                margin: 0 4px;
+                position: relative;
+                vertical-align: baseline;
+                z-index: 1;
+            }
+
+            // Review Mode Styles for Summary Completion
+            .summary-blank-review {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                border: 2px solid $border-light;
+                background: $background-light;
+                margin: 0 2px;
+                vertical-align: baseline;
+                min-width: 80px;
+
+                &.correct {
+                    border-color: $success-color;
+                    background: color.adjust($success-color, $lightness: 50%);
+                }
+
+                &.incorrect {
+                    border-color: $danger-color;
+                    background: color.adjust($danger-color, $lightness: 48%);
+                }
+
+                &.unanswered {
+                    border-color: $border-light;
+                    background: $background-light;
+                }
+
+                .blank-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.25rem;
+                    flex: 1;
+
+                    .user-answer-inline {
+                        .answer-text {
+                            font-size: 0.9rem;
+                            font-weight: 500;
+                            color: $text-primary;
+                            background: $background-light;
+                            padding: 0.1rem 0.3rem;
+                            border-radius: 3px;
+                            border: 1px solid $border-light;
+                        }
+                    }
+
+                    .correct-answer-inline {
+                        .correct-text {
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            color: $success-color;
+                            background: color.adjust($success-color, $lightness: 50%);
+                            padding: 0.1rem 0.3rem;
+                            border-radius: 3px;
+                            border: 1px solid color.adjust($success-color, $lightness: 20%);
+                        }
+                    }
+                }
+
+                .status-indicator {
+                    flex-shrink: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    .status-icon {
+                        width: 16px;
+                        height: 16px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.7rem;
+                        font-weight: bold;
+                        color: $background-light;
+
+                        &.correct {
+                            background: $success-color;
+                            box-shadow: 0 1px 3px rgba($success-color, 0.3);
+                        }
+
+                        &.incorrect {
+                            background: $danger-color;
+                            box-shadow: 0 1px 3px rgba($danger-color, 0.3);
+                        }
+
+                        &.unanswered {
+                            background: $warning-color;
+                            color: $text-primary;
+                            box-shadow: 0 1px 3px rgba($warning-color, 0.3);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Enhanced blank input styling for review mode
+        .blank-input-container {
+            &.review-mode {
+                .blank-input {
+                    background: $background-primary;
+                    border: 2px solid $border-medium;
+                    border-radius: 6px;
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    color: $text-primary;
+                    min-width: 100px;
+                    text-align: center;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+                    &:disabled {
+                        background: $background-secondary;
+                        color: $text-muted;
+                        cursor: not-allowed;
+                    }
+                }
+
+                &.correct {
+                    .blank-input {
+                        border-color: $success-color;
+                        background: color.adjust($success-color, $alpha: -0.95);
+                        box-shadow: 0 2px 6px rgba($success-color, 0.15);
+                    }
+
+                    .blank-feedback {
+                        .feedback-icon {
+                            color: $success-color;
+                            font-weight: bold;
+                            font-size: 1.1rem;
+                        }
+                    }
+                }
+
+                &.incorrect {
+                    .blank-input {
+                        border-color: $danger-color;
+                        background: color.adjust($danger-color, $alpha: -0.95);
+                        box-shadow: 0 2px 6px rgba($danger-color, 0.15);
+                    }
+
+                    .blank-feedback {
+                        .feedback-icon {
+                            color: $danger-color;
+                            font-weight: bold;
+                            font-size: 1.1rem;
+                        }
+                    }
+                }
+
+                .blank-feedback {
+                    position: absolute;
+                    top: calc(100% + 8px);
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 1000;
+                    background: $background-light;
+                    border: 1px solid $border-light;
+                    border-radius: 8px;
+                    padding: 0.75rem 1rem;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                    min-width: 200px;
+                    text-align: center;
+                    white-space: nowrap;
+                    opacity: 0;
+                    visibility: hidden;
+                    transform: translateX(-50%) translateY(-10px);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+                    // Professional feedback styling
+                    .feedback-icon {
+                        display: inline-block;
+                        margin-right: 0.5rem;
+                        font-size: 1rem;
+                    }
+
+                    .correct-answer-hint {
+                        margin-top: 0.5rem;
+                        padding-top: 0.5rem;
+                        border-top: 1px solid $border-light;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.25rem;
+
+                        .correct-label {
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                            color: $text-secondary;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 0.25rem;
+                        }
+
+                        .correct-text {
+                            color: $success-color;
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            background: color.adjust($success-color, $alpha: -0.9);
+                            padding: 0.25rem 0.5rem;
+                            border-radius: 4px;
+                            border: 1px solid color.adjust($success-color, $alpha: -0.8);
+                        }
+                    }
+
+                    // Professional arrow indicator
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        top: -6px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 0;
+                        height: 0;
+                        border-left: 6px solid transparent;
+                        border-right: 6px solid transparent;
+                        border-bottom: 6px solid $background-light;
+                    }
+
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: -7px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 0;
+                        height: 0;
+                        border-left: 6px solid transparent;
+                        border-right: 6px solid transparent;
+                        border-bottom: 6px solid $border-light;
+                    }
+                }
+
+                // Hover effect to show feedback
+                &:hover {
+                    z-index: 1001;
+
+                    .blank-feedback {
+                        opacity: 1;
+                        visibility: visible;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+
+                // Show feedback for incorrect answers on focus (for accessibility)
+                &:focus-within {
+                    z-index: 1001;
+
+                    .blank-feedback {
+                        opacity: 1;
+                        visibility: visible;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            }
+        }
+    }
+
+    // Professional mobile responsiveness
+    @media (max-width: 768px) {
+        padding: 0;
+        margin-bottom: 1rem;
+
+        .summary-text {
+            font-size: 1rem;
+            line-height: 1.7;
+
+            .blank-input-container {
+                &.review-mode {
+                    .blank-input {
+                        min-width: 80px;
+                        padding: 0.4rem 0.6rem;
+                        font-size: 0.9rem;
+                    }
+
+                    .blank-feedback {
+                        min-width: 180px;
+                        padding: 0.6rem 0.8rem;
+                        font-size: 0.85rem;
+
+                        .correct-answer-hint {
+                            .correct-label {
+                                font-size: 0.75rem;
+                            }
+
+                            .correct-text {
+                                font-size: 0.8rem;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media (max-width: 480px) {
+        border-radius: 8px;
+
+        .summary-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+
+            .blank-input-container {
+                &.review-mode {
+                    .blank-input {
+                        min-width: 70px;
+                        padding: 0.35rem 0.5rem;
+                        font-size: 0.85rem;
+                    }
+
+                    .blank-feedback {
+                        min-width: 160px;
+                        padding: 0.5rem 0.7rem;
+                        font-size: 0.8rem;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.table-completion {
+    .table-title {
+        margin: 0 0 1rem 0;
+        color: $text-primary;
+        text-align: center;
+    }
+
+    .table-container {
+        overflow-x: auto;
+
+        .completion-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid $border-medium;
+
+            th,
+            td {
+                padding: 0.75rem;
+                border: 1px solid $border-medium;
+                text-align: left;
+            }
+
+            th {
+                background: $background-primary;
+                font-weight: 600;
+                color: $text-primary;
+            }
+
+            td {
+                background: $background-light;
+                color: $text-primary;
+            }
+        }
+    }
+
+    // Review Mode Styles for Table Completion
+    &.review-mode {
+        .table-container {
+            .completion-table {
+                border-color: $border-medium;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+                th {
+                    background: linear-gradient(135deg, color.adjust($primary-color, $lightness: 47%) 0%, color.adjust($primary-color, $lightness: 44%) 100%);
+                    color: $text-primary;
+                    font-weight: 600;
+                    border-color: color.adjust($primary-color, $lightness: 30%);
+                }
+
+                td {
+                    background: linear-gradient(135deg, color.adjust($background-primary, $lightness: 5%) 0%, $background-primary 100%);
+                    border-color: $border-medium;
+                    transition: all 0.3s ease;
+
+                    // Style for cells with blank review containers
+                    .blank-review-container {
+                        margin: 0;
+                        padding: 0.5rem;
+                        border-radius: 6px;
+                        min-width: 120px;
+                        background: $background-light;
+                        border: 2px solid $border-light;
+                        transition: all 0.3s ease;
+
+                        &.correct {
+                            border-color: $success-color;
+                            background: color.adjust($success-color, $lightness: 50%);
+                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                        }
+
+                        &.incorrect {
+                            border-color: $danger-color;
+                            background: color.adjust($danger-color, $lightness: 48%);
+                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                        }
+
+                        &.unanswered {
+                            border-color: $warning-color;
+                            background: color.adjust($warning-color, $lightness: 48%);
+                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                        }
+
+                        .answer-display {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 0.375rem;
+
+                            .user-answer,
+                            .correct-answer {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 0.25rem;
+
+                                .answer-label {
+                                    font-size: 0.75rem;
+                                    font-weight: 600;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.5px;
+                                    color: $text-secondary;
+                                }
+
+                                .answer-text {
+                                    font-size: 0.9rem;
+                                    font-weight: 500;
+                                    color: $text-primary;
+                                    padding: 0.25rem 0.5rem;
+                                    background: $background-light;
+                                    border-radius: 3px;
+                                    border: 1px solid $border-light;
+
+                                    &.correct {
+                                        color: $success-color;
+                                        background: color.adjust($success-color, $lightness: 50%);
+                                        border-color: color.adjust($success-color, $lightness: 20%);
+                                    }
+                                }
+                            }
+                        }
+
+                        .status-indicator {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-top: 0.5rem;
+
+                            .status-icon {
+                                width: 20px;
+                                height: 20px;
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 0.8rem;
+                                font-weight: bold;
+
+                                &.correct {
+                                    background: $success-color;
+                                    color: white;
+                                }
+
+                                &.incorrect {
+                                    background: $danger-color;
+                                    color: white;
+                                }
+
+                                &.unanswered {
+                                    background: $warning-color;
+                                    color: white;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Diagram Labelling Styles - Full Width Design
+.diagram-labelling-completion {
+    .diagram-description {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, color.adjust($primary-color, $lightness: 47%) 0%, color.adjust($primary-color, $lightness: 44%) 100%);
+        border-radius: 12px;
+        border-left: 4px solid $primary-color;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        .description-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .description-icon {
+                font-size: 1.5rem;
+                color: $primary-color;
+                flex-shrink: 0;
+            }
+
+            .description-text {
+                margin: 0;
+                font-weight: 500;
+                color: $text-primary;
+                line-height: 1.6;
+                flex: 1;
+            }
+        }
+    }
+
+    .labels-grid-fullwidth {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .label-item-fullwidth {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: $background-light;
+            border: 2px solid $border-light;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+            &:hover {
+                border-color: $primary-color;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .label-icon-container {
+                .label-icon {
+                    font-size: 1.8rem;
+                    color: color.adjust($primary-color, $lightness: 10%);
+                    flex-shrink: 0;
+                    opacity: 0.8;
+                }
+            }
+
+            .label-content {
+                flex: 1;
+                min-width: 0; // Prevent flex item from overflowing
+
+                .label-description {
+                    margin: 0 0 0.75rem 0;
+                    color: $text-primary;
+                    font-weight: 500;
+                    line-height: 1.5;
+                    font-size: 0.95rem;
+                }
+
+                .label-input-wrapper {
+                    .blank-input-container {
+                        .blank-input {
+                            min-width: 140px;
+                            padding: 0.6rem 0.85rem;
+                            font-size: 0.95rem;
+                            border-width: 2px;
+
+                            &:focus {
+                                box-shadow: 0 0 0 3px color.adjust($primary-color, $lightness: 40%);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @media (max-width: 480px) {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: center;
+
+                .label-icon-container {
+                    align-self: center;
+                }
+
+                .label-content {
+                    width: 100%;
+                    text-align: left;
+                }
+            }
+        }
+    }
+}
+
+// Professional Flow Chart Styles - Compact Design
+.flow-chart-completion {
+    .flow-chart-header {
+        margin-bottom: 1.5rem;
+        text-align: center;
+
+        .flow-chart-title {
+            margin: 0;
+            color: $text-primary;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, color.adjust($primary-color, $lightness: 45%) 0%, color.adjust($primary-color, $lightness: 40%) 100%);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+            .title-icon {
+                font-size: 1.3rem;
+                color: $primary-color;
+            }
+        }
+    }
+
+    .flow-chart-container {
+        background: linear-gradient(135deg, color.adjust($primary-color, $lightness: 48%) 0%, color.adjust($primary-color, $lightness: 46%) 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid color.adjust($primary-color, $lightness: 30%);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+        &.review-mode {
+            background: linear-gradient(135deg, color.adjust($background-primary, $lightness: 5%) 0%, $background-primary 100%);
+            border-color: $border-medium;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+
+            .flow-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+                width: 100%;
+                max-width: 500px;
+
+                .flow-box {
+                    width: 100%;
+                    background: $background-light;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                    border: 2px solid transparent;
+                    transition: all 0.2s ease;
+                    overflow: hidden;
+
+                    &.process-box {
+                        border-color: color.adjust($primary-color, $lightness: 20%);
+
+                        .process-text {
+                            color: $text-primary;
+                            font-weight: 500;
+                            line-height: 1.4;
+                            font-size: 0.95rem;
+                            padding: 0.75rem 1rem;
+                            background: color.adjust($primary-color, $lightness: 46%);
+                            border-left: 4px solid $primary-color;
+                        }
+                    }
+
+                    &.input-box {
+                        border-color: color.adjust($info-color, $lightness: 20%);
+
+                        .input-area {
+                            padding: 0.75rem;
+                            display: flex;
+                            justify-content: center;
+                            background: color.adjust($info-color, $lightness: 46%);
+
+                            .blank-input-container {
+                                .blank-input {
+                                    background: $background-light;
+                                    border: 2px solid color.adjust($info-color, $lightness: 10%);
+                                    min-width: 120px;
+                                    font-weight: 500;
+                                    font-size: 0.95rem;
+                                    padding: 0.6rem 0.8rem;
+                                    text-align: center;
+                                    border-radius: 6px;
+
+                                    &:focus {
+                                        outline: none;
+                                        border-color: $info-color;
+                                        box-shadow: 0 0 0 2px color.adjust($info-color, $lightness: 40%);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .box-content {
+                        padding: 0;
+                        min-height: auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
+                    }
+                }
+
+                .flow-arrow {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: color.adjust($primary-color, $lightness: -10%);
+                    margin: 0.25rem 0;
+
+                    svg {
+                        transform: rotate(90deg);
+                        width: 20px;
+                        height: 20px;
+                        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+                    }
+                }
+            }
+
+            @media (min-width: 768px) {
+                .flow-item {
+                    max-width: 600px;
+                }
+            }
+
+            @media (min-width: 1024px) {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.5rem;
+
+                .flow-item {
+                    flex-direction: row;
+                    max-width: none;
+                    width: auto;
+
+                    .flow-arrow {
+                        margin: 0 0.75rem;
+
+                        svg {
+                            transform: rotate(0deg);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Review Mode Styles for Flow Chart Blank Containers
+    .blank-review-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: $background-light;
+        border-radius: 6px;
+        border: 2px solid $border-light;
+        min-width: 200px;
+
+        &.correct {
+            border-color: $success-color;
+            background: color.adjust($success-color, $lightness: 50%);
+        }
+
+        &.incorrect {
+            border-color: $danger-color;
+            background: color.adjust($danger-color, $lightness: 48%);
+        }
+
+        &.unanswered {
+            border-color: $border-light;
+            background: $background-light;
+        }
+
+        .answer-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .user-answer,
+            .correct-answer {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+
+                .answer-label {
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: $text-secondary;
+                }
+
+                .answer-text {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    color: $text-primary;
+                    padding: 0.25rem 0;
+                }
+            }
+
+            .correct-answer {
+                .correct-text {
+                    background: color.adjust($success-color, $lightness: 60%);
+                    color: color.adjust($success-color, $lightness: -15%);
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 4px;
+                    font-weight: 600;
+                    border-left: 3px solid $success-color;
+                }
+            }
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+
+            .status-icon {
+                font-size: 0.9rem;
+                font-weight: bold;
+
+                &.correct {
+                    color: $success-color;
+                }
+
+                &.incorrect {
+                    color: $danger-color;
+                }
+
+                &.unanswered {
+                    color: $warning-color;
+                }
+            }
+        }
+    }
+
+    // Professional Flow Chart Review Mode Styles
+    .flow-chart-blank-review {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: $background-light;
+        border-radius: 8px;
+        border: 2px solid $border-light;
+        min-width: 250px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+
+        &.correct {
+            border-color: $success-color;
+            background: color.adjust($success-color, $lightness: 50%);
+            box-shadow: 0 2px 8px rgba($success-color, 0.15);
+        }
+
+        &.incorrect {
+            border-color: $danger-color;
+            background: color.adjust($danger-color, $lightness: 55%);
+            box-shadow: 0 2px 8px rgba($danger-color, 0.15);
+        }
+
+        &.unanswered {
+            border-color: $warning-color;
+            background: color.adjust($warning-color, $lightness: 55%);
+            box-shadow: 0 2px 8px rgba($warning-color, 0.15);
+        }
+
+        .blank-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .user-answer-section,
+            .correct-answer-section {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+
+                .answer-label,
+                .correct-label {
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    color: $text-secondary;
+                }
+
+                .answer-text {
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    color: $text-primary;
+                    padding: 0.25rem 0;
+                    line-height: 1.3;
+                }
+
+                .correct-text {
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    color: color.adjust($success-color, $lightness: -20%);
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 4px;
+                    background: color.adjust($success-color, $lightness: 60%);
+                    border-left: 3px solid $success-color;
+                    line-height: 1.3;
+                }
+            }
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: $background-light;
+            border: 2px solid $border-light;
+
+            .status-icon {
+                font-size: 1rem;
+                font-weight: bold;
+
+                &.correct {
+                    color: $success-color;
+                }
+
+                &.incorrect {
+                    color: $danger-color;
+                }
+
+                &.unanswered {
+                    color: $warning-color;
+                }
+            }
+        }
+
+        // Responsive adjustments
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+
+            .status-indicator {
+                align-self: center;
+            }
+        }
+    }
+}
+
+.blank-input-container {
+    display: inline-block;
+    position: relative;
+    margin: 0 2px;
+
+    .blank-input {
+        padding: 0.5rem 0.75rem;
+        border: 2px solid $border-medium;
+        border-radius: 6px;
+        background: $background-light;
+        color: $text-primary;
+        min-width: 100px;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 3px color.adjust($primary-color, $alpha: -0.7);
+        }
+
+        &:disabled {
+            background: $background-secondary;
+            color: $text-muted;
+            cursor: not-allowed;
+        }
+    }
+
+    &.correct {
+        .blank-input {
+            border-color: $success-color;
+            background: color.adjust($success-color, $alpha: -0.95);
+            box-shadow: 0 2px 6px rgba($success-color, 0.15);
+        }
+    }
+
+    &.incorrect {
+        .blank-input {
+            border-color: $danger-color;
+            background: color.adjust($danger-color, $alpha: -0.95);
+            box-shadow: 0 2px 6px rgba($danger-color, 0.15);
+        }
+    }
+
+    .blank-feedback {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: $background-light;
+        border: 1px solid $border-light;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        min-width: 200px;
+        text-align: center;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-50%) translateY(-10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .feedback-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+
+            &.correct {
+                color: $success-color;
+            }
+
+            &.incorrect {
+                color: $danger-color;
+            }
+        }
+
+        .correct-answer-hint {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid $border-light;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .correct-label {
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: $text-secondary;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.25rem;
+            }
+
+            .correct-text {
+                color: $success-color;
+                font-weight: 600;
+                font-size: 0.9rem;
+                background: color.adjust($success-color, $alpha: -0.9);
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                border: 1px solid color.adjust($success-color, $alpha: -0.8);
+            }
+        }
+
+        // Professional arrow indicator
+        &::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid $background-light;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid $border-light;
+        }
+    }
+
+    // Hover effect to show feedback
+    &:hover {
+        z-index: 1001;
+
+        .blank-feedback {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    // Show feedback for incorrect answers on focus (for accessibility)
+    &:focus-within {
+        z-index: 1001;
+
+        .blank-feedback {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    // Mobile responsiveness for blank inputs
+    @media (max-width: 768px) {
+        .blank-input {
+            min-width: 80px;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .blank-feedback {
+            min-width: 180px;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+
+            .correct-answer-hint {
+                .correct-label {
+                    font-size: 0.75rem;
+                }
+
+                .correct-text {
+                    font-size: 0.8rem;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 480px) {
+        .blank-input {
+            min-width: 70px;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .blank-feedback {
+            min-width: 160px;
+            padding: 0.5rem 0.7rem;
+            font-size: 0.8rem;
+        }
+    }
+}
+
+// Professional completion stats styling
+.completion-stats {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, $background-light 0%, color.adjust($background-light, $lightness: -1%) 100%);
+    border-radius: 12px;
+    border: 1px solid $border-light;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+
+    // Professional header accent
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, $primary-color 0%, color.adjust($primary-color, $lightness: 10%) 50%, $primary-color 100%);
+        border-radius: 12px 12px 0 0;
+    }
+
+    .blank-result {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        background: $background-light;
+        border-radius: 8px;
+        border: 1px solid $border-light;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &:hover {
+            border-color: $primary-color;
+            box-shadow: 0 4px 12px rgba($primary-color, 0.1);
+            transform: translateY(-1px);
+        }
+
+        // Professional status indicator
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        &:hover::before {
+            width: 6px;
+        }
+
+
+
+        .answer-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-right: 1rem;
+
+            .blank-label {
+                font-weight: 600;
+                color: $text-primary;
+                font-size: 0.9rem;
+                margin: 0;
+            }
+
+            .correct-answer-text {
+                font-weight: 500;
+                font-size: 0.95rem;
+                color: $text-secondary;
+                font-style: italic;
+                line-height: 1.3;
+
+                // Add subtle highlighting for readability
+                padding: 0.25rem 0.5rem;
+                background: color.adjust($primary-color, $alpha: -0.95);
+                border-radius: 4px;
+                border-left: 2px solid color.adjust($primary-color, $alpha: -0.7);
+            }
+        }
+
+        .blank-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+
+            &:hover {
+                transform: scale(1.15);
+            }
+
+            &.correct {
+                background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                color: $background-light;
+                box-shadow: 0 3px 8px rgba($success-color, 0.3);
+
+                &+.answer-info::before {
+                    background: linear-gradient(to bottom, $success-color, color.adjust($success-color, $lightness: -10%));
+                }
+            }
+
+            &.incorrect {
+                background: linear-gradient(135deg, $danger-color 0%, color.adjust($danger-color, $lightness: -10%) 100%);
+                color: $background-light;
+                box-shadow: 0 3px 8px rgba($danger-color, 0.3);
+
+                &+.answer-info::before {
+                    background: linear-gradient(to bottom, $danger-color, color.adjust($danger-color, $lightness: -10%));
+                }
+            }
+
+            &.unanswered {
+                background: linear-gradient(135deg, $background-primary 0%, color.adjust($background-primary, $lightness: -5%) 100%);
+                color: $text-muted;
+                border: 2px solid $border-medium;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                font-size: 1.2rem;
+                font-weight: normal;
+
+                &:hover {
+                    transform: scale(1.05);
+                    border-color: $border-dark;
+                }
+
+                &+.answer-info::before {
+                    background: linear-gradient(to bottom, $border-medium, color.adjust($border-medium, $lightness: -5%));
+                }
+            }
+        }
+
+        &.correct::before {
+            background: linear-gradient(to bottom, $success-color, color.adjust($success-color, $lightness: -10%));
+        }
+
+        &.incorrect::before {
+            background: linear-gradient(to bottom, $danger-color, color.adjust($danger-color, $lightness: -10%));
+        }
+
+        &.unanswered::before {
+            background: linear-gradient(to bottom, $border-medium, color.adjust($border-medium, $lightness: -5%));
+        }
+    }
+
+    // Mobile responsiveness for completion stats
+    @media (max-width: 768px) {
+        padding: 0.75rem;
+
+        .blank-result {
+            padding: 0.4rem 0.6rem;
+
+            .answer-info {
+                gap: 0.15rem;
+
+                .blank-label {
+                    font-size: 0.8rem;
+                }
+
+                .correct-answer-text {
+                    font-size: 0.85rem;
+                    padding: 0.2rem 0.4rem;
+                }
+            }
+
+            .blank-status {
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
+            }
+        }
+    }
+
+    @media (max-width: 480px) {
+        padding: 0.5rem;
+
+        .blank-result {
+            padding: 0.35rem 0.5rem;
+
+            .answer-info {
+                gap: 0.1rem;
+
+                .blank-label {
+                    font-size: 0.75rem;
+                }
+
+                .correct-answer-text {
+                    font-size: 0.8rem;
+                    padding: 0.15rem 0.3rem;
+                }
+            }
+
+            .blank-status {
+                width: 18px;
+                height: 18px;
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+// Note Completion Styles
+.note-completion {
+    position: relative;
+    overflow: visible;
+
+    // Review Mode Styles for Note Completion
+    &.review-mode {
+        .notes-container {
+            .note-item {
+                background: linear-gradient(135deg, color.adjust($background-primary, $lightness: 3%) 0%, $background-primary 100%);
+                border-color: $border-medium;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+                &:hover {
+                    border-color: $border-medium;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+                    transform: none;
+                }
+
+                .note-content {
+                    .blank-container {
+                        .note-blank-review {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            padding: 0.25rem 0.5rem;
+                            border-radius: 4px;
+                            border: 2px solid $border-light;
+                            background: $background-light;
+                            margin: 0 2px;
+                            vertical-align: baseline;
+                            min-width: 80px;
+
+                            &.correct {
+                                border-color: $success-color;
+                                background: color.adjust($success-color, $lightness: 48%);
+                            }
+
+                            &.incorrect {
+                                border-color: $danger-color;
+                                background: color.adjust($danger-color, $lightness: 48%);
+                            }
+
+                            &.unanswered {
+                                border-color: $border-light;
+                                background: $background-light;
+                            }
+
+                            .blank-content {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 0.25rem;
+                                flex: 1;
+
+                                .user-answer-inline {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.25rem;
+
+                                    .answer-text {
+                                        font-weight: 500;
+                                        color: $text-primary;
+                                        font-size: 0.9rem;
+                                    }
+                                }
+
+                                .correct-answer-inline {
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 0.25rem;
+
+                                    .correct-text {
+                                        font-weight: 600;
+                                        color: $success-color;
+                                        font-size: 0.85rem;
+                                    }
+                                }
+                            }
+
+                            .status-indicator {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                width: 16px;
+                                height: 16px;
+                                border-radius: 50%;
+                                flex-shrink: 0;
+
+                                .status-icon {
+                                    font-size: 0.7rem;
+                                    font-weight: bold;
+
+                                    &.correct {
+                                        color: $success-color;
+                                    }
+
+                                    &.incorrect {
+                                        color: $danger-color;
+                                    }
+
+                                    &.unanswered {
+                                        color: $warning-color;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .notes-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.25rem;
+        background: $background-primary;
+        border-radius: $border-radius-sm;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+        .title-icon {
+            font-size: 1.5rem;
+            color: $primary-color;
+            flex-shrink: 0;
+        }
+
+        .title-text {
+            margin: 0;
+            font-weight: 600;
+            color: $text-primary;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            position: relative;
+            padding-left: $spacing-md;
+            @include flex-center();
+
+            &::before {
+                content: '»';
+                position: absolute;
+                font-size: 1.5rem;
+                top: -6px;
+                left: -$spacing-sm;
+                color: $primary-color;
+                width: 3px;
+                border-radius: $border-radius-sm;
+            }
+        }
+    }
+
+    .notes-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .note-item {
+            padding: 1.25rem;
+            background: $background-primary;
+            border: 2px solid $border-light;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+            &.answered {
+                border-color: $primary-color;
+                background: color.adjust($primary-color, $lightness: 52%);
+            }
+
+            &.unanswered {
+                border-color: $border-light;
+            }
+
+            &:hover {
+                border-color: $primary-color;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+                transform: translateY(-1px);
+            }
+
+            .note-content {
+                line-height: 1.8;
+                font-size: 1.05rem;
+                color: $text-primary;
+                font-weight: 400;
+                text-align: left;
+                position: relative;
+                z-index: 1;
+
+
+                .blank-container {
+                    display: inline-block;
+                    margin: 0 4px;
+                    position: relative;
+                    vertical-align: baseline;
+                    z-index: 1;
+                }
+            }
+        }
+    }
+
+    // Professional mobile responsiveness
+    @media (max-width: 768px) {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+
+        .notes-title {
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+
+            .title-icon {
+                font-size: 1.3rem;
+            }
+
+            .title-text {
+                font-size: 1rem;
+            }
+        }
+
+        .notes-container {
+            gap: 0.75rem;
+
+            .note-item {
+                padding: 1rem;
+
+                .note-content {
+                    font-size: 1rem;
+                    line-height: 1.7;
+                }
+            }
+        }
+    }
+
+    @media (max-width: 480px) {
+        padding: 1rem;
+        border-radius: 8px;
+
+        .notes-title {
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 0.75rem;
+
+            .title-icon {
+                font-size: 1.2rem;
+            }
+
+            .title-text {
+                font-size: 0.95rem;
+            }
+        }
+
+        .notes-container {
+            gap: 0.5rem;
+
+            .note-item {
+                padding: 0.75rem;
+
+                .note-content {
+                    font-size: 0.95rem;
+                    line-height: 1.6;
+                }
+            }
+        }
+    }
+}
+
+// Note Completion Question Container
+.note-completion-question-container {
+    position: relative;
+    overflow: visible;
+
+    .question-instruction {
+        @include question-instruction-style;
+    }
+}

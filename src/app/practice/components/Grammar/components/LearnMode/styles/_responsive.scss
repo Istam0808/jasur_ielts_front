@@ -1,0 +1,380 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+
+@include respond-down('md') {
+    .lm-header {
+        padding: 12px 16px;
+        border-bottom-width: 1px;
+        padding-right: 60px; // Make room for close button
+    }
+
+    .lm-topic {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+
+        .lm-brand {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba($text-primary, 0.08);
+        }
+
+        h2 {
+            font-size: 1.125rem;
+            line-height: 1.2;
+            margin: 0;
+        }
+    }
+
+    .lm-steps {
+        flex-wrap: wrap; // Allow wrapping to new lines
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding-bottom: 8px;
+        padding-top: 4px;
+        overflow: visible; // Remove horizontal scrolling
+        scroll-snap-type: none; // Remove scroll snapping
+        mask-image: none; // Remove mask for wrapping
+        -webkit-mask-image: none;
+
+        .lm-step+.lm-step {
+            margin-left: 0; // Override the negative margin completely
+        }
+    }
+
+    .lm-step {
+        // Maintain consistent chevron size for better visual connection
+        clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+        margin-bottom: 4px; // Add bottom margin for proper line spacing
+
+        // Keep chevron shape consistent on all screen sizes
+        &::before {
+            display: block; // Always show left chevron for connection
+        }
+
+        // Keep original chevron design, just hide titles
+        .lm-step-title {
+            display: none;
+        }
+
+        // Improve chevron handling for wrapped steps
+        &:not(:last-child)::after {
+            display: block; // Show chevron for all steps except the last one
+        }
+    }
+
+    .lm-content {
+        padding: 0;
+
+        // Prevent content overflow on tablets
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    // lm-slide styles moved to _content.scss for better organization
+
+    // Footer styles moved to _footer.scss to avoid duplication
+
+    // Make progress bar stretch appropriately
+    .lm-progress-bar {
+        width: min(100%, 480px);
+        max-width: none;
+    }
+
+    .lm-nav {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+@include respond-down('sm') {
+    .lm-header {
+        padding: 10px 14px;
+        padding-right: 56px; // Adjust for smaller close button
+
+        // Prevent header overflow on mobile
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lm-topic {
+        gap: 10px;
+        margin-bottom: 14px;
+
+        // Prevent topic overflow on mobile
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+
+        .lm-brand {
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
+        }
+
+        h2 {
+            font-size: 1rem;
+
+            // Prevent topic title overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    }
+
+    .lm-steps {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding-bottom: 6px; // Increased padding for better spacing
+        padding-top: 4px; // Increased padding for better spacing
+        padding-right: 0; // Remove right padding to eliminate wasted space
+        gap: 4px; // Increased gap between steps for better separation
+        overflow: visible;
+
+        // Prevent steps overflow on mobile
+        width: 100%;
+        box-sizing: border-box;
+
+        // Override the base gap for mobile
+        gap: 4px !important;
+
+        .lm-step+.lm-step {
+            margin-left: 0;
+        }
+
+    }
+
+    .lm-step {
+        padding: 8px 14px 8px 14px; // Reduced horizontal padding for smaller width
+        min-height: 36px; // Increased height for better usability
+        min-width: 42px; // Reduced minimum width for better mobile fit
+        // Maintain consistent chevron size for visual connection
+        clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+        margin-bottom: 4px; // Increased bottom margin for better spacing
+
+        // Prevent step overflow on mobile
+        overflow: hidden;
+        max-width: 100%;
+        box-sizing: border-box;
+
+        // Keep chevron shape consistent on all screen sizes
+        &::before {
+            display: block; // Always show left chevron for connection
+        }
+
+        .lm-step-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            font-size: 0.75rem; // Increased font size for better readability
+            padding: 3px 6px; // Reduced padding to fit smaller step width
+            font-weight: 700;
+            background: rgba($success-color, 0.2);
+            border-radius: $border-radius-sm;
+            margin-left: 4px; // Reduced margin for better fit
+        }
+
+        .lm-step-title {
+            // Prevent step title overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .lm-step-badge {
+            // Prevent step badge overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    }
+
+    // Footer styles moved to _footer.scss to avoid duplication
+
+    .lm-content {
+        // Prevent content overflow on mobile
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    // lm-slide styles moved to _content.scss for better organization
+}
+
+@include respond-down('xs') {
+    .lm-header {
+        padding: 6px 10px;
+        padding-right: 48px; // Adjust for ultra-small close button
+
+        // Prevent header overflow on ultra-small screens
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lm-topic {
+        gap: 6px;
+        margin-bottom: 10px;
+
+        // Prevent topic overflow on ultra-small screens
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+
+        .lm-brand {
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+        }
+
+        h2 {
+            font-size: 0.8rem;
+
+            // Prevent topic title overflow on ultra-small screens
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    }
+
+    .lm-steps {
+        padding-bottom: 3px; // Increased padding for better spacing
+        padding-top: 2px; // Increased padding for better spacing
+        padding-right: 0; // Remove right padding to eliminate wasted space
+        gap: 3px; // Increased gap between steps for better separation
+
+        .lm-step {
+            padding: 6px 14px 6px 12px; // Reduced horizontal padding for smaller width
+            min-height: 32px; // Increased height for better usability
+            min-width: 36px; // Reduced minimum width for better mobile fit
+            // Maintain consistent chevron size for visual connection
+            clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+            margin-bottom: 3px; // Increased bottom margin for better spacing
+
+            // Keep chevron shape consistent on all screen sizes
+            &::before {
+                display: block; // Always show left chevron for connection
+            }
+
+            .lm-step-index {
+                font-size: 0.6rem; // Slightly larger font for better readability
+                padding: 2px 4px; // Reduced padding to fit smaller step width
+                min-width: 16px; // Reduced minimum width for better fit
+            }
+        }
+    }
+
+    .lm-content {
+        // Prevent content overflow on ultra-small screens
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+
+
+// Very narrow screens - maintain chevron design but ensure proper wrapping
+@media (max-width: 480px) {
+    .lm-steps {
+        flex-wrap: wrap; // Keep wrapping
+        align-items: flex-start;
+        padding-bottom: 4px; // Increased padding for better spacing
+        padding-top: 2px; // Increased padding for better spacing
+        padding-right: 0; // Remove right padding to eliminate wasted space
+        gap: 3px; // Increased gap between steps for better separation
+
+        // Prevent steps overflow on very narrow screens
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+
+        .lm-step {
+            padding: 7px 16px 7px 14px; // Reduced horizontal padding for smaller width
+            min-height: 34px; // Increased height for better usability
+            min-width: 38px; // Reduced minimum width for better mobile fit
+            // Maintain consistent chevron size for visual connection
+            clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%);
+            margin-bottom: 3px; // Increased bottom margin for better spacing
+
+            // Prevent step overflow on very narrow screens
+            overflow: hidden;
+            max-width: 100%;
+            box-sizing: border-box;
+
+            // Keep chevron design intact but make it more compact
+            &::before {
+                display: block; // Always show left chevron for connection
+            }
+
+            // Ensure chevron arrow is visible
+            &::after {
+                display: block; // Keep the right chevron
+            }
+
+            .lm-step-index {
+                font-size: 0.65rem; // Slightly larger font for better readability
+                padding: 2px 5px; // Reduced padding to fit smaller step width
+                min-width: 18px; // Reduced minimum width for better fit
+            }
+        }
+    }
+}
+
+// Footer safe area and mobile fixes moved to _footer.scss to avoid duplication
+
+
+
+// Landscape footer optimizations moved to _footer.scss to avoid duplication
+
+// Additional mobile overflow prevention for all screen sizes
+@include respond-down('sm') {
+
+    // Global mobile overflow prevention
+    .learnmode-overlay {
+        // Ensure overlay doesn't cause overflow
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+        box-sizing: border-box;
+    }
+
+    .lm-content {
+        // Ensure content area doesn't overflow
+        overflow: hidden;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+    }
+
+    .lm-slide {
+        // Ensure slides don't overflow
+        overflow: hidden;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    // Prevent any horizontal scrolling on mobile
+    .lm-content,
+    .lm-slide,
+    .lm-slide-body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    // Footer overflow prevention moved to _footer.scss to avoid duplication
+}
+
+
+
+// Footer overflow prevention moved to _footer.scss to avoid duplication
+
+// Footer iOS Safe Area support moved to _footer.scss to avoid duplication

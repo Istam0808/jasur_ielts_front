@@ -1,0 +1,95 @@
+@use '@/assets/styles/settings' as *;
+
+// --- RESPONSIVE DESIGN ---
+@media (max-width: 1200px) {
+    .library-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: $spacing-md;
+    }
+}
+
+@media (max-width: 1024px) {
+    .library-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header-card {
+        padding: $spacing-lg;
+
+        .main-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    .howto-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .shadowing-library-wrapper {
+        padding: 0 $spacing-sm;
+    }
+
+    .header-card {
+        padding: $spacing-md;
+
+        .header-badge {
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+        }
+
+        .main-title {
+            font-size: 1.4rem;
+        }
+
+        .sub-title {
+            font-size: $font-size-sm;
+        }
+
+        .header-stats {
+            flex-direction: column;
+            gap: $spacing-sm;
+        }
+
+        .stat-divider {
+            display: none;
+        }
+    }
+
+    .library-grid {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+    }
+
+    .howto-grid {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+    }
+}
+
+@media (max-width: 600px) {
+    .btn-back-to-menu {
+        padding: $spacing-sm $spacing-md;
+        font-size: 0.8125rem;
+    }
+
+    .library-card {
+        .card-body {
+            padding: $spacing-md;
+        }
+
+        .card-title {
+            font-size: $font-size-base;
+        }
+    }
+
+    .howto-card {
+        padding: $spacing-md;
+
+        h2 {
+            font-size: 1.25rem;
+        }
+    }
+}

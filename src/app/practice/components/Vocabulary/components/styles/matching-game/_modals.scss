@@ -1,0 +1,797 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+@use './variables' as *;
+@use './mixins' as *;
+
+// =============================================================================
+// MODAL STYLES (OPTIMIZED FOR MOBILE)
+// =============================================================================
+
+// =============================================================================
+// GAME COMPLETE MODAL
+// =============================================================================
+
+.game-complete-content {
+    background: linear-gradient(135deg, rgba($accent-color, 0.1) 0%, rgba($primary-color, 0.05) 100%);
+    border-radius: $border-radius-xl;
+    padding: $spacing-xl;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    // Decorative background pattern
+    &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba($accent-color, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+        z-index: -1;
+    }
+
+    @media (max-width: 768px) {
+        padding: $spacing-lg;
+        max-width: 90vw;
+        margin: $spacing-sm;
+    }
+
+    @media (max-width: 480px) {
+        padding: $spacing-md;
+        max-width: 95vw;
+        margin: $spacing-xs;
+        border-radius: $border-radius-medium;
+    }
+}
+
+.game-complete-header {
+    margin-bottom: $spacing-xl;
+
+    h2 {
+        color: $text-primary;
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: $spacing-md;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-sm;
+
+        .game-complete-icon {
+            color: $accent-color;
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            font-size: 1.5rem;
+
+            .game-complete-icon {
+                font-size: 1.75rem;
+            }
+        }
+    }
+
+    .performance-rating {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $spacing-xs;
+
+        .rating-label {
+            color: $text-secondary;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .rating-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-medium;
+            background: rgba($background-light, 0.1);
+            backdrop-filter: blur(10px);
+        }
+    }
+}
+
+.game-complete-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-xl;
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: $spacing-sm;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+        gap: $spacing-sm;
+    }
+
+    .matching-stat-item {
+        background: rgba($background-light, 0.05);
+        border: 1px solid rgba($background-light, 0.1);
+        border-radius: $border-radius-medium;
+        padding: $spacing-md;
+        transition: all $animation-normal ease;
+
+        &:hover {
+            background: rgba($background-light, 0.1);
+            transform: translateY(-2px);
+            box-shadow: $shadow-medium;
+        }
+
+        .stat-label {
+            color: $text-secondary;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: $spacing-xs;
+        }
+
+        .stat-value {
+            color: $text-primary;
+            font-size: 1.25rem;
+            font-weight: 700;
+
+            @media (max-width: 768px) {
+                font-size: 1.125rem;
+            }
+        }
+    }
+}
+
+.game-complete-footer {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: center;
+
+    @media (max-width: 480px) {
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .btn {
+        min-width: 120px;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $border-radius-medium;
+        font-weight: 600;
+        transition: all $animation-normal ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-xs;
+
+        &.btn-primary {
+            background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+            color: $background-light;
+            border: none;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: $shadow-medium;
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
+
+        &.btn-secondary {
+            background: rgba($background-light, 0.1);
+            color: $text-primary;
+            border: 1px solid rgba($background-light, 0.2);
+
+            &:hover {
+                background: rgba($background-light, 0.2);
+                transform: translateY(-2px);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// PAIR SELECTOR MODAL
+// =============================================================================
+
+.pair-selector-modal-content {
+    background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($accent-color, 0.05) 100%);
+    border-radius: $border-radius-xl;
+    padding: $spacing-xl;
+    width: 100% !important;
+    max-width: 600px !important;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+
+    // Subtle background pattern
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba($accent-color, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba($primary-color, 0.1) 0%, transparent 50%);
+        z-index: -1;
+    }
+
+    @media (max-width: 768px) {
+        padding: $spacing-lg;
+        max-width: 90vw !important;
+        margin: $spacing-sm;
+    }
+
+    @media (max-width: 480px) {
+        padding: $spacing-md;
+        max-width: 95vw !important;
+        margin: $spacing-xs;
+        border-radius: $border-radius-medium;
+    }
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: $spacing-lg;
+
+    .modal-icon {
+        color: $accent-color;
+        font-size: 2.5rem;
+        margin-bottom: $spacing-sm;
+        animation: pulse 2s infinite;
+    }
+
+    h3 {
+        color: $text-primary;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+
+        @media (max-width: 768px) {
+            font-size: 1.25rem;
+        }
+    }
+}
+
+.modal-body {
+    margin-bottom: $spacing-xl;
+
+    .modal-description {
+        color: $text-secondary;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: $spacing-lg;
+        text-align: center;
+    }
+
+    .pairs-selector-section {
+        background: rgba($background-light, 0.05);
+        border: 1px solid rgba($background-light, 0.1);
+        border-radius: $border-radius-medium;
+        padding: $spacing-lg;
+
+        @media (max-width: 768px) {
+            padding: $spacing-md;
+        }
+    }
+}
+
+.modal-footer {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: center;
+
+    @media (max-width: 480px) {
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .btn {
+        min-width: 100px;
+        padding: $spacing-sm $spacing-lg;
+        border-radius: $border-radius-medium;
+        font-weight: 600;
+        transition: all $animation-normal ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-xs;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        &.btn-primary {
+            background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+            color: $background-light;
+            border: none;
+
+            &:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: $shadow-medium;
+            }
+        }
+
+        &.btn-secondary {
+            background: rgba($background-light, 0.1);
+            color: $text-primary;
+            border: 1px solid rgba($background-light, 0.2);
+
+            &:hover {
+                background: rgba($background-light, 0.2);
+                transform: translateY(-2px);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// MOBILE INSTRUCTIONS OVERLAY
+// =============================================================================
+
+.mobile-instructions-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba($dark-300, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: $z-index-modal;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-lg;
+
+    .mobile-instructions-content {
+        background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($accent-color, 0.05) 100%);
+        border-radius: $border-radius-xl;
+        padding: $spacing-xl;
+        width: 100%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+
+        // Decorative elements
+        &::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba($accent-color, 0.1) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            padding: $spacing-lg;
+            max-width: 90vw;
+            margin: $spacing-sm;
+        }
+
+        @media (max-width: 480px) {
+            padding: $spacing-md;
+            max-width: 95vw;
+            margin: $spacing-xs;
+            border-radius: $border-radius-medium;
+            max-height: 85vh;
+        }
+    }
+
+    .mobile-instructions-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-lg;
+
+        .mobile-instructions-title {
+            color: $text-primary;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+
+            @media (max-width: 768px) {
+                font-size: 1.25rem;
+            }
+        }
+
+        .mobile-instructions-close-btn {
+            background: rgba($background-light, 0.1);
+            border: 1px solid rgba($background-light, 0.2);
+            border-radius: $border-radius-medium;
+            color: $text-primary;
+            width: $touch-target-min;
+            height: $touch-target-min;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all $animation-normal ease;
+
+            &:hover {
+                background: rgba($background-light, 0.2);
+                transform: scale(1.1);
+            }
+        }
+    }
+
+    .mobile-instructions-steps {
+        margin-bottom: $spacing-xl;
+
+        .instruction-step {
+            display: flex;
+            gap: $spacing-md;
+            margin-bottom: $spacing-lg;
+            align-items: flex-start;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .step-number {
+                background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+                color: $background-light;
+                width: $touch-target-min;
+                height: $touch-target-min;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 1.125rem;
+                flex-shrink: 0;
+            }
+
+            .step-content {
+                flex: 1;
+
+                h3 {
+                    color: $text-primary;
+                    font-size: 1.125rem;
+                    font-weight: 600;
+                    margin: 0 0 $spacing-xs 0;
+
+                    @media (max-width: 768px) {
+                        font-size: 1rem;
+                    }
+                }
+
+                p {
+                    color: $text-secondary;
+                    font-size: 0.875rem;
+                    line-height: 1.5;
+                    margin: 0;
+                }
+            }
+        }
+    }
+
+    .mobile-instructions-footer {
+        text-align: center;
+
+        .mobile-instructions-start-btn {
+            background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+            color: $background-light;
+            border: none;
+            border-radius: $border-radius-medium;
+            padding: $spacing-sm $spacing-xl;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-xs;
+            min-width: 200px;
+            transition: all $animation-normal ease;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: $shadow-medium;
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// MOBILE MATCH MODE INDICATOR
+// =============================================================================
+
+.mobile-match-indicator {
+    position: fixed;
+    top: $spacing-lg;
+    left: $spacing-lg;
+    right: $spacing-lg;
+    background: linear-gradient(135deg, rgba($accent-color, 0.9) 0%, rgba($primary-color, 0.8) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: $border-radius-large;
+    padding: $spacing-md;
+    z-index: $z-index-modal;
+    box-shadow: $shadow-heavy;
+    animation: slideDown $animation-normal ease;
+
+    @media (max-width: 480px) {
+        top: $spacing-sm;
+        left: $spacing-sm;
+        right: $spacing-sm;
+        padding: $spacing-sm;
+    }
+
+    .match-indicator-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+
+        .match-indicator-left {
+            flex: 1;
+            min-width: 0;
+
+            .match-indicator-header {
+                display: flex;
+                align-items: center;
+                gap: $spacing-xs;
+                margin-bottom: $spacing-xs;
+
+                .match-indicator-icon {
+                    color: $background-light;
+                    font-size: 1.25rem;
+                }
+
+                .match-indicator-text {
+                    color: $background-light;
+                    font-weight: 600;
+                    font-size: 0.875rem;
+                }
+            }
+
+            .selected-card-preview {
+                background: rgba($background-light, 0.2);
+                border-radius: $border-radius-small;
+                padding: $spacing-xs $spacing-sm;
+
+                .selected-card-type {
+                    color: rgba($background-light, 0.8);
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    display: block;
+                    margin-bottom: 2px;
+                }
+
+                .selected-card-text {
+                    color: $background-light;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    display: block;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+
+        .cancel-match-btn {
+            background: rgba($background-light, 0.2);
+            border: 1px solid rgba($background-light, 0.3);
+            border-radius: $border-radius-medium;
+            color: $background-light;
+            width: $touch-target-min;
+            height: $touch-target-min;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all $animation-normal ease;
+            flex-shrink: 0;
+
+            &:hover {
+                background: rgba($background-light, 0.3);
+                transform: scale(1.1);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+    }
+}
+
+// =============================================================================
+// INSTRUCTIONS CONTENT (DESKTOP)
+// =============================================================================
+
+.instructions-content {
+    .instructions-body {
+        .instruction-step {
+            display: flex;
+            gap: $spacing-lg;
+            margin-bottom: $spacing-xl;
+            align-items: flex-start;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .step-number {
+                background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+                color: $background-light;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: 700;
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .step-content {
+                flex: 1;
+
+                h3 {
+                    color: $text-primary;
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    margin: 0 0 $spacing-sm 0;
+                }
+
+                p {
+                    color: $text-secondary;
+                    font-size: 1rem;
+                    line-height: 1.6;
+                    margin: 0;
+                }
+            }
+        }
+    }
+
+    .instructions-footer {
+        text-align: center;
+        margin-top: $spacing-xl;
+
+        .btn {
+            min-width: 200px;
+            padding: $spacing-md $spacing-xl;
+            border-radius: $border-radius-medium;
+            font-weight: 600;
+            transition: all $animation-normal ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-sm;
+
+            &.btn-primary {
+                background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+                color: $background-light;
+                border: none;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: $shadow-medium;
+                }
+            }
+        }
+    }
+}
+
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+// =============================================================================
+// ACCESSIBILITY IMPROVEMENTS
+// =============================================================================
+
+// Focus styles for better accessibility
+.btn:focus-visible,
+.mobile-instructions-close-btn:focus-visible,
+.cancel-match-btn:focus-visible {
+    outline: 2px solid $accent-color;
+    outline-offset: 2px;
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+
+    .game-complete-icon,
+    .modal-icon {
+        animation: none;
+    }
+
+    .game-complete-content::before,
+    .pair-selector-modal-content::before,
+    .mobile-instructions-content::before {
+        animation: none;
+    }
+
+    .btn:hover,
+    .matching-stat-item:hover {
+        transform: none;
+    }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+
+    .game-complete-content,
+    .pair-selector-modal-content,
+    .mobile-instructions-content {
+        border: 2px solid $text-primary;
+    }
+
+    .matching-stat-item {
+        border: 2px solid $text-primary;
+    }
+}

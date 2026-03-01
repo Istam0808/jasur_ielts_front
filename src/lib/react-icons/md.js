@@ -1,0 +1,23 @@
+import { createIcon } from "./_factory";
+
+export const MdFullscreen = createIcon("MdFullscreen");
+export const MdQuiz = createIcon("MdQuiz");
+export const MdBookmark = createIcon("MdBookmark");
+export const MdBookmarkBorder = createIcon("MdBookmarkBorder");
+export const MdLightbulb = createIcon("MdLightbulb");
+export const MdFlipToFront = createIcon("MdFlipToFront");
+export const MdClose = createIcon("MdClose");
+export const MdTranslate = createIcon("MdTranslate");
+export const MdVolumeUp = createIcon("MdVolumeUp");
+export const MdViewModule = createIcon("MdViewModule");
+export const MdRefresh = createIcon("MdRefresh");
+export const MdStopCircle = createIcon("MdStopCircle");
+export const MdCheckCircle = createIcon("MdCheckCircle");
+export const MdCancel = createIcon("MdCancel");
+export const MdAccountTree = createIcon("MdAccountTree");
+export const MdTimeline = createIcon("MdTimeline");
+export const MdExpandMore = createIcon("MdExpandMore");
+export const MdExpandLess = createIcon("MdExpandLess");
+export const MdFullscreenExit = createIcon("MdFullscreenExit");
+export const MdOutlineTipsAndUpdates = createIcon("MdOutlineTipsAndUpdates");
+export const MdOutlineEmojiEvents = createIcon("MdOutlineEmojiEvents");

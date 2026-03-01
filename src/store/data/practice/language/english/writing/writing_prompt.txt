@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "topic": "...", // Official IELTS topic from latest IELTS exams (SHOULD BE: UNIQUE, C2 LEVEL)
+        "relatedVocabulary": { // ONLY formal vocabulary that are considered as best ones for this topic
+            "en": {
+                "keyword": "definition...",
+                "keyword2": "definition...",
+                "...": "...",
+                // 10 very useful and related words that could be used to write this essay in this level C2
+            },
+            "ru": {
+                "keyword": "translation",
+                "keyword2": "translation",
+                "...": "translation",
+                // The same words as in en, but in RUSSIAN with VERY precise translations
+            },
+            "uz": {
+                "keyword": "translation",
+                "keyword2": "translation",
+                "...": "translation",
+                // The same words as in en, but in UZBEK with VERY precise translations
+            }
+        }
+    },
+    ...
+]
+
+EACH TOPIC SHOULD INCLUDE: 
+1. Official IELTS-style topic-question from recent exams (It should be described in C2 level and should be UNIQUE)
+2. CEFR-leveled vocabulary (C2) with:
+    - English definitions
+    - Russian translations
+    - Uzbek translations
+3. Progressive difficulty - vocabulary complexity increases appropriately for each level
+
+Each topic should contain 10 carefully selected vocabulary items per level, ensuring learners have appropriate language tools for their proficiency level.
+

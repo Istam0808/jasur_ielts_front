@@ -1,0 +1,13 @@
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use "../styles/progressTabs";
+
+.passage-navigation {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    margin-bottom: 0;
+    box-shadow: none;
+}

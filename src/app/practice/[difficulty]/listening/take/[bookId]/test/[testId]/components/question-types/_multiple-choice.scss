@@ -1,0 +1,68 @@
+@use "base" as base;
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+
+.question-multiple-choice,
+.question-multiple-choice-two {
+    .question-text {
+        @include question-texts-style;
+    }
+
+    .options {
+        @include flex($direction: column, $gap: $spacing-sm);
+
+        .option-label {
+            @include base.question-option;
+
+            input[type="radio"],
+            input[type="checkbox"] {
+                margin-right: $spacing-sm;
+            }
+        }
+    }
+
+    .question-inputs {
+        margin-top: $spacing-lg;
+        @include flex($direction: column, $gap: $spacing-md);
+
+        .question-input-group {
+            @include flex($align: center, $gap: $spacing-md);
+            padding: $spacing-sm;
+            border: 1px solid $border-light;
+            border-radius: $border-radius-sm;
+            background: $background-light;
+
+            .question-label {
+                min-width: 60px;
+                font-weight: $font-weight-semibold;
+                color: $text-primary;
+            }
+
+            .question-select {
+                flex: 1;
+                max-width: 200px;
+                padding: $spacing-xs $spacing-sm;
+                border: 1px solid $border-light;
+                border-radius: $border-radius-sm;
+                background: $background-light;
+                font-size: $font-size-base;
+                color: $text-primary;
+                cursor: pointer;
+                @include base.interactive-element;
+
+                &:focus {
+                    outline: none;
+                    border-color: $primary-color;
+                    box-shadow: 0 0 0 2px color.scale($primary-color, $alpha: -80%);
+                }
+
+                option {
+                    padding: $spacing-xs;
+                    color: $text-primary;
+                    background: $background-light;
+                }
+            }
+        }
+    }
+}

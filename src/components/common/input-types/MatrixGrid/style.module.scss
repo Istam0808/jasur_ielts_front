@@ -1,0 +1,63 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper { @include common.field-wrapper; }
+.label { @include common.field-label; }
+.required { color: common.$error-color; margin-left: 4px; }
+
+.table {
+  border: 1px solid common.$control-border;
+  border-radius: common.$input-radius;
+  overflow: hidden;
+}
+
+.head, .row {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(var(--cols, 3), 1fr);
+}
+
+.headCell, .rowHeader, .cell {
+  border-bottom: 1px solid common.$neutral-200;
+}
+
+.headCell, .rowHeader {
+  padding: 10px 12px;
+  background: common.$neutral-100;
+  color: common.$text-secondary;
+  font-weight: common.$font-weight-medium;
+}
+
+.row:last-child .rowHeader, .row:last-child .cell { border-bottom: none; }
+
+.cell {
+  appearance: none;
+  border: none;
+  background: common.$background-light;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color common.$transition-fast;
+
+  &:hover { background: common.$neutral-100; }
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid common.$neutral-400;
+  background: #fff;
+  transition: border-color common.$transition-fast, background-color common.$transition-fast;
+
+  &[data-selected] {
+    border-color: common.$primary-color;
+    background: color.mix(common.$primary-color, #fff, 80%);
+  }
+}
+
+.hint { @include common.field-hint; }
+.error { @include common.field-error; }
+
+

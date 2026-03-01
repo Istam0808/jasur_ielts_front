@@ -1,0 +1,1004 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+@use "../progressTabs";
+
+.fullscreen-header {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: relative;
+    overflow: visible; // Allow dropdowns to be visible
+    width: 100%;
+
+    // Main header row with controls
+    .fullscreen-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-sm;
+        min-height: 64px;
+        gap: $spacing-md;
+        background: $background-light;
+    }
+
+    // Left side - Passages Navigation OR Timer and Review Badge
+    .fullscreen-left-section {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 0; // Allow flex item to shrink
+        flex: 1; // Take available space
+        gap: $spacing-md; // Add gap between elements
+
+
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-xs;
+            font-family: $heading-font-family;
+            font-weight: $font-weight-semibold;
+            text-decoration: none;
+            border: none;
+            border-radius: $border-radius-sm;
+            cursor: pointer;
+            transition: all $transition-fast;
+            overflow: hidden;
+            min-height: 36px;
+            padding: $spacing-xs $spacing-sm;
+            font-size: $font-size-xs;
+            letter-spacing: 0.025em;
+            box-shadow: $shadow-sm;
+            white-space: nowrap;
+
+            // Professional gradient backgrounds
+            &.btn-submit {
+                background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -5%) 100%);
+                color: $background-light;
+                border: 1px solid color.adjust($success-color, $lightness: -10%);
+
+                &:hover:not(:disabled) {
+                    background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                    transform: translateY(-1px);
+                    box-shadow:
+                        0 4px 15px rgba($success-color, 0.3),
+                        0 2px 8px rgba($success-color, 0.2);
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
+                    box-shadow: $shadow-sm;
+                }
+
+                &:focus {
+                    outline: 2px solid color.adjust($success-color, $lightness: 20%);
+                    outline-offset: 2px;
+                }
+
+                &.ready {
+                    background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -5%) 100%);
+                    border-color: color.adjust($success-color, $lightness: -10%);
+                    box-shadow:
+                        0 2px 8px rgba($success-color, 0.2),
+                        0 1px 3px rgba($success-color, 0.1);
+
+                    &:hover:not(:disabled) {
+                        background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                        transform: translateY(-1px);
+                        box-shadow:
+                            0 4px 15px rgba($success-color, 0.4),
+                            0 2px 8px rgba($success-color, 0.2);
+                    }
+
+                    &::before {
+                        content: '✓';
+                        margin-right: $spacing-xs;
+                        font-weight: $font-weight-bold;
+                        opacity: 0.9;
+                    }
+                }
+
+                &.incomplete {
+                    background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                    color: $neutral-600;
+                    border-color: $neutral-400;
+                    cursor: not-allowed;
+                    opacity: 0.7;
+                    transform: none;
+                    box-shadow: none;
+
+                    &:hover {
+                        background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                        transform: none;
+                        box-shadow: none;
+                    }
+
+                    &::after {
+                        content: '⚠';
+                        margin-left: $spacing-sm;
+                        font-size: $font-size-sm;
+                        opacity: 0.8;
+                    }
+
+                    // Higher specificity: when incomplete AND disabled, make text visible
+                    &:disabled {
+                        background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                        color: $text-secondary !important;
+                        border-color: $neutral-300;
+                        opacity: 1 !important;
+                    }
+                }
+
+                &:disabled {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    color: $text-secondary;
+                    border-color: $neutral-300;
+                    cursor: not-allowed;
+                    opacity: 1;
+                    transform: none;
+                    box-shadow: none;
+
+                    &:hover {
+                        background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                        transform: none;
+                        box-shadow: none;
+                    }
+                }
+            }
+
+            &.btn-secondary {
+                background: linear-gradient(135deg, $neutral-100 0%, $neutral-200 100%);
+                color: $text-secondary;
+                border: 1px solid $border-light;
+
+                &:hover:not(:disabled) {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    color: $text-primary;
+                    transform: translateY(-1px);
+                    box-shadow: $shadow-md;
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
+                    box-shadow: $shadow-sm;
+                }
+
+                &:focus {
+                    outline: 2px solid $primary-color;
+                    outline-offset: 2px;
+                }
+            }
+
+            // Responsive sizing
+            @media (min-width: 784px) {
+                min-height: 40px;
+                padding: $spacing-sm $spacing-md;
+                font-size: $font-size-sm;
+                border-radius: $border-radius-md;
+            }
+
+            @media (min-width: 1024px) {
+                min-height: 44px;
+                padding: $spacing-sm $spacing-lg;
+                font-size: $font-size-base;
+                border-radius: $border-radius-md;
+            }
+        }
+    }
+
+    // Passages navigation for multi-passage readings
+    .fullscreen-passages-nav {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0; // Allow flex item to shrink
+
+        .passage-navigation {
+            width: 100%;
+            margin: 0;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+
+            // Make passage tabs expand to fill available space in the left section
+            .passage-tabs {
+                width: 100%;
+                max-width: none; // Remove any max-width constraints
+                display: flex; // Use flexbox for better space distribution
+
+                // Allow tabs to grow and fill available space
+                .passage-tab {
+                    flex: 1;
+                    min-width: 180px; // Slightly smaller minimum for better fit
+                    max-width: none; // Allow unlimited growth
+                }
+            }
+        }
+    }
+}
+
+// Advanced multi-page header banner (B2/C1/C2)
+.fullscreen-advanced-banner {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-lg;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%;
+    min-width: 0;
+
+    .advanced-part-title {
+        font-family: $heading-font-family;
+        font-weight: $font-weight-bold;
+        font-size: $font-size-lg;
+        color: $text-primary;
+    }
+
+    .advanced-instruction-text {
+        font-size: $font-size-md;
+        color: $text-secondary;
+        line-height: 1.4;
+    }
+
+    @media (min-width: 1024px) {
+        .advanced-part-title {
+            font-size: $font-size-xl;
+        }
+
+        .advanced-instruction-text {
+            font-size: $font-size-lg;
+        }
+    }
+}
+
+.fullscreen-advanced-right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    // In review mode, keep badge and timer in one row neatly
+    .fullscreen-title {
+        align-items: center;
+        flex-direction: row;
+        gap: $spacing-sm;
+    }
+
+    // Fullscreen toggle button styling within advanced right section
+    .fullscreen-toggle-btn {
+        flex-shrink: 0;
+        margin-left: auto; // Push to the right side
+
+        @media (max-width: 784px) {
+            margin-left: 0; // Reset margin on smaller screens
+        }
+    }
+}
+
+// Very light green background for the entire header when in advanced multi mode
+.fullscreen-header.advanced-multi {
+    background: rgba($success-color, 0.08);
+    border-radius: $border-radius-md;
+    margin: 0 $spacing-md;
+    box-sizing: border-box;
+    width: calc(100% - $spacing-md * 2);
+
+    .fullscreen-header-row {
+        background: transparent; // unify background
+    }
+}
+
+// Review Mode Badge and Timer styles (now used in left section)
+.fullscreen-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    flex-shrink: 0;
+
+    .review-mode-badge {
+        background: linear-gradient(135deg, $warning-color 0%, color.adjust($warning-color, $lightness: 10%) 100%);
+        color: $text-light;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.375rem 0.875rem;
+        border-radius: $border-radius-md;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        box-shadow:
+            0 2px 8px rgba($warning-color, 0.25),
+            0 1px 3px rgba($warning-color, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        transition: all $transition-fast;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 4px 12px rgba($warning-color, 0.3),
+                0 2px 6px rgba($warning-color, 0.2);
+
+            &::before {
+                left: 100%;
+            }
+        }
+
+        .review-icon {
+            font-size: 0.875rem;
+            color: $text-light;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+        }
+    }
+}
+
+// Timer
+.fullscreen-timer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-shrink: 0;
+    min-width: 80px;
+
+    .timer-circular {
+        padding: 0;
+
+        .timer-circle-container {
+            width: 4.25rem;
+            height: 4.25rem;
+
+            .timer-display-center {
+                padding: 0.75rem;
+
+                .timer-value-large {
+                    font-size: $font-size-xs;
+                }
+            }
+        }
+    }
+}
+
+// Right side - Submit Button OR Controls Group
+.fullscreen-right-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0; // Allow flex item to shrink
+    flex-shrink: 0; // Prevent shrinking
+
+    // Submit section for non-multi-passage readings
+    .fullscreen-submit-section {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        flex-shrink: 0;
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-xs;
+            font-family: $heading-font-family;
+            font-weight: $font-weight-semibold;
+            text-decoration: none;
+            border: none;
+            border-radius: $border-radius-sm;
+            cursor: pointer;
+            transition: all $transition-fast;
+            overflow: hidden;
+            min-height: 36px;
+            padding: $spacing-xs $spacing-sm;
+            font-size: $font-size-xs;
+            letter-spacing: 0.025em;
+            box-shadow: $shadow-sm;
+            white-space: nowrap;
+
+            // Professional gradient backgrounds
+            &.btn-submit {
+                background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -5%) 100%);
+                color: $background-light;
+                border: 1px solid color.adjust($success-color, $lightness: -10%);
+
+                &:hover:not(:disabled) {
+                    background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                    transform: translateY(-1px);
+                    box-shadow:
+                        0 4px 15px rgba($success-color, 0.3),
+                        0 2px 8px rgba($success-color, 0.2);
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
+                    box-shadow: $shadow-sm;
+                }
+
+                &:focus {
+                    outline: 2px solid color.adjust($success-color, $lightness: 20%);
+                    outline-offset: 2px;
+                }
+
+                &.ready {
+                    background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -5%) 100%);
+                    border-color: color.adjust($success-color, $lightness: -10%);
+                    box-shadow:
+                        0 2px 8px rgba($success-color, 0.2),
+                        0 1px 3px rgba($success-color, 0.1);
+
+                    &:hover:not(:disabled) {
+                        background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                        transform: translateY(-1px);
+                        box-shadow:
+                            0 4px 15px rgba($success-color, 0.4),
+                            0 2px 8px rgba($success-color, 0.2);
+                    }
+
+                    &::before {
+                        content: '✓';
+                        margin-right: $spacing-xs;
+                        font-weight: $font-weight-bold;
+                        opacity: 0.9;
+                    }
+                }
+
+                &.incomplete {
+                    background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                    color: $neutral-600;
+                    border-color: $neutral-400;
+                    cursor: not-allowed;
+                    opacity: 0.7;
+                    transform: none;
+                    box-shadow: none;
+
+                    &:hover {
+                        background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                        transform: none;
+                        box-shadow: none;
+                    }
+
+                    &::after {
+                        content: '⚠';
+                        margin-left: $spacing-sm;
+                        font-size: $font-size-sm;
+                        opacity: 0.8;
+                    }
+
+                    // Higher specificity: when incomplete AND disabled, make text visible
+                    &:disabled {
+                        background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                        color: $text-secondary !important;
+                        border-color: $neutral-300;
+                        opacity: 1 !important;
+                    }
+                }
+
+                &:disabled {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    color: $text-secondary;
+                    border-color: $neutral-300;
+                    cursor: not-allowed;
+                    opacity: 1;
+                    transform: none;
+                    box-shadow: none;
+
+                    &:hover {
+                        background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                        transform: none;
+                        box-shadow: none;
+                    }
+                }
+            }
+
+            &.btn-secondary {
+                background: linear-gradient(135deg, $neutral-100 0%, $neutral-200 100%);
+                color: $text-secondary;
+                border: 1px solid $border-light;
+
+                &:hover:not(:disabled) {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    color: $text-primary;
+                    transform: translateY(-1px);
+                    box-shadow: $shadow-md;
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
+                    box-shadow: $shadow-sm;
+                }
+
+                &:focus {
+                    outline: 2px solid $success-color;
+                    outline-offset: 2px;
+                }
+            }
+
+            // Responsive sizing
+            @media (min-width: 784px) {
+                min-height: 40px;
+                padding: $spacing-sm $spacing-md;
+                font-size: $font-size-sm;
+                border-radius: $border-radius-md;
+            }
+
+            @media (min-width: 1024px) {
+                min-height: 44px;
+                padding: $spacing-sm $spacing-lg;
+                font-size: $font-size-base;
+                border-radius: $border-radius-md;
+            }
+        }
+    }
+
+    // Controls group for multi-passage readings
+    .fullscreen-controls-group {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        flex-shrink: 0;
+
+
+
+        // Review Mode Badge
+        .fullscreen-title {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+
+            .review-mode-badge {
+                background: linear-gradient(135deg, $warning-color 0%, color.adjust($warning-color, $lightness: 10%) 100%);
+                color: $text-light;
+                font-size: 0.75rem;
+                font-weight: 600;
+                padding: 0.375rem 0.875rem;
+                border-radius: $border-radius-md;
+                display: flex;
+                align-items: center;
+                gap: 0.375rem;
+                box-shadow:
+                    0 2px 8px rgba($warning-color, 0.25),
+                    0 1px 3px rgba($warning-color, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.25);
+                transition: all $transition-fast;
+                position: relative;
+                overflow: hidden;
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                    transition: left 0.5s ease;
+                }
+
+                &:hover {
+                    transform: translateY(-1px);
+                    box-shadow:
+                        0 4px 12px rgba($warning-color, 0.3),
+                        0 2px 6px rgba($warning-color, 0.2);
+
+                    &::before {
+                        left: 100%;
+                    }
+                }
+
+                .review-icon {
+                    font-size: 0.875rem;
+                    color: $text-light;
+                    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+                }
+            }
+        }
+
+        // Timer
+        .fullscreen-timer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            min-width: 80px;
+        }
+
+
+    }
+
+    @media (min-width: 1024px) {
+        min-height: 80px;
+
+
+
+        .fullscreen-center-section {
+            .fullscreen-timer {
+                min-width: 100px;
+            }
+        }
+
+    }
+}
+
+// Progress Bar Section - Moved from navigation to header
+.fullscreen-progress-section {
+    background: rgba($background-light, 0.95);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    position: relative;
+
+    // In review mode, make room on the right for the fixed submit container
+    &.review-mode {
+        // Reserve horizontal space for the fixed `.fullscreen-submit` cluster (width varies by content/breakpoint)
+        // Desktop default
+        padding-right: 480px;
+
+        @media (max-width: 1280px) {
+            padding-right: 440px;
+        }
+
+        @media (max-width: 1024px) {
+            padding-right: 420px;
+        }
+
+        @media (max-width: 900px) {
+            padding-right: 380px;
+        }
+
+        @media (max-width: 784px) {
+            padding-right: 360px;
+        }
+
+        @media (max-width: 600px) {
+            padding-right: 320px;
+        }
+
+        @media (max-width: 500px) {
+            padding-right: 300px;
+        }
+
+        @media (max-width: 428px) {
+            padding-right: 280px;
+        }
+
+        @media (max-width: 390px) {
+            padding-right: 260px;
+        }
+
+        @media (max-width: 375px) {
+            padding-right: 240px;
+        }
+    }
+
+    .fullscreen-progress-bar {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        max-width: 100%;
+        width: 100%;
+        justify-content: center;
+
+        .question-dots {
+            display: flex;
+            gap: $spacing-xs;
+            overflow-x: auto;
+            padding: $spacing-sm;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+            max-width: calc(100% - 80px); // Account for arrows
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: $border-radius-md;
+            border: 1px solid #e9ecef;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+
+        .question-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 11px;
+            font-weight: $font-weight-medium;
+            color: #6b7280;
+            border: 1.5px solid #d1d5db;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            user-select: none;
+            overflow: hidden;
+
+            // Natural color palette overlay
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                border-radius: 6px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            // Range styling for question numbers like "14-19"
+            &.range-number {
+                min-width: 44px;
+                border-radius: 6px;
+                padding: 0 $spacing-xs;
+            }
+
+            .dot-question-number {
+                line-height: 1;
+                font-weight: $font-weight-medium;
+            }
+
+            &:hover {
+                transform: translateY(-1px) scale(1.02);
+                border-color: $success-color;
+                background: linear-gradient(135deg, color.adjust($success-color, $lightness: 95%) 0%, color.adjust($success-color, $lightness: 90%) 100%);
+                color: $success-color;
+                box-shadow: 0 2px 8px rgba(86, 79, 253, 0.15);
+
+                &::before {
+                    opacity: 1;
+                }
+            }
+
+            &:active {
+                transform: translateY(0) scale(0.98);
+                transition: all 0.1s ease;
+            }
+
+            .checkmark {
+                display: none; // Hide by default, show on answered
+                position: absolute;
+                top: -3px;
+                right: -3px;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                border: 1.5px solid #ffffff;
+                color: #ffffff;
+                font-size: 7px;
+                text-align: center;
+                line-height: 15px;
+                font-weight: $font-weight-bold;
+                box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+                opacity: 0;
+                transform: scale(0.8);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                z-index: 2;
+            }
+
+            &.answered {
+                border-color: #059669;
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                color: #047857;
+                box-shadow: 0 1px 4px rgba(5, 150, 105, 0.15);
+
+                .checkmark {
+                    display: block;
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                &:hover {
+                    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+                }
+            }
+
+            // Review mode coloring
+            &.correct {
+                border-color: #059669;
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                color: #047857;
+            }
+
+            &.incorrect {
+                border-color: color.adjust($danger-color, $lightness: -5%);
+                background: linear-gradient(135deg, color.adjust($danger-color, $lightness: 45%) 0%, color.adjust($danger-color, $lightness: 50%) 100%);
+                color: color.adjust($danger-color, $lightness: -10%);
+
+                .checkmark {
+                    display: none;
+                }
+            }
+
+            // Ensure incorrect overrides other states
+            &.answered.incorrect,
+            &.current-passage.incorrect,
+            &.other-passage.incorrect,
+            &.current-passage.answered.incorrect,
+            &.other-passage.answered.incorrect {
+                border-color: color.adjust($danger-color, $lightness: -5%);
+                background: linear-gradient(135deg, color.adjust($danger-color, $lightness: 45%) 0%, color.adjust($danger-color, $lightness: 50%) 100%);
+                color: color.adjust($danger-color, $lightness: -10%);
+                opacity: 1;
+
+                .checkmark {
+                    display: none;
+                }
+            }
+
+            // Ensure correct is consistent with other variants
+            &.answered.correct,
+            &.current-passage.correct,
+            &.other-passage.correct,
+            &.current-passage.answered.correct,
+            &.other-passage.answered.correct {
+                border-color: #059669;
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                color: #047857;
+            }
+
+            // Current Passage styling with success color accents
+            &.current-passage {
+                border-color: $success-color;
+                background: linear-gradient(135deg, color.adjust($success-color, $lightness: 95%) 0%, color.adjust($success-color, $lightness: 90%) 100%);
+                color: $success-color;
+                font-weight: $font-weight-semibold;
+                box-shadow: 0 1px 4px rgba(86, 79, 253, 0.15);
+
+                &:hover {
+                    background: linear-gradient(135deg, color.adjust($success-color, $lightness: 90%) 0%, color.adjust($success-color, $lightness: 85%) 100%);
+                    box-shadow: 0 2px 8px rgba(35, 189, 51, 0.25);
+                }
+
+                &.answered {
+                    background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                    color: #ffffff;
+                    border-color: $success-color;
+                    box-shadow: 0 1px 4px rgba(35, 189, 51, 0.25);
+
+                    .checkmark {
+                        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+                        border-color: $success-color;
+                        box-shadow: 0 1px 3px rgba(5, 150, 105, 0.4);
+                    }
+
+                    &:hover {
+                        background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -15%) 100%);
+                        box-shadow: 0 2px 8px rgba(35, 189, 51, 0.35);
+                    }
+                }
+            }
+
+            // Other Passage styling with muted earth tones
+            &.other-passage {
+                border-color: #d1d5db;
+                background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+                color: #6b7280;
+                opacity: 0.8;
+
+                &:hover {
+                    border-color: $success-color;
+                    background: linear-gradient(135deg, color.adjust($success-color, $lightness: 95%) 0%, color.adjust($success-color, $lightness: 90%) 100%);
+                    color: $success-color;
+                    opacity: 1;
+                    box-shadow: 0 2px 8px rgba(86, 79, 253, 0.1);
+                }
+
+                &.answered {
+                    border-color: #9ca3af;
+                    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+                    color: #6b7280;
+                    opacity: 0.9;
+
+                    .checkmark {
+                        background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+                        border-color: #9ca3af;
+                        box-shadow: 0 1px 3px rgba(156, 163, 175, 0.3);
+                    }
+
+                    &:hover {
+                        background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+                        box-shadow: 0 2px 8px rgba(156, 163, 175, 0.15);
+                    }
+                }
+            }
+
+            // Review hover overrides to win over later passage hovers
+            &.current-passage.correct:hover,
+            &.other-passage.correct:hover,
+            &.answered.current-passage.correct:hover,
+            &.answered.other-passage.correct:hover {
+                border-color: #059669;
+                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                color: $text-light;
+                box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+            }
+
+            &.current-passage.incorrect:hover,
+            &.other-passage.incorrect:hover,
+            &.answered.current-passage.incorrect:hover,
+            &.answered.other-passage.incorrect:hover {
+                border-color: $danger-color;
+                background: linear-gradient(135deg, color.adjust($danger-color, $lightness: 40%) 0%, color.adjust($danger-color, $lightness: 45%) 100%);
+                color: $danger-color;
+                box-shadow: 0 2px 8px rgba($danger-color, 0.2);
+            }
+
+            &:focus,
+            &:focus-visible {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(86, 79, 253, 0.3);
+            }
+        }
+
+        .scroll-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: rgba($neutral-500, 0.1);
+            cursor: pointer;
+            transition: background-color $transition-fast;
+            flex-shrink: 0;
+            color: $success-color;
+            @include flex-center();
+
+            &:hover {
+                background-color: rgba($neutral-500, 0.2);
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+
+            svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    }
+
+    // Mobile responsive adjustments for progress bar
+    @media (max-width: 783px) {
+        padding: $spacing-xs;
+        min-height: 40px;
+    }
+
+    // Keep passage arrows visible in review mode for navigation
+    &.review-mode {
+        .fullscreen-passage-arrows {
+            position: fixed;
+            top: 0;
+            right: 20px;
+            // Passage arrows remain visible during review mode
+            // to allow users to navigate between passages
+        }
+    }
+}

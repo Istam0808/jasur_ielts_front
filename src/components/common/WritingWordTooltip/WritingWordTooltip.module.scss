@@ -1,0 +1,180 @@
+@use "sass:color";
+@use '@/assets/styles/settings' as *;
+@use '@/assets/styles/mixins' as *;
+
+.tooltipContainer {
+  position: relative;
+  display: inline;
+  cursor: help;
+}
+
+.tooltipContent {
+  position: fixed;
+  z-index: 100001;
+  background: $background-light;
+  color: $text-primary;
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--category-color, $primary-color);
+  max-width: min(380px, calc(100vw - 2rem));
+  min-width: 280px;
+  width: max-content;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+  pointer-events: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  animation: fadeIn 0.2s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 576px) {
+    max-width: calc(100vw - 1rem);
+    min-width: 240px;
+    padding: $spacing-sm;
+    font-size: $font-size-xs;
+  }
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  border-bottom: 2px solid var(--category-color, $primary-color);
+  @include flex(row, space-between, center);
+}
+
+.categoryName {
+  font-weight: $font-weight-bold;
+  font-size: $font-size-base;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wordExample {
+  font-weight: $font-weight-semibold;
+  font-style: italic;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+}
+
+.tooltipBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.ruleSection,
+.examplesSection,
+.tipsSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.sectionTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: var(--category-color, $primary-color);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.75rem;
+}
+
+.ruleText {
+  margin: 0;
+  color: $text-primary;
+  line-height: 1.6;
+  font-size: $font-size-sm;
+}
+
+.examplesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.exampleTag {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: var(--category-color, $primary-color);
+  
+  // Category-specific colors will be applied via inline styles in the component
+}
+
+.tipsList {
+  margin: 0;
+  padding-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.tipItem {
+  margin: 0;
+  color: $text-secondary;
+  line-height: 1.5;
+  font-size: $font-size-sm;
+}
+
+.coherenceNote {
+  margin-top: $spacing-sm;
+  padding: $spacing-sm;
+  background-color: rgba($accent-color, 0.1);
+  border-left: 3px solid $accent-color;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-xs;
+  line-height: 1.5;
+  color: $text-primary;
+
+  strong {
+    color: $accent-color;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.tooltipArrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.tooltipContent.top .tooltipArrow {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top: 8px solid var(--category-color, $primary-color);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: none;
+}
+
+.tooltipContent.bottom .tooltipArrow {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom: 8px solid var(--category-color, $primary-color);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: none;
+}

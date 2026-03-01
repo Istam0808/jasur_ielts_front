@@ -1,0 +1,265 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+    @include common.field-wrapper;
+}
+
+.label {
+    @include common.field-label;
+}
+
+// New vertical flow chart styles
+.verticalFlow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.flowStep {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px 20px;
+    border: 2px solid common.$control-border;
+    border-radius: 12px;
+    background: common.$background-light;
+    min-width: 300px;
+    text-align: center;
+    box-shadow: 0 2px 4px color.change(black, $alpha: 0.1);
+}
+
+.stepText {
+    color: common.$text-secondary;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.blankInput {
+    @include common.form-control;
+    height: 40px;
+    width: 120px;
+    text-align: center;
+    border: 2px solid common.$control-border;
+    background: white;
+
+    &::placeholder {
+        color: common.$text-muted;
+        font-weight: 500;
+    }
+
+    &:hover {
+        border-color: common.$control-border-hover;
+    }
+
+    &:focus {
+        border-color: common.$control-border-focus;
+        box-shadow: 0 0 0 3px color.change(common.$control-border-focus, $alpha: 0.1);
+    }
+}
+
+.arrowContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 40px;
+}
+
+.arrow {
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 12px solid common.$neutral-400;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: -14px;
+        left: -6px;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 10px solid white;
+    }
+}
+
+// Legacy horizontal flow styles
+.flow {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.wrapper[data-vertical] .flow {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.textBox {
+    padding: 10px 12px;
+    border: 1px solid common.$control-border;
+    border-radius: 10px;
+    background: common.$background-light;
+    color: common.$text-secondary;
+}
+
+.inputBox {
+    @include common.form-control;
+    height: 38px;
+    width: 180px;
+    border-width: 2px;
+}
+
+.hint {
+    @include common.field-hint;
+}
+
+.error {
+    @include common.field-error;
+}
+
+// Review Mode Styles
+.reviewInput {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: common.$background-light;
+    border-radius: 8px;
+    border: 2px solid common.$border-light;
+    min-width: 250px;
+    box-shadow: 0 2px 8px color.change(black, $alpha: 0.08);
+    transition: all 0.2s ease;
+    margin: 0.5rem 0;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px color.change(black, $alpha: 0.12);
+    }
+
+    &.correct {
+        border-color: common.$success-color;
+        background: color.adjust(common.$success-color, $lightness: 50%);
+        box-shadow: 0 2px 8px color.change(common.$success-color, $alpha: 0.15);
+
+        &:hover {
+            box-shadow: 0 4px 12px color.change(common.$success-color, $alpha: 0.2);
+        }
+    }
+
+    &.incorrect {
+        border-color: common.$danger-color;
+        background: color.adjust(common.$danger-color, $lightness: 55%);
+        box-shadow: 0 2px 8px color.change(common.$danger-color, $alpha: 0.15);
+
+        &:hover {
+            box-shadow: 0 4px 12px color.change(common.$danger-color, $alpha: 0.2);
+        }
+    }
+
+    &.unanswered {
+        border-color: common.$warning-color;
+        background: color.adjust(common.$warning-color, $lightness: 55%);
+        box-shadow: 0 2px 8px color.change(common.$warning-color, $alpha: 0.15);
+
+        &:hover {
+            box-shadow: 0 4px 12px color.change(common.$warning-color, $alpha: 0.2);
+        }
+    }
+}
+
+.reviewInputContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.userAnswerSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.answerLabel {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: common.$text-secondary;
+}
+
+.answerText {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: common.$text-primary;
+    padding: 0.25rem 0;
+    line-height: 1.3;
+}
+
+.statusIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: common.$background-light;
+    border: 2px solid common.$border-light;
+    transition: all 0.2s ease;
+
+    .reviewInput.correct & {
+        border-color: common.$success-color;
+        background: color.adjust(common.$success-color, $lightness: 60%);
+    }
+
+    .reviewInput.incorrect & {
+        border-color: common.$danger-color;
+        background: color.adjust(common.$danger-color, $lightness: 65%);
+    }
+
+    .reviewInput.unanswered & {
+        border-color: common.$warning-color;
+        background: color.adjust(common.$warning-color, $lightness: 65%);
+    }
+}
+
+.statusIcon {
+    font-size: 1.1rem;
+    font-weight: bold;
+
+    &.correct {
+        color: common.$success-color;
+    }
+
+    &.incorrect {
+        color: common.$danger-color;
+    }
+
+    &.unanswered {
+        color: common.$warning-color;
+    }
+}
+
+.reviewInputWrapper {
+    min-width: 250px;
+    margin: 0.5rem 0;
+}
+
+// Enhanced flow step styling for review mode
+.flowStep {
+    &.review-mode {
+        background: linear-gradient(135deg, color.adjust(common.$background-primary, $lightness: 5%) 0%, common.$background-primary 100%);
+        border-color: common.$border-medium;
+        box-shadow: 0 2px 8px color.change(black, $alpha: 0.05);
+    }
+}

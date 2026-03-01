@@ -1,0 +1,39 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+
+.lm-header {
+    padding: $spacing-md $spacing-xl;
+    background: $background-light;
+    border-bottom: 1px solid $border-light;
+    box-shadow: 0 2px 8px rgba($text-primary, 0.05);
+    transition: padding 0.2s ease, opacity 0.2s ease;
+}
+
+.lm-topic {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 1.5vw, 16px);
+    margin-bottom: clamp(16px, 2vw, 24px);
+    transition: gap 0.2s ease, margin-bottom 0.2s ease;
+
+    .lm-brand {
+        width: clamp(28px, 4vw, 40px);
+        height: clamp(28px, 4vw, 40px);
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba($text-primary, 0.08);
+        border: 1px solid $border-light;
+        transition: width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    h2 {
+        font-size: clamp(0.9rem, 2vw, 1.75rem);
+        margin: 0;
+        color: $text-primary;
+        font-weight: 700;
+        line-height: 1.2;
+        transition: font-size 0.2s ease;
+    }
+}

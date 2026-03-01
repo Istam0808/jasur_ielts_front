@@ -1,0 +1,326 @@
+@use "sass:map";
+@use "sass:math";
+@use "@/assets/styles/settings" as *;
+
+$breakpoints: (
+    xs: 480px,
+    sm: 640px,
+    md: 768px,
+    lg: 1024px,
+    xl: 1280px,
+    xxl: 1536px
+);
+
+@mixin respond-to($breakpoint) {
+    $min: map.get($breakpoints, $breakpoint);
+    @if $min != null {
+        @media (min-width: $min) {
+            @content;
+        }
+    } @else {
+        @content;
+    }
+}
+
+@mixin respond-down($breakpoint) {
+    $max: map.get($breakpoints, $breakpoint);
+    @if $max != null {
+        @media (max-width: ($max - 0.02px)) {
+            @content;
+        }
+    } @else {
+        @content;
+    }
+}
+
+@mixin flex($direction: row, $justify: flex-start, $align: stretch, $wrap: nowrap, $gap: null) {
+    display: flex;
+    flex-direction: $direction;
+    justify-content: $justify;
+    align-items: $align;
+    flex-wrap: $wrap;
+    @if $gap != null {
+        gap: $gap;
+    }
+}
+
+@mixin center-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin absolute-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@mixin box-shadow($x, $y, $blur, $spread, $color) {
+    box-shadow: $x $y $blur $spread $color;
+}
+
+@mixin text-shadow($x, $y, $blur, $color) {
+    text-shadow: $x $y $blur $color;
+}
+
+@mixin container($max-width: $container-width) {
+    width: 100%;
+    max-width: $max-width;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+}
+
+@mixin position($position, $top: null, $right: null, $bottom: null, $left: null) {
+    position: $position;
+    @if $top != null {
+        top: $top;
+    }
+    @if $right != null {
+        right: $right;
+    }
+    @if $bottom != null {
+        bottom: $bottom;
+    }
+    @if $left != null {
+        left: $left;
+    }
+}
+
+@mixin size($width, $height: $width) {
+    width: $width;
+    height: $height;
+}
+
+@mixin circle($size) {
+    width: $size;
+    height: $size;
+    border-radius: 50%;
+}
+
+@mixin grid($columns, $rows: auto, $gap: 0) {
+    display: grid;
+    grid-template-columns: $columns;
+    grid-template-rows: $rows;
+    gap: $gap;
+}
+
+@mixin font-size($size, $line-height: null) {
+    font-size: $size;
+    @if $line-height != null {
+        line-height: $line-height;
+    }
+}
+
+@mixin font-medium {
+    font-weight: $font-weight-medium;
+}
+
+@mixin font-semibold {
+    font-weight: $font-weight-semibold;
+}
+
+@mixin font-bold {
+    font-weight: $font-weight-bold;
+}
+
+@mixin smooth-transition($value: $transition-normal) {
+    transition: $value;
+}
+
+@mixin multiple-box-shadow($shadows...) {
+    box-shadow: $shadows;
+}
+
+@mixin gradient-text($from, $to) {
+    background: linear-gradient(135deg, $from 0%, $to 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+@mixin score-progress-gradient($color) {
+    background: linear-gradient(90deg, color.adjust($color, $lightness: 10%), $color);
+}
+
+@mixin zone-badge-gradient($color) {
+    background: linear-gradient(135deg, color.adjust($color, $lightness: 8%), $color);
+}
+
+@mixin badge-gradient($from, $to) {
+    background: linear-gradient(135deg, $from 0%, $to 100%);
+}
+
+@mixin gradient-button($from, $to: null) {
+    $gradient-to: $from;
+
+    @if $to != null {
+        $gradient-to: $to;
+    }
+
+    background: linear-gradient(135deg, $from 0%, $gradient-to 100%);
+    color: $text-light;
+    border: none;
+}
+
+@mixin glass-effect($opacity: 0.85, $blur: 12px) {
+    background: rgba(255, 255, 255, $opacity);
+    -webkit-backdrop-filter: blur($blur);
+    backdrop-filter: blur($blur);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@mixin mobile-touch-target($size: 44px) {
+    min-width: $size;
+    min-height: $size;
+}
+
+@mixin mobile-safe-area {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+@mixin mobile-scroll-snap {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+@mixin card-hover-effect {
+    transition: transform $transition-fast, box-shadow $transition-fast;
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+    }
+}
+
+@mixin modal-base {
+    background: $background-light;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+}
+
+@mixin modal-content-base {
+    padding: $spacing-lg;
+}
+
+@mixin custom-scrollbar($size: 8px, $thumb: rgba(17, 24, 39, 0.2), $track: transparent, $hover: null) {
+    &::-webkit-scrollbar {
+        width: $size;
+        height: $size;
+    }
+    &::-webkit-scrollbar-track {
+        background: $track;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: $thumb;
+        border-radius: 999px;
+    }
+    @if $hover != null {
+        &::-webkit-scrollbar-thumb:hover {
+            background: $hover;
+        }
+    }
+}
+
+@mixin stat-item-base {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius-md;
+    background: $background-light;
+    box-shadow: $shadow-sm;
+}
+
+@mixin heading-color {
+    color: $text-primary;
+}
+
+@mixin heading-bg {
+    background: $background-secondary;
+    box-shadow: $shadow-sm;
+}
+
+@mixin header-banner-complete {
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+@mixin header-banner-gradient($from, $to, $third: null) {
+    @if $third != null {
+        background: linear-gradient(135deg, $from 0%, $to 50%, $third 100%);
+    } @else {
+        background: linear-gradient(135deg, $from 0%, $to 100%);
+    }
+}
+
+@mixin mobile-gradient {
+    background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
+}
+
+@mixin small-screen-gradient {
+    background: linear-gradient(135deg, $primary-color 0%, $secondary-color 100%);
+}
+
+@mixin dropdown-gradient($from-opacity: 0.9, $to-opacity: 0.95) {
+    background: linear-gradient(
+        135deg,
+        rgba($background-dark, $from-opacity) 0%,
+        rgba($primary-color, $to-opacity) 100%
+    );
+}
+
+@mixin question-instruction-style {
+    font-size: $font-size-base;
+    line-height: $line-height-normal;
+    color: $text-secondary;
+    margin-bottom: $spacing-md;
+}
+
+@mixin question-texts-style {
+    font-size: $font-size-base;
+    line-height: $line-height-normal;
+    color: $text-primary;
+    margin: 0;
+}
+
+@mixin focus-visible {
+    &:focus-visible {
+        @content;
+    }
+}
+
+@mixin keyframes($name) {
+    @keyframes #{$name} {
+        @content;
+    }
+}
+
+@mixin z-index($layer) {
+    $z-layers: (
+        base: 1,
+        dropdown: 1000,
+        sticky: 1020,
+        overlay: 1030,
+        modal: 1050,
+        popover: 1060,
+        tooltip: 1070
+    );
+    $value: map.get($z-layers, $layer);
+    @if $value == null {
+        $value: 1;
+    }
+    z-index: $value;
+}

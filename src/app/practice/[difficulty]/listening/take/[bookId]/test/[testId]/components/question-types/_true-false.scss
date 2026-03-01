@@ -1,0 +1,81 @@
+@use "base" as base;
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+
+.question-true-false {
+    .true-false-item {
+        margin-bottom: $spacing-lg;
+        padding: $spacing-md;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-sm;
+        background: $background-light;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        .statement-container {
+            margin-bottom: $spacing-md;
+
+            .question-text {
+                @include question-texts-style;
+            }
+        }
+
+        .true-false-options {
+            @include flex($gap: $spacing-lg);
+
+            .option-label {
+                @include base.question-option;
+                @include flex($align: center, $gap: $spacing-sm);
+                padding: $spacing-sm $spacing-md;
+                border: 2px solid $border-light;
+                border-radius: $border-radius-sm;
+                background: $background-light;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                flex: 1;
+                justify-content: center;
+                font-weight: $font-weight-medium;
+
+                &:hover {
+                    border-color: color.adjust($primary-color, $alpha: -0.3);
+                    background: color.adjust($primary-color, $alpha: -0.95);
+                }
+
+                &.selected {
+                    border-color: $primary-color;
+                    background: color.adjust($primary-color, $alpha: -0.9);
+                    color: $primary-color;
+                    font-weight: $font-weight-semibold;
+                }
+
+                .radio-input {
+                    margin: 0;
+                    width: 18px;
+                    height: 18px;
+                    accent-color: $primary-color;
+                }
+
+                .option-text {
+                    font-size: $font-size-base;
+                    user-select: none;
+                }
+            }
+        }
+
+        @media (max-width: 784px) {
+            padding: $spacing-sm;
+
+            .true-false-options {
+                flex-direction: column;
+                gap: $spacing-sm;
+
+                .option-label {
+                    padding: $spacing-sm;
+                }
+            }
+        }
+    }
+}

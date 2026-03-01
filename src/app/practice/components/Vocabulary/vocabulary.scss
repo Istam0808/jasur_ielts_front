@@ -1,0 +1,1430 @@
+@use 'sass:color';
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use './components/styles/vocabulary-card/index.scss';
+@use './components/styles/TopicFilter.scss';
+@use './components/styles/StudyModeSelector.scss';
+
+// =============================================================================
+// GLOBAL CUSTOMSELECT OVERRIDES FOR VOCABULARY
+// =============================================================================
+
+.vocabulary-practice {
+
+    // Force CustomSelect to take full width in vocabulary context
+    :global(.custom-select) {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+        display: block !important;
+        table-layout: auto !important;
+
+        :global(.custom-select__trigger) {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+    }
+}
+
+// =============================================================================
+// VOCABULARY PRACTICE STYLES
+// =============================================================================
+
+.vocabulary-scroll-target {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.vocabulary-practice {
+    padding-top: $spacing-lg;
+    padding-bottom: $spacing-xxl;
+    min-height: 100vh;
+    @include container($max-width: $container-width);
+
+    @include respond-to('md') {
+        padding-top: $spacing-xl;
+        padding-bottom: $spacing-xl;
+    }
+
+    @include respond-to('sm') {
+        padding-top: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        padding-left: $spacing-md;
+        padding-right: $spacing-md;
+    }
+
+    @include respond-to('xs') {
+        padding-left: $spacing-sm;
+        padding-right: $spacing-sm;
+    }
+
+    @include respond-down('sm') {
+        padding-bottom: 0;
+    }
+}
+
+// =============================================================================
+// VOCABULARY SPECIFIC STYLES header
+// =============================================================================
+// Note: Main header banner styles moved to ../headerBanner.scss
+// This file now only contains vocabulary-specific styling that doesn't fit the common banner pattern
+
+.vocabulary-header-main-row {
+    @include flex(row, center, space-between);
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+
+    @include respond-down('md') {
+        gap: 1.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    @include respond-down('sm') {
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+}
+
+.vocabulary-header-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+
+    @include respond-down('sm') {
+        flex: 1 1 100%;
+    }
+}
+
+.vocabulary-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    @include respond-down('sm') {
+        flex: 1 1 100%;
+        justify-content: flex-end;
+    }
+}
+
+.vocabulary-title-group {
+    @include flex(row, center, flex-start);
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+
+    @include respond-down('md') {
+        gap: 0.75rem;
+    }
+
+    @include respond-down('sm') {
+        gap: 0.5rem;
+    }
+}
+
+.vocabulary-title-wrapper {
+    @include flex(row, center, flex-start);
+    gap: 1rem;
+    position: relative;
+    z-index: 2;
+
+    @include respond-down('md') {
+        gap: 0.75rem;
+    }
+
+    @include respond-down('sm') {
+        gap: 0.5rem;
+    }
+
+    .vocabulary-title-icon {
+        font-size: 2.5rem;
+        color: $accent-color;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        @include respond-down('md') {
+            font-size: 2.25rem;
+        }
+
+        @include respond-down('sm') {
+            font-size: 2rem;
+        }
+    }
+}
+
+.vocabulary-title-icon {
+    font-size: 2.5rem;
+    color: $accent-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @include respond-down('md') {
+        font-size: 2.25rem;
+    }
+
+    @include respond-down('sm') {
+        font-size: 2rem;
+    }
+}
+
+.vocabulary-level-selector-pill {
+    @include flex(row, center, center);
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: rgba($accent-color, 0.1);
+    border: 2px solid $accent-color;
+    border-radius: $border-radius-full;
+    color: $accent-color;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+
+    &:hover {
+        background: rgba($accent-color, 0.2);
+        transform: translateY(-2px);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    @include respond-down('sm') {
+        padding: 0.6rem 1rem;
+        font-size: $font-size-xs;
+    }
+}
+
+.vocabulary-level-code {
+    font-weight: $font-weight-bold;
+    font-size: 0.9em;
+}
+
+.vocabulary-level-name {
+    font-weight: $font-weight-medium;
+}
+
+.vocabulary-selector-icon {
+    font-size: 1.2em;
+    transition: transform 0.3s ease;
+}
+
+.vocabulary-change-label {
+    @include respond-down('sm') {
+        display: none;
+    }
+}
+
+.vocabulary-header-description {
+    font-size: 1rem;
+    color: #ccc;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+}
+
+.inline-stats {
+    @include flex(row, center, flex-start);
+    gap: $spacing-md;
+
+    .stat-item {
+        @include flex(row, center, center);
+        gap: 0.5rem;
+        background: rgba($text-light, 0.15);
+        border: 1px solid rgba($text-light, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: $border-radius-sm;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+        color: $text-light;
+        flex-shrink: 0;
+
+        &:hover {
+            background: rgba($text-light, 0.25);
+        }
+
+        .stat-icon {
+            color: $accent-color;
+            font-size: 1.1rem;
+            margin-right: 0.25rem;
+        }
+
+        span {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: $text-light;
+        }
+    }
+}
+
+// =============================================================================
+// CONTROLS SECTION
+// =============================================================================
+
+.vocabulary-controls-details {
+    margin-top: $spacing-lg;
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+
+
+
+    @include respond-down('sm') {
+        margin-top: $spacing-md;
+    }
+
+    *::selection {
+        background-color: transparent !important;
+        color: inherit !important;
+    }
+
+    *::-moz-selection {
+        background-color: transparent !important;
+        color: inherit !important;
+    }
+
+    // Additional selection prevention
+    * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    // Allow selection only for input fields
+    input,
+    textarea {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    .controls-summary {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0;
+        background: $background-light;
+        border: none;
+        border-radius: $border-radius-lg $border-radius-lg 0 0;
+        transition: all 0.2s ease;
+        position: relative;
+        width: 100%;
+        margin: 0;
+        margin-bottom: 0;
+        outline: none;
+        overflow: hidden;
+        box-shadow: none;
+
+        @include respond-down('sm') {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: $spacing-md $spacing-lg;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-family: inherit;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            line-height: inherit;
+            outline: none;
+            color: $text-secondary;
+            min-height: 48px;
+            position: relative;
+            margin: 0;
+            gap: $spacing-sm;
+            @include flex(row, center, center);
+
+            @include respond-down('sm') {
+                padding: $spacing-sm $spacing-md;
+                min-height: 44px;
+                flex: 1;
+                min-width: 0;
+                font-size: $font-size-xs;
+                gap: $spacing-xs;
+            }
+
+            &:hover {
+                background-color: rgba($accent-color, 0.08);
+                color: $accent-color;
+
+                .summary-text {
+                    color: $accent-color;
+                }
+
+                .summary-icon {
+                    color: $accent-color;
+                }
+            }
+
+            &.active {
+                background-color: $accent-color;
+                color: $text-light;
+                font-weight: $font-weight-semibold;
+                border: none !important;
+                border-bottom: none !important;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+                outline: none !important;
+                box-shadow: none !important;
+                margin-bottom: -1px !important;
+                position: relative;
+                z-index: 1;
+
+                .summary-text {
+                    color: $text-light;
+                    font-weight: $font-weight-semibold;
+                }
+
+                .summary-icon {
+                    color: $text-light;
+                }
+
+                &:hover {
+                    background-color: color.adjust($accent-color, $lightness: -5%);
+                }
+            }
+
+
+
+            .summary-text {
+                font-size: inherit;
+                font-weight: inherit;
+                color: inherit;
+                transition: color 0.2s ease;
+                white-space: nowrap;
+
+                @include respond-down('xs') {
+                    font-size: 0.75rem;
+                }
+            }
+
+            .summary-icon {
+                font-size: 1.1rem;
+                color: inherit;
+                transition: color 0.2s ease;
+                flex-shrink: 0;
+
+                @include respond-down('sm') {
+                    font-size: 1rem;
+                }
+
+                @include respond-down('xs') {
+                    font-size: 0.9rem;
+                }
+            }
+        }
+
+        .toggle-btn {
+            @include flex(row, center, center);
+            padding: $spacing-md;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            flex-shrink: 0;
+            min-width: 48px;
+            min-height: 48px;
+            color: $text-secondary;
+            border-left: none;
+            margin: 0;
+
+            @include respond-down('sm') {
+                padding: $spacing-sm;
+                min-width: 44px;
+                min-height: 44px;
+                border-left: none;
+                border-top: none;
+                flex-shrink: 0;
+            }
+
+            &:hover {
+                background-color: rgba($accent-color, 0.08);
+                color: $accent-color;
+
+                .summary-chevron {
+                    color: $accent-color;
+                }
+            }
+
+            .summary-chevron {
+                font-size: 1.25rem;
+                color: inherit;
+                transition: transform 0.2s ease, color 0.2s ease;
+
+                &.rotated {
+                    transform: rotate(180deg);
+                }
+
+                @include respond-down('sm') {
+                    font-size: 1.1rem;
+                }
+            }
+        }
+    }
+}
+
+.controls-section {
+    padding: 0 !important;
+    border-top: none;
+    border-radius: 0 0 $border-radius-lg $border-radius-lg;
+    margin: 0 !important;
+    transform-origin: top;
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transform: scaleY(0);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    // Prevent scroll behavior from affecting this element
+    scroll-margin-top: 0;
+    scroll-margin-bottom: 0;
+    scroll-behavior: auto;
+
+    &.open {
+        max-height: 1000px;
+        opacity: 1;
+        visibility: visible;
+        transform: scaleY(1);
+        padding: $spacing-lg $spacing-xl $spacing-md !important;
+        border-top: none !important;
+        // Ensure proper positioning when open
+        scroll-margin-top: 0;
+        scroll-margin-bottom: 0;
+    }
+
+    // Ensure no content is visible when closed, especially on small screens
+    &:not(.open) {
+        max-height: 0 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: scaleY(0) !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+
+        // Force hide all child elements
+        * {
+            display: none !important;
+        }
+    }
+
+    // Remove text selection for all elements
+    *::selection {
+        background-color: transparent;
+        color: inherit;
+    }
+
+    *::-moz-selection {
+        background-color: transparent;
+        color: inherit;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-md $spacing-lg !important;
+    }
+
+    @include respond-down('sm') {
+        padding: $spacing-md $spacing-sm $spacing-xs !important;
+    }
+
+
+
+    .filter-controls {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    // Override any header banner styles that might add spacing
+    &.headerBanner {
+        padding: $spacing-md $spacing-lg $spacing-sm !important;
+        margin: 0 !important;
+
+        @include respond-down('sm') {
+            padding: $spacing-xs $spacing-sm $spacing-xs !important;
+        }
+    }
+}
+
+// =============================================================================
+// PROFESSIONAL FILTER CONTROLS REDESIGN
+// =============================================================================
+
+.filter-controls {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xl;
+    padding: 0;
+
+    // Remove text selection for all elements
+    *::selection {
+        background-color: transparent;
+        color: inherit;
+    }
+
+    *::-moz-selection {
+        background-color: transparent;
+        color: inherit;
+    }
+
+    @include respond-down('lg') {
+        gap: $spacing-lg;
+    }
+
+    @include respond-down('md') {
+        gap: $spacing-md;
+    }
+
+    @include respond-down('sm') {
+        gap: $spacing-sm;
+        padding-top: $spacing-md;
+    }
+
+    // =============================================================================
+    // CONTROL GROUPS
+    // =============================================================================
+
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+
+        .group-header {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            margin-bottom: $spacing-sm;
+
+            .group-icon {
+                font-size: 1.25rem;
+                color: $accent-color;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                background: rgba($accent-color, 0.1);
+                border-radius: $border-radius-md;
+                flex-shrink: 0;
+            }
+
+            .group-title {
+                font-size: $font-size-lg;
+                font-weight: $font-weight-semibold;
+                color: $text-light;
+                margin: 0;
+            }
+
+            .group-description {
+                font-size: $font-size-sm;
+                color: rgba($text-light, 0.7);
+                margin: 0;
+                margin-top: $spacing-xs;
+            }
+        }
+
+        .group-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $spacing-md;
+            align-items: flex-start;
+
+            @include respond-down('lg') {
+                gap: $spacing-sm;
+            }
+
+            @include respond-down('md') {
+                flex-direction: column;
+                gap: $spacing-sm;
+            }
+
+            @include respond-down('sm') {
+                gap: $spacing-xs;
+            }
+        }
+    }
+
+    // =============================================================================
+    // STUDY MODES GROUP
+    // =============================================================================
+
+    .study-modes-group {
+        .group-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: $spacing-lg;
+
+            @include respond-down('lg') {
+                gap: $spacing-md;
+            }
+
+            @include respond-down('md') {
+                grid-template-columns: 1fr;
+                gap: $spacing-md;
+            }
+
+            @include respond-down('sm') {
+                gap: $spacing-sm;
+            }
+
+            .study-mode-section {
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-sm;
+                width: 100%;
+                min-width: 0; // Allow shrinking
+
+                @include respond-down('sm') {
+                    gap: $spacing-xs;
+                }
+            }
+        }
+    }
+
+    // =============================================================================
+    // FILTERS & VIEW OPTIONS GROUP
+    // =============================================================================
+
+    .filters-view-group {
+
+        // Force CustomSelect to take full width in this specific context
+        :global(.custom-select) {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+            display: block !important;
+            table-layout: auto !important;
+
+            :global(.custom-select__trigger) {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+            }
+        }
+
+        .group-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: $spacing-lg;
+            align-items: start;
+
+            @include respond-down('lg') {
+                grid-template-columns: 1fr;
+                gap: $spacing-md;
+            }
+
+            @include respond-down('md') {
+                gap: $spacing-sm;
+            }
+
+            .filters-section {
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-md;
+                width: 100%;
+
+                .topic-filter {
+                    width: 100%;
+                    max-width: 100%;
+
+                    // Force CustomSelect to take full width
+                    :global(.custom-select) {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        min-width: 0 !important;
+                        flex: 1 !important;
+                        display: block !important;
+                        table-layout: auto !important;
+
+                        :global(.custom-select__trigger) {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            min-width: 0 !important;
+                        }
+                    }
+                }
+
+                @include respond-down('md') {
+                    gap: $spacing-sm;
+                }
+            }
+
+            // Filters Note Styles
+            .filters-note {
+                display: flex !important;
+                align-items: center !important;
+                gap: $spacing-lg !important;
+                padding: $spacing-lg !important;
+                background: linear-gradient(135deg, color.adjust($accent-color, $lightness: -15%), color.adjust($accent-color, $lightness: -25%)) !important;
+                border: 1px solid color.adjust($accent-color, $lightness: -10%) !important;
+                border-radius: $border-radius-md !important;
+                margin-bottom: $spacing-md !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+                position: relative !important;
+                overflow: hidden !important;
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 2px;
+                    background: linear-gradient(90deg, $accent-color, color.adjust($accent-color, $lightness: 10%)) !important;
+                }
+
+                .note-icon {
+                    flex-shrink: 0 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 48px !important;
+                    height: 48px !important;
+                    color: white !important;
+                    font-size: 2.2rem !important;
+                    margin-top: 0 !important;
+
+                    @include respond-down('md') {
+                        width: 40px !important;
+                        height: 40px !important;
+                        font-size: 1.8rem !important;
+                    }
+
+                    @include respond-down('sm') {
+                        width: 36px !important;
+                        height: 36px !important;
+                        font-size: 1.6rem !important;
+                    }
+                }
+
+                .note-content {
+                    flex: 1 !important;
+                    min-width: 0 !important;
+
+                    p {
+                        margin: 0 !important;
+                        color: white !important;
+                        font-size: 1.1rem !important;
+                        line-height: 1.4 !important;
+                        font-weight: 600 !important;
+
+                        @include respond-down('md') {
+                            font-size: 1rem !important;
+                        }
+
+                        @include respond-down('sm') {
+                            font-size: 0.95rem !important;
+                        }
+                    }
+                }
+
+                @include respond-down('md') {
+                    padding: $spacing-sm !important;
+                    gap: $spacing-sm !important;
+                }
+
+                @include respond-down('sm') {
+                    flex-direction: row !important;
+                    align-items: center !important;
+                    padding: $spacing-sm !important;
+                }
+            }
+
+            .view-options-section {
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-sm;
+                width: 100%;
+
+                .view-options {
+                    display: flex;
+                    flex-direction: row;
+                    gap: $spacing-sm;
+                    width: 100%;
+                }
+
+                @include respond-down('lg') {
+                    .view-options {
+                        flex-direction: row;
+                        gap: $spacing-sm;
+                    }
+                }
+
+                @include respond-down('sm') {
+                    .view-options {
+                        flex-direction: column;
+                        width: 100%;
+                    }
+                }
+            }
+
+            .search-section {
+                grid-column: 1 / -1; // Span full width across all columns
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-sm;
+                width: 100%;
+
+                .search-box {
+                    width: 100%;
+                    max-width: 100%;
+                }
+
+                @include respond-down('md') {
+                    gap: $spacing-xs;
+                }
+            }
+        }
+    }
+
+    // =============================================================================
+    // COMPONENT OVERRIDES
+    // =============================================================================
+
+    // Topic Filter Overrides
+    .topic-filter {
+        width: 100%;
+        max-width: 300px;
+
+        @include respond-down('md') {
+            max-width: 100%;
+        }
+
+        .filter-label {
+            font-size: $font-size-sm;
+            color: rgba($text-light, 0.8);
+            font-weight: $font-weight-medium;
+            margin-bottom: $spacing-xs;
+        }
+
+        // CustomSelect overrides for better integration
+        :global(.custom-select) {
+            width: 100% !important;
+            max-width: 100% !important;
+
+            :global(.custom-select__trigger) {
+                background: rgba($background-light, 0.1);
+                border: 1px solid rgba($border-light, 0.3);
+                color: $text-light;
+                padding: $spacing-sm $spacing-md;
+                border-radius: $border-radius-md;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    background: rgba($background-light, 0.15);
+                    border-color: rgba($accent-color, 0.3);
+                }
+
+                &:focus {
+                    border-color: $accent-color;
+                    box-shadow: 0 0 0 3px rgba($accent-color, 0.1);
+                }
+            }
+        }
+    }
+
+    // View Options Overrides
+    .view-options {
+        display: flex;
+        flex-direction: row;
+        gap: $spacing-sm;
+        width: 100%;
+
+        @include respond-down('lg') {
+            flex-direction: row;
+            gap: $spacing-sm;
+        }
+
+        @include respond-down('sm') {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .option-btn {
+            @include flex(row, center, center);
+            gap: $spacing-sm;
+            padding: $spacing-sm $spacing-md;
+            border-radius: $border-radius-md;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            white-space: nowrap;
+            min-height: 44px;
+            border: 1px solid rgba($border-light, 0.3);
+            background: rgba($background-light, 0.1);
+            color: $text-light;
+            flex: 1;
+
+            @include respond-down('lg') {
+                flex: 1;
+                min-width: 0;
+            }
+
+            @include respond-down('sm') {
+                width: 100%;
+                white-space: normal;
+                text-align: center;
+            }
+
+            svg {
+                font-size: 1.1em;
+                color: inherit;
+                transition: color 0.2s ease;
+                flex-shrink: 0;
+            }
+
+            &:hover {
+                background: rgba($accent-color, 0.15);
+                border-color: rgba($accent-color, 0.3);
+                color: $accent-color;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba($accent-color, 0.1);
+            }
+
+            &.active {
+                background: $accent-color;
+                border-color: $accent-color;
+                color: $text-light;
+                font-weight: $font-weight-semibold;
+                box-shadow: 0 4px 12px rgba($accent-color, 0.2);
+
+                svg {
+                    color: $text-light;
+                }
+
+                &:hover {
+                    background: color.adjust($accent-color, $lightness: -5%);
+                    transform: translateY(-1px);
+                }
+            }
+        }
+    }
+
+    // Study Mode Selector Overrides
+    .study-mode-selector {
+        .mode-section {
+            .mode-selector-label {
+                font-size: $font-size-sm;
+                color: rgba($text-light, 0.8);
+                font-weight: $font-weight-medium;
+                margin-bottom: $spacing-xs;
+
+                @include respond-down('sm') {
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-semibold;
+                    margin-bottom: $spacing-sm;
+                }
+            }
+
+            .mode-buttons {
+                background: rgba($background-light, 0.05);
+                border: 1px solid rgba($border-light, 0.2);
+                border-radius: $border-radius-md;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+                &.game-modes {
+                    background: rgba($accent-color, 0.05);
+                    border-color: rgba($accent-color, 0.2);
+                }
+
+                @include respond-down('sm') {
+                    border-radius: $border-radius-sm;
+                }
+            }
+        }
+    }
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: visible; // Allow button to be positioned properly
+
+    // Global selection styles for the search box
+    &::selection {
+        background-color: color.adjust($accent-color, $alpha: 0.3) !important;
+        color: $text-primary !important;
+    }
+
+    &::-moz-selection {
+        background-color: color.adjust($accent-color, $alpha: 0.3) !important;
+        color: $text-primary !important;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: $spacing-sm;
+        font-size: 1.5rem;
+        color: $text-secondary;
+        pointer-events: none;
+        transition: color 0.2s ease;
+        z-index: 2;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: $spacing-sm;
+        padding-left: 2.5rem;
+        padding-right: 2.5rem; // Restore original padding
+        border-radius: $border-radius-md;
+        border: 1px solid $border-light;
+        background-color: $background-light;
+        color: $text-primary;
+        font-size: 1rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        box-sizing: border-box;
+        line-height: 1.5;
+        min-height: 44px; // Ensure consistent height for better centering
+
+        // Enhanced selection styles with higher specificity
+        &::selection {
+            background-color: color.adjust($accent-color, $alpha: 0.4) !important;
+            color: $text-primary !important;
+        }
+
+        &::-moz-selection {
+            background-color: color.adjust($accent-color, $alpha: 0.4) !important;
+            color: $text-primary !important;
+        }
+
+        @include respond-down('sm') {
+            font-size: 0.9rem;
+            padding-top: $spacing-xs;
+            padding-bottom: $spacing-xs;
+            padding-left: 2.25rem;
+            padding-right: 2.25rem; // Restore original padding
+        }
+
+        &::placeholder {
+            color: $text-muted;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: $accent-color;
+            box-shadow: 0 0 0 3px color.adjust($accent-color, $alpha: -0.8);
+
+            @include respond-down('sm') {
+                box-shadow: 0 0 0 4px color.adjust($accent-color, $alpha: -0.85);
+            }
+
+            +.search-icon {
+                color: $accent-color;
+            }
+        }
+    }
+
+    .search-clear-btn {
+        position: absolute;
+        right: 12px; // Position within the padding area
+        transform: translateY(-50%);
+        background: rgba($background-light, 0.9);
+        border: 1px solid rgba($border-light, 0.3);
+        color: $text-secondary;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        -webkit-user-select: none; // Add this line
+        user-select: none; // Prevent text selection on the button
+        z-index: 3;
+        box-sizing: border-box;
+
+        @include respond-down('sm') {
+            font-size: 1rem;
+            width: 22px;
+            height: 22px;
+            right: 10px;
+        }
+
+        &:hover {
+            background-color: rgba($accent-color, 0.1);
+            border-color: rgba($accent-color, 0.3);
+            color: $accent-color;
+        }
+
+        &:focus {
+            outline: none;
+            background-color: rgba($accent-color, 0.15);
+            border-color: $accent-color;
+            color: $accent-color;
+            box-shadow: 0 0 0 2px rgba($accent-color, 0.2);
+        }
+
+        &:active {
+            transform: translateY(-50%) scale(0.95);
+            background-color: rgba($accent-color, 0.2);
+        }
+
+        // Prevent text selection on the button content
+        &::selection {
+            background-color: transparent;
+            color: inherit;
+        }
+
+        &::-moz-selection {
+            background-color: transparent;
+            color: inherit;
+        }
+    }
+}
+
+
+// =============================================================================
+// CONTENT SECTION
+// =============================================================================
+
+.vocabulary-content {
+    margin-top: 2rem;
+}
+
+// =============================================================================
+// PAGINATION STYLES
+// =============================================================================
+
+.vocabulary-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: $spacing-xxl;
+}
+
+// =============================================================================
+// NO RESULTS STATE
+// =============================================================================
+
+.no-results {
+    text-align: center;
+    padding: $spacing-xxl;
+    color: $text-muted;
+    @include flex(column, center, center);
+
+    .no-results-icon {
+        font-size: 4rem;
+        margin-bottom: $spacing-lg;
+        opacity: 0.5;
+    }
+
+    h3 {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-md;
+        color: $text-primary;
+    }
+
+    p {
+        font-size: $font-size-md;
+        line-height: 1.6;
+    }
+}
+
+// =============================================================================
+// LOADING AND ERROR STATES
+// =============================================================================
+
+.vocabulary-section.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: $spacing-lg;
+
+    p {
+        font-size: $font-size-lg;
+        color: $text-muted;
+    }
+}
+
+.vocabulary-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: $spacing-lg;
+    color: $danger-color;
+
+    .error-icon {
+        font-size: 3rem;
+    }
+
+    .error-text {
+        font-size: $font-size-lg;
+        text-align: center;
+        max-width: 500px;
+        line-height: 1.6;
+    }
+}
+
+.vocabulary-empty {
+    text-align: center;
+    padding: $spacing-xxl;
+    font-size: $font-size-lg;
+    color: $text-muted;
+    background: $background-secondary;
+    border-radius: $border-radius-lg;
+    border: 2px dashed $border-light;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+        max-height: 1000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: scaleY(1);
+        max-height: 1000px;
+    }
+
+    to {
+        opacity: 0;
+        transform: scaleY(0);
+        max-height: 0;
+    }
+}
+
+// =============================================================================
+// FILTERS NOTE OVERRIDE - HIGH SPECIFICITY
+// =============================================================================
+
+.vocabulary-practice .vocabulary-controls-details .controls-section .filter-controls .control-group.filters-view-group .filters-note {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+    padding: 1.5rem !important;
+    background: linear-gradient(135deg, #8b4513, #654321) !important;
+    border: 1px solid #a0522d !important;
+    border-radius: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #a0522d, #8b4513) !important;
+    }
+
+    .note-icon {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 48px !important;
+        height: 48px !important;
+        color: white !important;
+        font-size: 2.2rem !important;
+        margin-top: 0 !important;
+
+        @media (max-width: 768px) {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 1.8rem !important;
+        }
+
+        @media (max-width: 480px) {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1.6rem !important;
+        }
+    }
+
+    .note-content {
+        flex: 1 !important;
+        min-width: 0 !important;
+
+        p {
+            margin: 0 !important;
+            color: white !important;
+            font-size: 1.1rem !important;
+            line-height: 1.4 !important;
+            font-weight: 600 !important;
+
+            @media (max-width: 768px) {
+                font-size: 1rem !important;
+            }
+
+            @media (max-width: 480px) {
+                font-size: 0.95rem !important;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        padding: 1rem !important;
+        gap: 1rem !important;
+    }
+
+    @media (max-width: 480px) {
+        flex-direction: row !important;
+        align-items: center !important;
+        padding: 1rem !important;
+    }
+}

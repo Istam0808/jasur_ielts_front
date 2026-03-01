@@ -1,0 +1,39 @@
+// Base styles for question types
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+// Common styles for all question types
+.reading-question-card {
+    margin-bottom: 1.5rem;
+    background: $background-light;
+    transition: all 0.3s ease;
+
+    &.answered {
+        border-color: color.adjust($primary-color, $lightness: 20%);
+        background: color.adjust($primary-color, $lightness: 45%);
+    }
+
+    &.review-mode {
+        &.answered {
+            &.correct {
+                border-color: $success-color;
+                background: color.adjust($success-color, $lightness: 45%);
+            }
+
+            &.incorrect {
+                border-color: $danger-color;
+                background: color.adjust($danger-color, $lightness: 45%);
+            }
+        }
+    }
+
+    // Add specific class-based styling
+    &.question-type-multiple-choice-multiple {
+        .question-content {
+            border-bottom: 1px solid $border-light;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+    }
+}

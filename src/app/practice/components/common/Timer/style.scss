@@ -1,0 +1,589 @@
+@use '../../../assets/styles/mixins' as *;
+@use '../../../assets/styles/settings' as *;
+@use 'sass:color';
+@use 'sass:math';
+
+// =============================================================================
+// GLASSMORPHIC TIMER - Modern Professional Design
+// =============================================================================
+
+.timer-circular {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: $spacing-xs;
+    perspective: 1000px;
+    transform: translate3d(0, 0, 0);
+
+    .timer-circle-container {
+        position: relative;
+        width: 7rem;
+        height: 7rem;
+        border-radius: $border-radius-full;
+        overflow: visible;
+
+        // Glassmorphism effect
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        // Glass border with light refraction
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow:
+            0 8px 32px 0 rgba(31, 38, 135, 0.15),
+            0 4px 12px 0 rgba(0, 0, 0, 0.05),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 0 rgba(255, 255, 255, 0.1);
+
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateZ(0);
+
+        // Subtle glow based on state
+        &::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: $border-radius-full;
+            background: linear-gradient(135deg,
+                    rgba($success-color, 0.2) 0%,
+                    rgba($success-color, 0.1) 50%,
+                    rgba($success-color, 0.05) 100%);
+            z-index: -1;
+            opacity: 0.8;
+            filter: blur(12px);
+            transition: all 0.4s ease;
+        }
+
+        @media (max-width: 784px) {
+            width: 6rem;
+            height: 6rem;
+        }
+
+        @media (max-width: 480px) {
+            width: 5rem;
+            height: 5rem;
+        }
+
+        .timer-circle-bg {
+            position: absolute;
+            inset: 0.375rem;
+            border-radius: $border-radius-full;
+            overflow: hidden;
+
+            // Inner glass layer
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.15) 0%,
+                    rgba(255, 255, 255, 0.08) 100%);
+
+            // Soft inner shadow for depth
+            box-shadow:
+                inset 0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 -2px 4px rgba(255, 255, 255, 0.15);
+
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+            // Dynamic background color fill (diminishing effect)
+            &::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: $border-radius-full;
+                background: radial-gradient(circle at center,
+                        rgba($success-color, 0.12) 0%,
+                        rgba($success-color, 0.06) 60%,
+                        transparent 100%);
+                opacity: 1;
+                transition: opacity 0.6s ease, background 0.6s ease;
+            }
+        }
+
+        .timer-progress-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+            filter: drop-shadow(0 0 8px rgba($success-color, 0.3));
+            transition: filter 0.4s ease;
+
+            .timer-track {
+                stroke: $success-color;
+                stroke-width: 6;
+                stroke-linecap: round;
+                stroke-opacity: 0.5;
+                transition: stroke 0.4s ease, stroke-opacity 0.4s ease;
+                filter: drop-shadow(0 0 3px rgba($success-color, 0.3));
+
+                // Dynamic color based on percentage - shows remaining time as diminishing green
+                stroke: color-mix(in srgb,
+                        $success-color calc(var(--percentage) * 1%),
+                        $warning-color calc(100% - var(--percentage) * 1%));
+            }
+
+            .timer-progress-ring {
+                stroke: rgba(255, 255, 255, 0.85);
+                stroke-width: 6;
+                stroke-linecap: round;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+
+        .timer-display-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 10;
+
+            .timer-value-large {
+                font-size: $font-size-sm;
+                font-family: $heading-font-family;
+                font-weight: $font-weight-bold;
+                color: $text-primary;
+                letter-spacing: 0.05em;
+                text-shadow:
+                    0 2px 4px rgba(0, 0, 0, 0.1),
+                    0 0 20px rgba(255, 255, 255, 0.4);
+                line-height: $line-height-tight;
+                transition: all $transition-normal;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+
+                @media (max-width: 784px) {
+                    font-size: $font-size-xs;
+                }
+
+                @media (max-width: 480px) {
+                    font-size: $font-size-xs;
+                }
+            }
+        }
+    }
+
+    // =============================================================================
+    // WARNING STATE (≤50%)
+    // =============================================================================
+    &.warning {
+        .timer-circle-container {
+            background: rgba(255, 200, 100, 0.12);
+            border-color: rgba(255, 193, 7, 0.25);
+            box-shadow:
+                0 8px 32px 0 rgba(255, 193, 7, 0.2),
+                0 4px 12px 0 rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.35),
+                inset 0 -1px 0 0 rgba(255, 255, 255, 0.15);
+
+            &::before {
+                background: linear-gradient(135deg,
+                        rgba($warning-color, 0.25) 0%,
+                        rgba($warning-color, 0.15) 50%,
+                        rgba($warning-color, 0.08) 100%);
+                opacity: 1;
+                filter: blur(16px);
+            }
+
+            .timer-circle-bg {
+                background: linear-gradient(135deg,
+                        rgba(255, 220, 130, 0.18) 0%,
+                        rgba(255, 200, 100, 0.1) 100%);
+
+                &::before {
+                    background: radial-gradient(circle at center,
+                            rgba($warning-color, 0.15) 0%,
+                            rgba($warning-color, 0.08) 60%,
+                            transparent 100%);
+                }
+            }
+
+            .timer-progress-svg {
+                filter: drop-shadow(0 0 12px rgba($warning-color, 0.4));
+
+                .timer-track {
+                    stroke: $warning-color;
+                    stroke-opacity: 0.55;
+                    filter: drop-shadow(0 0 4px rgba($warning-color, 0.4));
+                }
+
+                .timer-progress-ring {
+                    stroke: rgba(255, 255, 255, 0.85);
+                }
+            }
+
+            .timer-display-center {
+                .timer-value-large {
+                    color: color.adjust($warning-color, $lightness: -25%);
+                    animation: glass-pulse 2s ease-in-out infinite;
+                }
+            }
+        }
+    }
+
+    // =============================================================================
+    // CRITICAL STATE (≤20%)
+    // =============================================================================
+    &.critical {
+        .timer-circle-container {
+            background: rgba(255, 100, 100, 0.15);
+            border-color: rgba(244, 67, 54, 0.3);
+            box-shadow:
+                0 8px 32px 0 rgba(244, 67, 54, 0.25),
+                0 4px 16px 0 rgba(244, 67, 54, 0.15),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 0 rgba(255, 255, 255, 0.2);
+            animation: glass-shake 0.5s ease-in-out infinite;
+
+            &::before {
+                background: linear-gradient(135deg,
+                        rgba($danger-color, 0.3) 0%,
+                        rgba($danger-color, 0.2) 50%,
+                        rgba($danger-color, 0.1) 100%);
+                opacity: 1;
+                filter: blur(20px);
+                animation: glow-pulse 1.5s ease-in-out infinite;
+            }
+
+            .timer-circle-bg {
+                background: linear-gradient(135deg,
+                        rgba(255, 130, 130, 0.2) 0%,
+                        rgba(255, 100, 100, 0.12) 100%);
+                animation: glass-inner-pulse 1.5s ease-in-out infinite;
+
+                &::before {
+                    background: radial-gradient(circle at center,
+                            rgba($danger-color, 0.2) 0%,
+                            rgba($danger-color, 0.12) 60%,
+                            transparent 100%);
+                    animation: color-pulse 1.5s ease-in-out infinite;
+                }
+            }
+
+            .timer-progress-svg {
+                filter: drop-shadow(0 0 16px rgba($danger-color, 0.6));
+
+                .timer-track {
+                    stroke: $danger-color;
+                    stroke-opacity: 0.6;
+                    filter: drop-shadow(0 0 5px rgba($danger-color, 0.5));
+                }
+
+                .timer-progress-ring {
+                    stroke: rgba(255, 255, 255, 0.85);
+                }
+            }
+
+            .timer-display-center {
+                .timer-value-large {
+                    color: color.adjust($danger-color, $lightness: -20%);
+                    animation: glass-pulse-critical 1s ease-in-out infinite;
+                }
+            }
+        }
+    }
+
+    // =============================================================================
+    // TIME UP STATE
+    // =============================================================================
+    &.time-up {
+        .timer-circle-container {
+            background: rgba(100, 200, 150, 0.15);
+            border-color: rgba($success-color, 0.3);
+            box-shadow:
+                0 8px 32px 0 rgba($success-color, 0.3),
+                0 4px 16px 0 rgba($success-color, 0.2),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 0 rgba(255, 255, 255, 0.2);
+            animation: glass-completion 2s ease-in-out infinite;
+
+            &::before {
+                background: linear-gradient(135deg,
+                        rgba($success-color, 0.3) 0%,
+                        rgba($success-color, 0.2) 50%,
+                        rgba($success-color, 0.1) 100%);
+                opacity: 1;
+                filter: blur(20px);
+                animation: completion-glow 2s ease-in-out infinite;
+            }
+
+            .timer-circle-bg {
+                background: linear-gradient(135deg,
+                        rgba(150, 230, 180, 0.2) 0%,
+                        rgba(100, 200, 150, 0.12) 100%);
+
+                &::before {
+                    background: radial-gradient(circle at center,
+                            rgba($success-color, 0.2) 0%,
+                            rgba($success-color, 0.12) 60%,
+                            transparent 100%);
+                    animation: completion-pulse 2s ease-in-out infinite;
+                }
+            }
+
+            .timer-progress-svg {
+                filter: drop-shadow(0 0 20px rgba($success-color, 0.5));
+
+                .timer-track {
+                    stroke: $success-color;
+                    stroke-opacity: 0.5;
+                    filter: drop-shadow(0 0 6px rgba($success-color, 0.5));
+                }
+
+                .timer-progress-ring {
+                    stroke: rgba(255, 255, 255, 0.85);
+                }
+            }
+
+            .timer-display-center {
+                .timer-value-large {
+                    color: color.adjust($success-color, $lightness: -25%);
+                    animation: glass-celebration 2s ease-in-out infinite;
+                }
+            }
+
+            // Celebration ring effect
+            &::after {
+                content: '';
+                position: absolute;
+                inset: -0.75rem;
+                border-radius: $border-radius-full;
+                border: 2px solid rgba($success-color, 0.4);
+                animation: completion-ring 2s ease-out infinite;
+                opacity: 0;
+            }
+        }
+    }
+}
+
+// =============================================================================
+// GLASSMORPHIC ANIMATIONS
+// =============================================================================
+
+@keyframes glass-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes glass-pulse-critical {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(0.96);
+    }
+}
+
+@keyframes glass-shake {
+
+    0%,
+    100% {
+        transform: translateX(0) translateZ(0);
+    }
+
+    25% {
+        transform: translateX(-2px) translateZ(0);
+    }
+
+    75% {
+        transform: translateX(2px) translateZ(0);
+    }
+}
+
+@keyframes glass-inner-pulse {
+
+    0%,
+    100% {
+        box-shadow:
+            inset 0 2px 8px rgba(0, 0, 0, 0.08),
+            inset 0 -2px 4px rgba(255, 255, 255, 0.15);
+    }
+
+    50% {
+        box-shadow:
+            inset 0 2px 12px rgba($danger-color, 0.15),
+            inset 0 -2px 6px rgba(255, 255, 255, 0.2);
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes color-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes glass-completion {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-3px) scale(1.02);
+    }
+}
+
+@keyframes glass-celebration {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        opacity: 0.9;
+        transform: scale(1.05) rotate(2deg);
+    }
+
+    75% {
+        opacity: 0.9;
+        transform: scale(1.05) rotate(-2deg);
+    }
+}
+
+@keyframes completion-glow {
+
+    0%,
+    100% {
+        opacity: 1;
+        filter: blur(20px);
+    }
+
+    50% {
+        opacity: 0.8;
+        filter: blur(24px);
+    }
+}
+
+@keyframes completion-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes completion-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+
+// =============================================================================
+// iOS-SPECIFIC FIXES FOR GLASSMORPHIC TIMER
+// =============================================================================
+
+@supports (-webkit-touch-callout: none) {
+    .timer-circular {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+
+        .timer-circle-container {
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+
+            // iOS Safari backdrop-filter support
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .timer-progress-svg {
+            -webkit-writing-mode: horizontal-tb;
+            writing-mode: horizontal-tb;
+        }
+    }
+}
+
+// High-DPI iOS devices
+@media (-webkit-min-device-pixel-ratio: 2) and (max-width: 784px) {
+    .timer-circular {
+        .timer-circle-container {
+            .timer-display-center {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                text-rendering: optimizeLegibility;
+            }
+        }
+    }
+}
+
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// =============================================================================
+
+@media (prefers-reduced-motion: reduce) {
+    .timer-circular {
+        .timer-circle-container {
+            animation: none !important;
+            transition: none !important;
+
+            &::before,
+            &::after {
+                animation: none !important;
+            }
+
+            .timer-circle-bg {
+                animation: none !important;
+
+                &::before {
+                    animation: none !important;
+                }
+            }
+
+            .timer-display-center .timer-value-large {
+                animation: none !important;
+            }
+        }
+    }
+}

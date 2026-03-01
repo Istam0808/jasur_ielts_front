@@ -1,0 +1,1 @@
+export { generateHighlightedText } from './textHighlighter';

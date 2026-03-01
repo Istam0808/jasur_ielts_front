@@ -1,0 +1,36 @@
+@use '@/assets/styles/settings' as *;
+
+// ============================================
+// ROOT CONTAINER
+// ============================================
+.shadowing-library-root {
+    padding: 2rem;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: visible;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    // Note: No position: relative here to avoid creating containing block for sticky
+
+    // Prevent scrollbar flash during initial render
+    &.overflow-hidden {
+        overflow-y: hidden;
+    }
+
+    // FIX BELOW 780px
+    @media (max-width: 780px) {
+        padding: 1.5rem;
+    }
+
+    @media (max-width: 400px) {
+        padding: 1rem;
+    }
+
+    // CRITICAL: Ensure container class doesn't interfere with sticky positioning
+    // Target the .container div that wraps the content
+    :global(.container) {
+        overflow: visible;
+        position: static;
+    }
+}

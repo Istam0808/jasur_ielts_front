@@ -1,0 +1,236 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+@use './variables' as *;
+
+// =============================================================================
+// OPTIMIZED MIXINS FOR MOBILE PERFORMANCE
+// =============================================================================
+
+@mixin glass-effect($bg-opacity: 0.95, $blur: 10px) {
+    background: linear-gradient(135deg, rgba($background-light, $bg-opacity), rgba($background-primary, $bg-opacity));
+    backdrop-filter: blur($blur);
+    border: 1px solid $border-light;
+
+    // Optimize for mobile
+    @media (max-width: $grid-breakpoint-sm) {
+        backdrop-filter: blur(5px);
+    }
+}
+
+@mixin gradient-button($start-color, $end-color: null, $hover-lift: true) {
+    $end: if($end-color, $end-color, color.adjust($start-color, $lightness: -10%));
+    background: linear-gradient(135deg, $start-color, $end);
+    color: $text-light;
+    border: none;
+    border-radius: $border-radius-md;
+    cursor: pointer;
+    transition: all $animation-normal ease;
+    box-shadow: 0 4px 15px rgba($start-color, 0.3);
+
+    // Optimize for mobile
+    @if $enable-gpu-acceleration {
+        transform: translateZ(0);
+        will-change: transform;
+    }
+
+    @if $hover-lift {
+        &:hover:not(.disabled) {
+            transform: translateY(-2px) translateZ(0);
+            box-shadow: 0 6px 20px rgba($start-color, 0.4);
+        }
+    }
+
+    &.disabled {
+        background: linear-gradient(135deg, $neutral-400, $neutral-500);
+        box-shadow: 0 4px 15px rgba($neutral-400, 0.3);
+        cursor: not-allowed;
+    }
+}
+
+@mixin card-hover-effect($scale: 1.05, $shadow: $shadow-lg) {
+    transition: all $animation-normal cubic-bezier(0.4, 0, 0.2, 1);
+
+    @if $enable-gpu-acceleration {
+        will-change: transform;
+        transform: translateZ(0);
+    }
+
+    &:hover:not(.dragging):not(.matched) {
+        transform: scale($scale) translateZ(0);
+        z-index: $z-index-card;
+        box-shadow: $shadow;
+        border-color: rgba($accent-color, 0.6);
+    }
+}
+
+@mixin modal-base {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: $z-index-modal;
+    padding: $spacing-md;
+    @include center-flex;
+
+    // Optimize for mobile
+    @media (max-width: $grid-breakpoint-sm) {
+        backdrop-filter: blur(3px);
+    }
+}
+
+@mixin modal-content-base {
+    background: $background-light;
+    border-radius: $border-radius-xl;
+    padding: $spacing-xl;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+
+    @include respond-to('sm') {
+        padding: $spacing-lg;
+        margin: $spacing-sm;
+    }
+}
+
+@mixin stat-item-base {
+    border-radius: $border-radius-lg;
+    padding: $spacing-md $spacing-lg;
+    box-shadow: $shadow-md;
+    min-width: 140px;
+    min-height: 60px;
+    gap: $spacing-sm;
+
+    // Disable animations for better performance
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+    will-change: auto !important;
+
+    @include center-flex;
+    @include glass-effect;
+
+    @include respond-to('sm') {
+        min-width: 120px;
+        min-height: 50px;
+        padding: $spacing-sm $spacing-md;
+    }
+
+    // Completely prevent any hover effects on stat items
+    &:hover {
+        transform: none !important;
+        scale: none !important;
+        box-shadow: $shadow-md !important;
+        background: linear-gradient(135deg, rgba($background-light, 0.95), rgba($background-primary, 0.95)) !important;
+        border: 1px solid $border-light !important;
+        color: inherit !important;
+        opacity: 1 !important;
+        filter: none !important;
+        backdrop-filter: blur(10px) !important;
+        transition: none !important;
+        animation: none !important;
+        will-change: auto !important;
+    }
+
+    // Also prevent any focus effects
+    &:focus {
+        transform: none !important;
+        scale: none !important;
+        outline: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+
+    // Prevent any active state effects
+    &:active {
+        transform: none !important;
+        scale: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+// =============================================================================
+// MOBILE-SPECIFIC OPTIMIZED MIXINS
+// =============================================================================
+
+@mixin mobile-touch-target($size: $touch-target-min) {
+    min-width: $size;
+    min-height: $size;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+
+    // Optimize for mobile performance
+    @if $enable-touch-optimizations {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+@mixin mobile-safe-area {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+@mixin mobile-scroll-snap {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+
+    // Optimize scrolling performance
+    @if $enable-gpu-acceleration {
+        transform: translateZ(0);
+    }
+}
+
+@mixin mobile-card-grid {
+    @include respond-down('sm') {
+        grid-template-columns: repeat(2, 1fr);
+        gap: $spacing-sm;
+        padding: $spacing-xs;
+    }
+
+    @include respond-down('xs') {
+        grid-template-columns: 1fr;
+        gap: $spacing-xs;
+    }
+}
+
+// =============================================================================
+// PERFORMANCE OPTIMIZATION MIXINS
+// =============================================================================
+
+@mixin gpu-accelerated {
+    @if $enable-gpu-acceleration {
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
+    }
+}
+
+@mixin reduced-motion {
+    @if $enable-reduced-motion {
+        @media (prefers-reduced-motion: reduce) {
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+        }
+    }
+}
+
+@mixin mobile-optimized-transition($property: all, $duration: $animation-normal) {
+    transition: $property $duration ease;
+
+    @if $enable-gpu-acceleration {
+        will-change: $property;
+    }
+
+    @include reduced-motion;
+}

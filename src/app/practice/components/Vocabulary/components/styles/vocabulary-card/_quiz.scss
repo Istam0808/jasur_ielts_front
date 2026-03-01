@@ -1,0 +1,456 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// =============================================================================
+// QUIZ STYLES (OPTIMIZED FOR PERFORMANCE)
+// =============================================================================
+
+.quiz-card-container {
+    height: auto;
+    background: linear-gradient(135deg, $background-dark 0%, color.adjust($background-dark, $lightness: 12%) 40%, $accent-color 100%);
+    border-radius: $border-radius-xl;
+    overflow: visible;
+    position: relative;
+    box-shadow: 0 4px 16px rgba($accent-color, 0.1);
+    border: 1px solid rgba($accent-color, 0.1);
+
+    &.no-quiz-data {
+        .quiz-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .no-quiz-message {
+                color: rgba($text-light, 0.8);
+                font-size: $font-size-md;
+                text-align: center;
+                margin: 0;
+            }
+        }
+    }
+
+    .quiz-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba($background-light, 0.1);
+        position: relative;
+
+        // Responsive padding for smaller screens
+        @include respond-down('md') {
+            padding: 14px 16px;
+        }
+
+        @include respond-down('sm') {
+            padding: 12px 14px;
+        }
+
+        @include respond-down('xs') {
+            padding: 10px 12px;
+        }
+
+        // Placeholder for the save button to correctly center the label
+        &::after {
+            content: '';
+            width: 44px; // width of save button
+            flex-shrink: 0;
+        }
+
+        .quiz-icon-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+
+            .quiz-icon {
+                font-size: 24px;
+                color: $yellow-color;
+            }
+
+            .audio-btn {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background-color: rgba($background-light, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                cursor: pointer;
+                position: relative;
+                z-index: 10;
+                transition: all 0.2s ease;
+
+                &:disabled {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
+
+                &:not(:disabled) {
+                    cursor: pointer;
+                    pointer-events: auto;
+                }
+
+                svg {
+                    font-size: 20px;
+                    color: $text-light;
+                    pointer-events: none;
+                }
+
+                &:hover:not(:disabled) {
+                    background-color: rgba($background-light, 0.2);
+                    transform: scale(1.05);
+                }
+
+                &:active:not(:disabled) {
+                    transform: scale(0.95);
+                }
+
+                &.playing {
+                    background-color: rgba($accent-color, 0.2);
+
+                    svg {
+                        color: $accent-color;
+                    }
+                }
+
+                .audio-pulse {
+                    position: absolute;
+                    display: flex;
+                    gap: 2px;
+                    align-items: flex-end;
+                    height: 20px;
+
+                    span {
+                        width: 3px;
+                        height: 15px;
+                        background: currentColor;
+                        border-radius: 2px;
+                        animation: audioPulse 1s infinite;
+
+                        &:nth-child(2) {
+                            animation-delay: 0.2s;
+                        }
+
+                        &:nth-child(3) {
+                            animation-delay: 0.4s;
+                        }
+                    }
+                }
+
+                // iOS touch feedback
+                @media (hover: none) and (pointer: coarse) {
+                    &:active:not(:disabled) {
+                        background-color: rgba($background-light, 0.2);
+                    }
+                }
+            }
+        }
+
+        .quiz-label {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: rgba($text-light, 0.9);
+            padding: 0 16px;
+        }
+    }
+
+    .quiz-content {
+        position: relative;
+        z-index: 2;
+        padding: 0 $spacing-md $spacing-md;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+        height: auto;
+        min-height: 0;
+
+        // Responsive padding for smaller screens
+        @include respond-down('md') {
+            padding: 0 $spacing-sm $spacing-sm;
+            gap: $spacing-xs;
+        }
+
+        .question-section {
+            margin-bottom: $spacing-sm;
+            flex-shrink: 0;
+
+            .word-display {
+                margin-bottom: $spacing-sm;
+                text-align: center;
+
+                .quiz-word {
+                    color: $text-light;
+                    font-size: 2rem;
+                    font-weight: $font-weight-bold;
+                    margin: 0 0 $spacing-sm 0;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                    text-transform: capitalize;
+
+                    // Responsive font sizes for smaller screens
+                    @include respond-down('md') {
+                        font-size: 1.75rem;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: 1.5rem;
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: 1.25rem;
+                    }
+                }
+
+                .topic-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    background: rgba($background-light, 0.15);
+                    color: $text-light;
+                    padding: 6px 14px;
+                    border-radius: $border-radius-full;
+                    font-size: $font-size-xs;
+                    font-weight: $font-weight-medium;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+            }
+
+            .quiz-question {
+                color: $text-light;
+                font-size: $font-size-lg;
+                font-weight: $font-weight-medium;
+                line-height: $line-height-relaxed;
+                margin: 0;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                text-align: center;
+
+                // Responsive font sizes for smaller screens
+                @include respond-down('md') {
+                    font-size: $font-size-base;
+                }
+
+                @include respond-down('sm') {
+                    font-size: $font-size-sm;
+                }
+
+                @include respond-down('xs') {
+                    font-size: $font-size-xs;
+                }
+
+                strong {
+                    color: $yellow-color;
+                    font-weight: $font-weight-bold;
+                }
+            }
+        }
+
+        .quiz-options {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-sm;
+            min-height: 0;
+            position: relative;
+            z-index: 1;
+
+            .quiz-option {
+                background: rgba($background-light, 0.15);
+                border: 2px solid rgba($background-light, 0.2);
+                border-radius: $border-radius-md;
+                padding: $spacing-md $spacing-lg;
+                color: $text-light;
+                font-size: $font-size-md;
+                font-weight: $font-weight-medium;
+                cursor: pointer;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                gap: $spacing-sm;
+                position: relative;
+                border: none;
+                outline: none;
+
+                // Responsive padding and font sizes for smaller screens
+                @include respond-down('md') {
+                    padding: $spacing-sm $spacing-md;
+                    font-size: $font-size-sm;
+                    gap: $spacing-xs;
+                }
+
+                @include respond-down('sm') {
+                    padding: $spacing-xs $spacing-sm;
+                    font-size: $font-size-xs;
+                    gap: $spacing-xs;
+                }
+
+                &:hover:not(:disabled) {
+                    background: rgba($background-light, 0.25);
+                    border-color: rgba($background-light, 0.3);
+                }
+
+                &:active:not(:disabled) {
+                    transform: scale(0.98);
+                }
+
+                &.selected {
+                    background: rgba($accent-color, 0.2);
+                    border-color: rgba($accent-color, 0.4);
+                    box-shadow: 0 2px 8px rgba($accent-color, 0.2);
+                }
+
+                // Show correct answer when result is displayed
+                &.correct-answer {
+                    background: rgba($success-color, 0.2);
+                    border-color: rgba($success-color, 0.6);
+                    box-shadow: 0 2px 8px rgba($success-color, 0.2);
+                }
+
+                // Show incorrect selected answer when result is displayed
+                &.incorrect-selected {
+                    background: rgba($danger-color, 0.2);
+                    border-color: rgba($danger-color, 0.6);
+                    box-shadow: 0 2px 8px rgba($danger-color, 0.2);
+                }
+
+                &.disabled {
+                    cursor: not-allowed;
+                    opacity: 0.7;
+                }
+            }
+        }
+
+        .quiz-result {
+            position: relative;
+            margin-top: $spacing-md;
+            background: rgba($success-color, 0.1);
+            border: 2px solid rgba($success-color, 0.3);
+            border-radius: $border-radius-lg;
+            padding: $spacing-md;
+            color: $text-light;
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            box-shadow: 0 4px 16px rgba($success-color, 0.15);
+
+            // Responsive adjustments
+            @include respond-down('md') {
+                padding: $spacing-sm;
+                gap: $spacing-sm;
+            }
+
+            @include respond-down('sm') {
+                padding: $spacing-xs;
+                gap: $spacing-xs;
+            }
+
+            .result-icon-large {
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                flex-shrink: 0;
+
+                @include respond-down('sm') {
+                    width: 40px;
+                    height: 40px;
+                    font-size: 1.25rem;
+                }
+            }
+
+            .result-text {
+                flex: 1;
+                min-width: 0;
+
+                h4 {
+                    font-size: $font-size-lg;
+                    font-weight: $font-weight-bold;
+                    margin: 0 0 $spacing-xs 0;
+                    color: $text-light;
+
+                    // Responsive font sizes for smaller screens
+                    @include respond-down('md') {
+                        font-size: $font-size-base;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: $font-size-sm;
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: $font-size-xs;
+                    }
+                }
+
+                p {
+                    font-size: $font-size-md;
+                    margin: 0;
+                    color: rgba($text-light, 0.9);
+                    line-height: 1.5;
+
+                    // Responsive font sizes for smaller screens
+                    @include respond-down('md') {
+                        font-size: $font-size-sm;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: $font-size-xs;
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: $font-size-xs;
+                    }
+                }
+            }
+
+            &.correct {
+                background: rgba($success-color, 0.15);
+                border: 2px solid rgba($success-color, 0.4);
+                box-shadow: 0 4px 16px rgba($success-color, 0.2);
+
+                .result-icon-large {
+                    background: $success-color;
+                    color: $text-light;
+                    box-shadow: 0 2px 8px rgba($success-color, 0.3);
+                }
+            }
+
+            &.incorrect {
+                background: rgba($danger-color, 0.15);
+                border: 2px solid rgba($danger-color, 0.4);
+                box-shadow: 0 4px 16px rgba($danger-color, 0.2);
+
+                .result-icon-large {
+                    background: $danger-color;
+                    color: $text-light;
+                    box-shadow: 0 2px 8px rgba($danger-color, 0.3);
+                }
+            }
+        }
+    }
+}
+
+// Audio pulse animation for the audio button
+@keyframes audioPulse {
+
+    0%,
+    100% {
+        height: 8px;
+        opacity: 0.5;
+    }
+
+    50% {
+        height: 20px;
+        opacity: 1;
+    }
+}

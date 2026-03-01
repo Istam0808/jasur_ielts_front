@@ -1,0 +1,192 @@
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use "sass:color";
+// Fullscreen Navigation Components
+// Submit button and progress bar
+
+// Mobile-first full-screen submit section
+.fullscreen-submit {
+    position: fixed;
+    bottom: 0; // Position at the very bottom
+    right: 0; // Position at the very right
+    z-index: 102;
+    display: flex;
+    gap: $spacing-xs;
+    align-items: center;
+    background: rgba($background-primary, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md 0 0 0; // Rounded top-left corner only
+    padding: $spacing-xs;
+    box-shadow: $shadow-lg;
+
+    // Professional button styling for full-screen mode
+    .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-xs;
+        font-family: $heading-font-family;
+        font-weight: $font-weight-semibold;
+        text-decoration: none;
+        border: none;
+        border-radius: $border-radius-sm;
+        cursor: pointer;
+        transition: all $transition-fast;
+        overflow: hidden;
+        min-height: 36px;
+        padding: $spacing-xs $spacing-sm;
+        font-size: $font-size-xs;
+        letter-spacing: 0.025em;
+        box-shadow: $shadow-sm;
+        white-space: nowrap;
+
+        // Professional gradient backgrounds
+        &.btn-submit {
+            background: linear-gradient(135deg, $primary-color 0%, color.adjust($primary-color, $lightness: -5%) 100%);
+            color: $background-light;
+            border: 1px solid color.adjust($primary-color, $lightness: -10%);
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, color.adjust($primary-color, $lightness: -5%) 0%, color.adjust($primary-color, $lightness: -10%) 100%);
+                transform: translateY(-1px);
+                box-shadow:
+                    0 4px 15px rgba($primary-color, 0.3),
+                    0 2px 8px rgba($primary-color, 0.2);
+            }
+
+            &:active:not(:disabled) {
+                transform: translateY(0);
+                box-shadow: $shadow-sm;
+            }
+
+            &:focus {
+                outline: 2px solid color.adjust($primary-color, $lightness: 20%);
+                outline-offset: 2px;
+            }
+
+            &.ready {
+                background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -5%) 100%);
+                border-color: color.adjust($success-color, $lightness: -10%);
+                box-shadow:
+                    0 2px 8px rgba($success-color, 0.2),
+                    0 1px 3px rgba($success-color, 0.1);
+
+                &:hover:not(:disabled) {
+                    background: linear-gradient(135deg, color.adjust($success-color, $lightness: -5%) 0%, color.adjust($success-color, $lightness: -10%) 100%);
+                    transform: translateY(-1px);
+                    box-shadow:
+                        0 4px 15px rgba($success-color, 0.4),
+                        0 2px 8px rgba($success-color, 0.2);
+                }
+
+                &::before {
+                    content: '✓';
+                    margin-right: $spacing-xs;
+                    font-weight: $font-weight-bold;
+                    opacity: 0.9;
+                }
+            }
+
+            &.incomplete {
+                background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                color: $neutral-600;
+                border-color: $neutral-400;
+                cursor: not-allowed;
+                opacity: 0.7;
+                transform: none;
+                box-shadow: none;
+
+                &:hover {
+                    background: linear-gradient(135deg, $neutral-300 0%, $neutral-400 100%);
+                    transform: none;
+                    box-shadow: none;
+                }
+
+                &::after {
+                    content: '⚠';
+                    margin-left: $spacing-sm;
+                    font-size: $font-size-sm;
+                    opacity: 0.8;
+                }
+
+                // Higher specificity: when incomplete AND disabled, make text visible
+                &:disabled {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    color: $text-secondary !important;
+                    border-color: $neutral-300;
+                    opacity: 1 !important;
+                }
+            }
+
+            &:disabled {
+                background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                color: $text-secondary;
+                border-color: $neutral-300;
+                cursor: not-allowed;
+                opacity: 1;
+                transform: none;
+                box-shadow: none;
+
+                &:hover {
+                    background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                    transform: none;
+                    box-shadow: none;
+                }
+            }
+        }
+
+        &.btn-secondary {
+            background: linear-gradient(135deg, $neutral-100 0%, $neutral-200 100%);
+            color: $text-secondary;
+            border: 1px solid $border-light;
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, $neutral-200 0%, $neutral-300 100%);
+                color: $text-primary;
+                transform: translateY(-1px);
+                box-shadow: $shadow-md;
+            }
+
+            &:active:not(:disabled) {
+                transform: translateY(0);
+                box-shadow: $shadow-sm;
+            }
+
+            &:focus {
+                outline: 2px solid $primary-color;
+                outline-offset: 2px;
+            }
+        }
+
+        // Responsive sizing
+        @media (min-width: 784px) {
+            min-height: 40px;
+            padding: $spacing-sm $spacing-md;
+            font-size: $font-size-sm;
+            border-radius: $border-radius-md;
+        }
+
+        @media (min-width: 1024px) {
+            min-height: 44px;
+            padding: $spacing-sm $spacing-lg;
+            font-size: $font-size-base;
+            border-radius: $border-radius-md;
+        }
+    }
+
+    @media (min-width: 784px) {
+        bottom: 0;
+        right: 0;
+        gap: $spacing-sm;
+        padding: $spacing-sm;
+    }
+
+    @media (min-width: 1024px) {
+        bottom: 0;
+        right: 0;
+        gap: $spacing-md;
+        padding: $spacing-md;
+    }
+}

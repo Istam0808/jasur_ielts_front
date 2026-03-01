@@ -1,0 +1,327 @@
+@use '../../assets/styles/settings' as *;
+@use '../../assets/styles/mixins' as *;
+@use 'sass:math';
+@use 'sass:color';
+
+// ========================================
+// VARIABLES
+// ========================================
+$sync-indicator-size: $spacing-xxl; // 48px
+$sync-indicator-size-small: $spacing-xl; // 32px
+$sync-indicator-border-radius: $border-radius-sm; // 8px
+$sync-indicator-shadow: $shadow-sm; // subtle shadow
+$sync-indicator-transition: $transition-normal; // 0.3s ease
+
+// Colors
+$sync-status-online: $success-color;
+$sync-status-offline: $danger-color;
+$sync-status-syncing: $info-color;
+$sync-status-error: $warning-color;
+$sync-status-synced: $success-color;
+$sync-status-no-data: $neutral-500;
+
+// ========================================
+// ROOT VARIABLES
+// ========================================
+:root {
+    --sync-status-online: #{$sync-status-online};
+    --sync-status-offline: #{$sync-status-offline};
+    --sync-status-syncing: #{$sync-status-syncing};
+    --sync-status-error: #{$sync-status-error};
+    --sync-status-synced: #{$sync-status-synced};
+    --sync-status-no-data: #{$sync-status-no-data};
+    
+    // Background colors for different status states
+    --sync-status-online-bg: #{color.adjust($sync-status-online, $alpha: -0.9)};
+    --sync-status-offline-bg: #{color.adjust($sync-status-offline, $alpha: -0.9)};
+    --sync-status-syncing-bg: #{color.adjust($sync-status-syncing, $alpha: -0.9)};
+    --sync-status-error-bg: #{color.adjust($sync-status-error, $alpha: -0.9)};
+    --sync-status-synced-bg: #{color.adjust($sync-status-synced, $alpha: -0.9)};
+}
+
+// ========================================
+// COMPONENT STYLES
+// ========================================
+.sync-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+    cursor: pointer;
+    user-select: none;
+    font-family: $body-font-family;
+
+    &--inline {
+        .sync-status-indicator__text {
+            font-size: $font-size-sm;
+            font-weight: 500;
+            color: $neutral-700;
+        }
+    }
+
+    // Compact clickable icon
+    &__compact {
+        width: $sync-indicator-size-small;
+        height: $sync-indicator-size-small;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: transparent;
+        transition: transform $sync-indicator-transition;
+        cursor: pointer;
+
+        &:hover,
+        &:focus {
+            transform: scale(1.05);
+            outline: none;
+        }
+    }
+
+    // Icon wrapper with background
+    &__icon-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        position: relative;
+        transition: all $sync-indicator-transition;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        
+        &:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+    }
+
+    &__icon {
+        font-size: $font-size-lg;
+        transition: all $sync-indicator-transition;
+        z-index: 2;
+        position: relative;
+        
+        // Status-specific icon styles
+        &--syncing {
+            animation: rotate 2s linear infinite;
+        }
+        
+        &--error {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        &--offline {
+            opacity: 0.7;
+        }
+    }
+
+    // Pulse animation for syncing status
+    &__pulse {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.3;
+        animation: pulse 2s ease-in-out infinite;
+        z-index: 1;
+    }
+
+    &__text {
+        font-size: $font-size-sm;
+        color: $neutral-700;
+        white-space: nowrap;
+    }
+
+    // ========================================
+    // DROPDOWN (DESKTOP)
+    // ========================================
+    &__details {
+        position: fixed;
+        z-index: 1000;
+        min-width: 280px;
+        background: $background-light;
+        border-radius: $sync-indicator-border-radius;
+        box-shadow: $shadow-md;
+        padding: $spacing-md;
+        animation: fadeInUp 0.25s ease forwards;
+
+
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: $spacing-md;
+
+        h4 {
+            font-size: $font-size-base;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .sync-status-indicator__close {
+            background: none;
+            border: none;
+            color: $neutral-500;
+            font-size: $font-size-lg;
+            cursor: pointer;
+            padding: $spacing-xs;
+            border-radius: 50%;
+
+            &:hover {
+                background-color: $neutral-100;
+                color: $neutral-700;
+            }
+        }
+    }
+
+    &__section {
+        margin-bottom: $spacing-md;
+
+        h5 {
+            font-size: $font-size-sm;
+            font-weight: 600;
+            color: $neutral-700;
+            margin-bottom: $spacing-xs;
+        }
+
+        p,
+        small {
+            font-size: $font-size-sm;
+            color: $neutral-600;
+            margin: 0 0 $spacing-xs 0;
+
+            &.error {
+                color: $sync-status-error;
+                font-weight: 500;
+            }
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            background-color: $primary-color;
+            color: $background-light;
+            font-size: $font-size-sm;
+            font-weight: 500;
+            padding: $spacing-xs $spacing-sm;
+            border: none;
+            border-radius: $border-radius-sm;
+            cursor: pointer;
+            transition: background-color $sync-indicator-transition;
+
+            svg {
+                font-size: $font-size-sm;
+            }
+
+            &:hover:enabled {
+                background-color: color.scale($primary-color, $lightness: -10%);
+            }
+
+            &:disabled {
+                background-color: $neutral-200;
+                color: $neutral-500;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    // ========================================
+    // PORTAL OVERLAY (TELEPORT)
+    // ========================================
+    &__portal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: transparent;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        z-index: 999;
+        pointer-events: none;
+
+        // Desktop positioning - position relative to indicator
+        .sync-status-indicator__details {
+            position: fixed;
+            pointer-events: auto;
+            margin: 0;
+            transform: none;
+        }
+
+        // Mobile overlay
+        &--mobile {
+            align-items: flex-end;
+            justify-content: center;
+            background-color: $overlay-color;
+            pointer-events: auto;
+            z-index: 1000; // Ensure mobile overlay is above desktop
+
+            .sync-status-indicator__details {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                border-radius: $border-radius-lg $border-radius-lg 0 0;
+                max-height: 70vh;
+                overflow-y: auto;
+                animation: slideUp 0.3s ease forwards;
+                z-index: 1001; // Ensure dropdown is above overlay
+                background-color: $background-light; // Ensure background is visible
+                box-shadow: $shadow-lg; // Add shadow for better visibility
+            }
+        }
+    }
+}
+
+// ========================================
+// ANIMATIONS
+// ========================================
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.1;
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

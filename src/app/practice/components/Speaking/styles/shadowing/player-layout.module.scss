@@ -1,0 +1,36 @@
+@use '@/assets/styles/settings' as *;
+@use '@/assets/styles/mixins' as *;
+
+// ============================================
+// NEW HORIZONTAL LAYOUT
+// ============================================
+
+.new-horizontal-layout {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+
+  @include respond-down('md') {
+    gap: $spacing-md;
+  }
+
+  @include respond-down('sm') {
+    gap: $spacing-sm;
+  }
+}
+
+// TOP ROW: Video + Transcript Side by Side
+.top-row-horizontal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+
+  @include respond-down('md') {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+
+  @include respond-down('sm') {
+    gap: $spacing-sm;
+  }
+}

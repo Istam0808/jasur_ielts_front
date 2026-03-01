@@ -1,0 +1,60 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+.progressSection {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    min-width: 200px;
+
+    @include respond-down('md') {
+        min-width: auto;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.progressInfo {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    width: 100%;
+}
+
+.progressBar {
+    height: 8px;
+    background: rgba($text-primary, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+    border-radius: 4px;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+        animation: shimmer 2s infinite;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+
+    100% {
+        background-position: 200px 0;
+    }
+}

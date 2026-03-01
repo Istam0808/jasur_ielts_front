@@ -1,0 +1,43 @@
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+
+@mixin interactive-element {
+    transition: all $transition-fast;
+
+    &:hover {
+        border-color: $primary-color;
+        box-shadow: $shadow-sm;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px color.scale($primary-color, $alpha: -80%);
+    }
+}
+
+@mixin question-option {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    cursor: pointer;
+    @include flex($align: center);
+    @include interactive-element;
+
+    &.selected {
+        background-color: color.scale($primary-color, $lightness: 90%);
+        border-color: color.scale($primary-color, $lightness: 50%);
+    }
+
+    &:hover {
+        border-color: color.scale($secondary-color, $lightness: 50%);
+    }
+}
+
+@mixin input-base {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-base;
+    border-radius: $border-radius-xs;
+    @include interactive-element;
+}

@@ -1,0 +1,120 @@
+@use "sass:color";
+
+// Colors
+$background-primary: #f5f7fb;
+$background-secondary: #eef1f6;
+$background-light: #ffffff;
+$background-dark: #0f172a;
+
+$overlay-color: rgba(15, 23, 42, 0.6);
+$dark-200: #4b5563;
+$dark-300: #374151;
+$dark-400: #1f2937;
+
+$text-primary: #111827;
+$text-secondary: #4b5563;
+$text-muted: #6b7280;
+$text-light: #f9fafb;
+$text-dark: #0b0f19;
+
+$border-light: #e5e7eb;
+$border-dark: #1f2937;
+$border-hover: #cbd5f5;
+$border-medium: #d1d5db;
+
+$neutral-50: #f9fafb;
+$neutral-100: #f3f4f6;
+$neutral-200: #e5e7eb;
+$neutral-300: #d1d5db;
+$neutral-400: #9ca3af;
+$neutral-500: #6b7280;
+$neutral-600: #4b5563;
+$neutral-700: #374151;
+$neutral-800: #1f2937;
+$neutral-900: #111827;
+
+$primary-color: #2563eb;
+$primary-color-light: #60a5fa;
+$primary-color-dark: #1d4ed8;
+$accent-color: #ef4444;
+$accent-color-light: #f87171;
+$accent-color-dark: #dc2626;
+$secondary-color: #9333ea;
+$secondary-color-light: #a855f7;
+$secondary-color-dark: #7e22ce;
+$success-color: #16a34a;
+$success-light: #6ee7b7;
+$warning-color: #f59e0b;
+$yellow-color: #facc15;
+// Highlight / marker (reading passage)
+$marker-yellow: #fef08a;
+$marker-yellow-light: #fef9c3;
+$marker-yellow-dark: #fde047;
+$danger-color: #dc2626;
+$error-light: #fca5a5;
+$info-color: #0ea5e9;
+$button-secondary: #4b5563;
+
+// Typography
+$font-family-base: "Inter", "Segoe UI", "Arial", sans-serif;
+$body-font-family: $font-family-base;
+$heading-font-family: $font-family-base;
+$font-size-xs: 0.75rem;
+$font-size-sm: 0.875rem;
+$font-size-base: 1rem;
+$font-size-md: 1.125rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.5rem;
+$font-size-xxl: 2rem;
+$font-size-xxxl: 2.5rem;
+
+$h1-size: 2.25rem;
+$h1-size-mobile: 2rem;
+$h2-size: 1.75rem;
+$h2-size-mobile: 1.5rem;
+$h3-size: 1.5rem;
+$h3-size-mobile: 1.25rem;
+$h6-size: 1.1rem;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.7;
+
+// Spacing
+$spacing-xxs: 0.25rem;
+$spacing-xs: 0.5rem;
+$spacing-sm: 0.75rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+$spacing-2xl: 2.5rem;
+$spacing-xxl: 3rem;
+
+// Radius
+$border-radius-xs: 6px;
+$border-radius-full: 9999px;
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+$border-radius-pill: 9999px;
+
+// Shadows
+$shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.08);
+$shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.1);
+$shadow-md: 0 6px 16px rgba(15, 23, 42, 0.16);
+$shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.2);
+$shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.25);
+
+// Transitions
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// Layout
+$container-width: 1200px;

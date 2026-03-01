@@ -1,0 +1,31 @@
+.scroll-navbar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+
+    // Smooth entrance animation
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Ensure the navbar inside has proper styling
+    .simple-navbar {
+        position: relative;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease, backdrop-filter 0.3s ease;
+
+        // Scroll-based styling is now handled by global styles
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

@@ -1,0 +1,152 @@
+@use "../../../assets/styles/settings" as *;
+@use 'sass:color';
+
+.go-to-top {
+    position: fixed !important;
+    bottom: 2rem !important;
+    right: 2rem !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    border-radius: 50% !important;
+
+    // 3D Gradient Effect
+    background: linear-gradient(135deg,
+            $primary-color 0%,
+            $primary-color-dark 35%,
+            $secondary-color 100%) !important;
+
+    // Enhanced 3D layered shadows for depth
+    box-shadow:
+        0 4px 15px rgba($primary-color, 0.4),
+        0 8px 25px rgba($primary-color-dark, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+
+    border: none !important; // Remove border for cleaner 3D look
+    color: $text-light !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all $transition-normal !important;
+    z-index: 9999 !important; // Very high z-index to ensure visibility
+
+    // Ensure visibility even when navbar is hidden or transformed
+    html.navbar-hidden &,
+    body.navbar-hidden &,
+    html.navbar-scrolled &,
+    body.navbar-scrolled & {
+        z-index: 9999 !important; // Highest priority
+        transform: none !important; // Override any navbar transforms
+        position: fixed !important; // Ensure fixed positioning
+        visibility: visible !important; // Force visibility
+        opacity: 1 !important; // Force opacity
+        display: flex !important; // Force display
+    }
+
+    // Override any conflicting styles
+    &[style*="display: none"],
+    &[style*="visibility: hidden"],
+    &[style*="opacity: 0"] {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    // Subtle inner highlight for 3D effect
+    &::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                transparent 100%);
+        pointer-events: none;
+    }
+
+    // Hover effects - Enhanced 3D lift with gradient shift
+    &:hover {
+        background: linear-gradient(135deg,
+                color.adjust($primary-color, $lightness: 5%) 0%,
+                $primary-color 35%,
+                color.adjust($secondary-color, $lightness: 5%) 100%) !important;
+
+        transform: translateY(-4px) !important;
+        box-shadow:
+            0 8px 25px rgba($primary-color, 0.5),
+            0 15px 35px rgba($primary-color-dark, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
+    }
+
+    // Active state - Pressed 3D effect
+    &:active {
+        transform: translateY(-1px) !important;
+        transition: transform $transition-fast !important;
+        background: linear-gradient(135deg,
+                $primary-color-dark 0%,
+                color.adjust($secondary-color, $lightness: -5%) 35%,
+                color.adjust($secondary-color, $lightness: -10%) 100%) !important;
+        box-shadow:
+            0 2px 8px rgba($primary-color, 0.4),
+            0 4px 15px rgba($primary-color-dark, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.3) !important;
+    }
+
+    // Focus state for accessibility with 3D glow
+    &:focus {
+        outline: none !important;
+        box-shadow:
+            0 4px 15px rgba($primary-color, 0.4),
+            0 8px 25px rgba($primary-color-dark, 0.25),
+            0 0 0 3px rgba($primary-color, 0.3),
+            0 0 0 6px rgba($primary-color, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+    }
+
+    // SVG icon styles with 3D text-shadow effect
+    svg {
+        transition: transform $transition-fast !important;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    &:hover svg {
+        transform: scale(1.1) !important;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)) !important;
+    }
+
+    // Mobile responsive design
+    @media (max-width: 784px) {
+        bottom: 1.5rem !important;
+        right: 1.5rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+
+        // Slightly reduced shadows for mobile
+        box-shadow:
+            0 3px 12px rgba($primary-color, 0.35),
+            0 6px 20px rgba($primary-color-dark, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+
+        svg {
+            width: 16px !important;
+            height: 16px !important;
+        }
+    }
+
+    // iPhone safe area support
+    @media (max-width: 428px) {
+        bottom: calc(1.5rem + env(safe-area-inset-bottom)) !important;
+        right: calc(1.5rem + env(safe-area-inset-right)) !important;
+    }
+}

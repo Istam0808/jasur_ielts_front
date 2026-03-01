@@ -1,0 +1,32 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+  @include common.field-wrapper;
+}
+
+.label {
+  @include common.field-label;
+}
+
+.required {
+  color: common.$error-color;
+  margin-left: 4px;
+}
+
+.textarea {
+  @include common.form-control;
+  height: auto;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.hint {
+  @include common.field-hint;
+}
+
+.error {
+  @include common.field-error;
+}
+
+

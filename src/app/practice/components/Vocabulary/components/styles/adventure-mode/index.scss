@@ -1,0 +1,201 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// Import all adventure mode components
+@use './adventure-header';
+@use './chapter-navigation';
+@use './chapter-content';
+@use './chapter-complete-modal';
+@use './achievement-notification';
+@use './animations';
+
+// Performance optimization variables
+$enable-gpu-acceleration: true;
+$enable-reduced-motion: true;
+
+// GPU acceleration mixin
+@mixin gpu-accelerated {
+    @if $enable-gpu-acceleration {
+        transform: translateZ(0);
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+    }
+}
+
+// Reduced motion mixin
+@mixin reduced-motion {
+    @if $enable-reduced-motion {
+        @media (prefers-reduced-motion: reduce) {
+            transition: none !important;
+            animation: none !important;
+            transform: none !important;
+        }
+    }
+}
+
+// Mobile-optimized transition mixin
+@mixin mobile-optimized-transition($property: all, $duration: 0.3s) {
+    transition: $property $duration ease;
+
+    @if $enable-gpu-acceleration {
+        will-change: $property;
+    }
+
+    @include reduced-motion;
+}
+
+// Main adventure mode container - Optimized for Performance
+.adventure-mode {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    @include gpu-accelerated;
+
+    @include respond-down('md') {
+        gap: $spacing-md;
+    }
+
+    @include respond-down('sm') {
+        gap: $spacing-sm;
+        padding: 0;
+    }
+
+    // Error state styling - Optimized
+    .adventure-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: $spacing-xxl;
+        background: $background-light;
+        border-radius: $border-radius-lg;
+        box-shadow: $shadow-sm;
+        border: 1px solid $border-light;
+        @include mobile-optimized-transition;
+
+        svg {
+            font-size: 3rem;
+            color: $text-muted;
+            margin-bottom: $spacing-lg;
+            @include mobile-optimized-transition;
+        }
+
+        h3 {
+            font-size: $font-size-xl;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            margin: 0 0 $spacing-md 0;
+        }
+
+        p {
+            font-size: $font-size-md;
+            color: $text-secondary;
+            line-height: 1.6;
+            margin: 0;
+            max-width: 100%;
+        }
+
+        @include respond-down('sm') {
+            padding: $spacing-xl;
+            border-radius: 0;
+            margin: 0;
+            border-left: none;
+            border-right: none;
+
+            svg {
+                font-size: 2.5rem;
+                margin-bottom: $spacing-md;
+            }
+
+            h3 {
+                font-size: $font-size-lg;
+                margin-bottom: $spacing-sm;
+            }
+
+            p {
+                font-size: $font-size-sm;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    // Chapter content container - Optimized
+    .chapter-content {
+        background: $background-light;
+        border-radius: $border-radius-lg;
+        box-shadow: $shadow-sm;
+        border: 1px solid $border-light;
+        overflow: hidden;
+        @include gpu-accelerated;
+        @include mobile-optimized-transition;
+
+        @include respond-down('sm') {
+            border-radius: $border-radius-md;
+            border-left: none;
+            border-right: none;
+            margin: 0;
+            box-shadow: none;
+            background: transparent;
+        }
+    }
+}
+
+// Performance optimizations for reduced motion
+@media (prefers-reduced-motion: reduce) {
+    .adventure-mode {
+
+        .adventure-error,
+        .chapter-content {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+}
+
+// High-performance optimizations for modern devices
+@media (min-width: 768px) and (min-resolution: 2dppx) {
+    .adventure-mode {
+        @include gpu-accelerated;
+    }
+}
+
+// Mobile-specific performance optimizations
+@media (max-width: 768px) {
+    .adventure-mode {
+        // Reduce layout shifts on mobile
+        min-height: 100vh;
+
+        // Optimize touch interactions
+        touch-action: manipulation;
+
+        // Reduce memory usage
+        contain: layout style paint;
+
+        // Optimize scrolling
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
+
+// iOS-specific optimizations
+@supports (-webkit-touch-callout: none) {
+    .adventure-mode {
+        // iOS Safari optimizations
+        -webkit-transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+
+        // Prevent zoom on input focus
+        input,
+        textarea,
+        select {
+            font-size: 16px;
+        }
+    }
+}

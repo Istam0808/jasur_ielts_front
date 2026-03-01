@@ -1,0 +1,81 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// Achievement Notification
+.achievement-notification {
+    position: fixed;
+    top: $spacing-lg;
+    right: $spacing-lg;
+    z-index: 1001;
+    max-width: 300px;
+
+    .achievement-content {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        padding: $spacing-md;
+        background: linear-gradient(135deg, $background-light 0%, $background-primary 100%);
+        border-radius: $border-radius-md;
+        box-shadow: $shadow-lg;
+        border: 2px solid $accent-color;
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba($accent-color, 0.1) 50%, transparent 70%);
+            animation: achievementShimmer 2s infinite;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            color: $accent-color;
+            z-index: 1;
+            animation: achievementPulse 1s ease-in-out infinite;
+        }
+
+        .achievement-text {
+            flex: 1;
+            z-index: 1;
+
+            h4 {
+                font-size: $font-size-md;
+                font-weight: $font-weight-bold;
+                margin: 0 0 $spacing-xs 0;
+                color: $text-primary;
+            }
+
+            p {
+                font-size: $font-size-sm;
+                margin: 0;
+                color: $text-secondary;
+            }
+        }
+
+        @include respond-down('sm') {
+            right: $spacing-sm;
+            left: $spacing-sm;
+            max-width: none;
+
+            .achievement-icon {
+                font-size: 1.5rem;
+            }
+
+            .achievement-text {
+                h4 {
+                    font-size: $font-size-sm;
+                }
+
+                p {
+                    font-size: $font-size-xs;
+                }
+            }
+        }
+    }
+}

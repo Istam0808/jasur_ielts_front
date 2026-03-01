@@ -1,0 +1,1400 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+
+.lm-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    min-width: 280px;
+    max-width: 90vw;
+    padding: $spacing-md $spacing-lg;
+    border-radius: $border-radius-lg;
+    box-shadow: 0 20px 40px rgba($text-primary, 0.15), 0 8px 16px rgba($text-primary, 0.1);
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    letter-spacing: 0.025em;
+    z-index: 9999999;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba($text-light, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: toast-slide-up 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Loading state animation
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: rgba($text-light, 0.7);
+        border-radius: $border-radius-full $border-radius-full 0 0;
+        animation: toast-progress 4s linear forwards;
+    }
+
+    // Success state (default)
+    background: linear-gradient(135deg, color.adjust($success-color, $lightness: -8%), $success-color);
+    color: $text-light;
+    box-shadow: 0 20px 40px rgba($success-color, 0.25),
+    0 8px 16px rgba($success-color, 0.15);
+
+    // Info state
+    &.lm-toast--info {
+        background: linear-gradient(135deg, color.adjust($info-color, $lightness: -8%), $info-color);
+        color: $text-light;
+        box-shadow: 0 20px 40px rgba($info-color, 0.25), 0 8px 16px rgba($info-color, 0.15);
+    }
+
+    // Warning state
+    &.lm-toast--warning {
+        background: linear-gradient(135deg, color.adjust($warning-color, $lightness: -8%), $warning-color);
+        color: $text-light;
+        box-shadow: 0 20px 40px rgba($warning-color, 0.25), 0 8px 16px rgba($warning-color, 0.15);
+    }
+
+    // Error state
+    &.lm-toast--error {
+        background: linear-gradient(135deg, color.adjust($danger-color, $lightness: -8%), $danger-color);
+        color: $text-light;
+        box-shadow: 0 20px 40px rgba($danger-color, 0.25), 0 8px 16px rgba($danger-color, 0.15);
+    }
+
+    // Responsive breakpoints
+    @include respond-down('lg') {
+        left: $spacing-lg;
+        right: $spacing-lg;
+        transform: none;
+        min-width: auto;
+        max-width: none;
+        width: auto;
+    }
+
+    @include respond-down('md') {
+        left: $spacing-md;
+        right: $spacing-md;
+        bottom: $spacing-md;
+        padding: $spacing-sm $spacing-md;
+        min-width: 240px;
+        font-size: 0.8125rem;
+    }
+
+    @include respond-down('sm') {
+        left: $spacing-sm;
+        right: $spacing-sm;
+        bottom: $spacing-sm;
+        padding: $spacing-sm;
+        min-width: 200px;
+        font-size: 0.75rem;
+        border-radius: $border-radius-md;
+    }
+
+    @include respond-down('xs') {
+        left: $spacing-xs;
+        right: $spacing-xs;
+        bottom: $spacing-xs;
+        padding: $spacing-xs $spacing-sm;
+        min-width: 180px;
+        font-size: 0.75rem;
+        border-radius: $border-radius-sm;
+
+        // iOS safe area support
+        bottom: calc(#{$spacing-xs} + env(safe-area-inset-bottom));
+        left: calc(#{$spacing-xs} + env(safe-area-inset-left));
+        right: calc(#{$spacing-xs} + env(safe-area-inset-right));
+    }
+
+    // Extra small screens (iPhone SE and similar)
+    @media (max-width: 360px) {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        padding: 12px;
+        min-width: auto;
+        font-size: 0.75rem;
+        border-radius: $border-radius-sm;
+
+        // Ensure minimum touch target size
+        .lm-toast__close {
+            width: 44px;
+            height: 44px;
+            font-size: 1.125rem;
+        }
+    }
+
+    // Hover effects for desktop
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 24px 48px rgba($text-primary, 0.2), 0 12px 24px rgba($text-primary, 0.15);
+        }
+
+        &.lm-toast--info:hover {
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        &.lm-toast--warning:hover {
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        &.lm-toast--error:hover {
+            transform: translateX(-50%) translateY(-2px);
+        }
+    }
+
+    // Responsive hover adjustments
+    @include respond-down('lg') {
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                transform: translateY(-2px);
+            }
+        }
+    }
+}
+
+// Toast icon container
+.lm-toast__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: currentColor;
+    font-size: 1rem;
+
+    @include respond-down('sm') {
+        width: 18px;
+        height: 18px;
+        font-size: 0.875rem;
+    }
+
+    @include respond-down('xs') {
+        width: 16px;
+        height: 16px;
+        font-size: 0.8125rem;
+    }
+}
+
+// Toast info icon
+.lm-toast__info-icon {
+    font-weight: bold;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+// Toast content container
+.lm-toast__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+// Toast text
+.lm-toast__text {
+    color: currentColor;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+// Toast close button
+.lm-toast__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    background: rgba($text-light, 0.15);
+    border: none;
+    border-radius: $border-radius-full;
+    color: $text-light;
+    font-size: 1.25rem;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+
+    @include respond-down('sm') {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    @include respond-down('xs') {
+        width: 28px;
+        height: 28px;
+        font-size: 0.875rem;
+    }
+
+    // Hover effects for desktop
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            background: rgba($text-light, 0.25);
+            transform: scale(1.1);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+
+    // Touch device active state
+    &:active {
+        background: rgba($text-light, 0.3);
+        transform: scale(0.95);
+    }
+
+    // Focus state for accessibility
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($text-light, 0.5);
+    }
+}
+
+// Toast animations
+@keyframes toast-slide-up {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes toast-slide-down {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+}
+
+// Responsive animation adjustments
+@include respond-down('lg') {
+    @keyframes toast-slide-up {
+        from {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes toast-slide-down {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+    }
+}
+
+// Toast exit animation class
+.lm-toast--exiting {
+    animation: toast-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+// Success state special effects
+.lm-toast--success {
+    .lm-toast__icon {
+        animation: success-pulse 2s ease-in-out infinite;
+    }
+}
+
+// Success pulse animation
+@keyframes success-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+// Toast progress bar animation
+@keyframes toast-progress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+.lm-content {
+    padding: $spacing-sm $spacing-lg;
+    overflow: auto;
+    position: relative; // establish containing block for sticky children
+    background: $background-primary;
+    @include custom-scrollbar();
+}
+
+// Shared icon button used across LearnMode (examples + mistakes)
+.lm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $border-radius-full;
+    color: $accent-color;
+    background: rgba($accent-color, 0.08);
+    border: 1px solid color.adjust($accent-color, $lightness: 16%);
+    transition: background-color $transition-fast, transform $transition-normal, box-shadow $transition-normal;
+    cursor: pointer;
+
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            background: rgba($accent-color, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba($accent-color, 0.15);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($accent-color, 0.25), 0 6px 16px rgba($accent-color, 0.15);
+    }
+
+    // Speed visual feedback for pronunciation buttons
+    &.speed-07 {
+        background: rgba($warning-color, 0.15);
+        border-color: color.adjust($warning-color, $lightness: 16%);
+        color: $warning-color;
+        
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background: rgba($warning-color, 0.25);
+                box-shadow: 0 4px 10px rgba($warning-color, 0.2);
+            }
+        }
+        
+        &:focus-visible {
+            box-shadow: 0 0 0 3px rgba($warning-color, 0.25), 0 6px 16px rgba($warning-color, 0.15);
+        }
+    }
+
+    &.speed-05 {
+        background: rgba($danger-color, 0.15);
+        border-color: color.adjust($danger-color, $lightness: 16%);
+        color: $danger-color;
+        
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                background: rgba($danger-color, 0.25);
+                box-shadow: 0 4px 10px rgba($danger-color, 0.2);
+            }
+        }
+        
+        &:focus-visible {
+            box-shadow: 0 0 0 3px rgba($danger-color, 0.25), 0 6px 16px rgba($danger-color, 0.15);
+        }
+    }
+}
+
+.lm-slide {
+    max-width: $container-width;
+    margin: 0 auto;
+    background: $background-light;
+    color: $text-primary;
+    border-radius: $border-radius-lg;
+    padding: $spacing-md;
+    box-shadow: 0 8px 32px rgba($text-primary, 0.08);
+    border: 1px solid $border-light;
+    width: 100%;
+    transition: background-color $transition-fast, border-color $transition-fast, box-shadow $transition-normal, transform $transition-normal;
+
+    // Base keeps desktop unchanged; mobile-specific rhythm/focus are below
+
+    // Mobile-first responsive improvements
+    @include respond-down('md') {
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+    }
+
+    @include respond-down('sm') {
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+
+        // Prevent content overflow on mobile
+        overflow: hidden;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+
+        // Mobile vertical rhythm inside slide
+        >*+* {
+            margin-top: $spacing-sm;
+        }
+
+    }
+
+    @include respond-down('xs') {
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        margin: 0;
+
+        // Prevent content overflow on very small screens
+        overflow: hidden;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}
+
+.lm-slide-title {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    margin: 0 $spacing-sm $spacing-md;
+    color: $text-primary;
+    padding-bottom: 16px;
+    padding-left: $spacing-sm;
+    border-bottom: 2px solid $border-light;
+    @include flex(row, flex-start, center);
+
+    @include respond-down('md') {
+        font-size: $font-size-md;
+        padding-bottom: 12px;
+        border-bottom-width: 1px;
+    }
+
+    @include respond-down('sm') {
+        font-size: $font-size-base;
+        padding-bottom: 10px;
+        line-height: $line-height-tight;
+
+        // Prevent title overflow on mobile
+        word-break: break-word;
+        hyphens: auto;
+        overflow-wrap: break-word;
+    }
+
+    @include respond-down('xs') {
+        font-size: $font-size-base;
+        padding-bottom: 8px;
+        line-height: $line-height-tight;
+
+        // Prevent title overflow on very small screens
+        word-break: break-word;
+        hyphens: auto;
+        overflow-wrap: break-word;
+    }
+}
+
+.lm-slide-body {
+    line-height: 1.6;
+
+    // Mobile-first responsive improvements
+    @include respond-down('md') {
+        line-height: 1.5;
+    }
+
+    @include respond-down('sm') {
+        line-height: 1.4;
+
+        // Prevent content overflow on mobile
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    @include respond-down('xs') {
+        line-height: 1.4;
+
+        // Prevent content overflow on very small screens
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+.lm-section {
+    display: grid;
+    gap: $spacing-lg;
+
+    // Mobile-first responsive grid
+    @include respond-down('md') {
+        gap: $spacing-md;
+    }
+
+    @include respond-down('sm') {
+        gap: $spacing-sm;
+
+        // Prevent section overflow on mobile
+        overflow: hidden;
+        width: 100%;
+    }
+
+    @include respond-down('xs') {
+        gap: $spacing-sm;
+
+        // Prevent section overflow on very small screens
+        overflow: hidden;
+        width: 100%;
+    }
+}
+
+.lm-list {
+    list-style: none;
+    padding-left: 0;
+    display: grid;
+    gap: 16px;
+
+    // Mobile-first responsive list
+    @include respond-down('md') {
+        gap: 12px;
+    }
+
+    @include respond-down('sm') {
+        gap: 10px;
+
+        // Prevent list overflow on mobile
+        overflow: hidden;
+        width: 100%;
+    }
+
+    @include respond-down('xs') {
+        gap: 8px;
+
+        // Prevent list overflow on very small screens
+        overflow: hidden;
+        width: 100%;
+    }
+}
+
+.lm-list li {
+    position: relative;
+    padding: 16px 20px 16px 48px;
+    background: $background-secondary;
+    border-radius: $border-radius-md;
+    border: 1px solid $border-light;
+    font-weight: 500;
+    line-height: 1.5;
+
+    // Mobile-first responsive list items
+    @include respond-down('md') {
+        padding: 14px 16px 14px 40px;
+        border-radius: $border-radius-sm;
+    }
+
+    @include respond-down('sm') {
+        padding: 12px 14px 12px 36px;
+        font-size: $font-size-sm;
+        line-height: 1.4;
+
+        // Prevent list item overflow on mobile
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    @include respond-down('xs') {
+        padding: 10px 12px 10px 32px;
+        font-size: $font-size-sm;
+        line-height: 1.4;
+
+        // Prevent list item overflow on very small screens
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+.lm-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $success-color;
+    font-weight: 700;
+    font-size: 1.2rem;
+    background: rgba($success-color, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Mobile-first responsive checkmark
+    @include respond-down('md') {
+        left: 12px;
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+    }
+
+    @include respond-down('sm') {
+        left: 10px;
+        width: 18px;
+        height: 18px;
+        font-size: 0.9rem;
+    }
+
+    @include respond-down('xs') {
+        left: 8px;
+        width: 16px;
+        height: 16px;
+        font-size: 0.8rem;
+    }
+}
+
+.lm-subtopic {
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md;
+    padding: 24px;
+    background: $background-light;
+    box-shadow: 0 2px 8px rgba($text-primary, 0.05);
+
+    // Mobile-first responsive subtopic
+    @include respond-down('md') {
+        padding: 20px;
+        border-radius: $border-radius-sm;
+    }
+
+    @include respond-down('sm') {
+        padding: 16px;
+        border-radius: $border-radius-sm;
+
+        // Prevent subtopic overflow on mobile
+        overflow: hidden;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+    @include respond-down('xs') {
+        padding: 12px;
+        border-radius: $border-radius-sm;
+
+        // Prevent subtopic overflow on very small screens
+        overflow: hidden;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+    h4 {
+        margin: 0 0 16px 0;
+        color: $accent-color;
+        font-size: 1.1rem;
+        font-weight: 600;
+
+        // Mobile-first responsive headings
+        @include respond-down('md') {
+            font-size: 1rem;
+            margin: 0 0 12px 0;
+        }
+
+        @include respond-down('sm') {
+            font-size: $font-size-sm;
+            margin: 0 0 10px 0;
+
+            // Prevent heading overflow on mobile
+            word-break: break-word;
+            hyphens: auto;
+            overflow-wrap: break-word;
+        }
+
+        @include respond-down('xs') {
+            font-size: $font-size-sm;
+            margin: 0 0 8px 0;
+
+            // Prevent heading overflow on very small screens
+            word-break: break-word;
+            hyphens: auto;
+            overflow-wrap: break-word;
+        }
+    }
+}
+
+.lm-explanation {
+    color: $text-secondary;
+    line-height: 1.6;
+    margin: 0;
+
+    // Mobile-first responsive explanation text
+    @include respond-down('md') {
+        line-height: 1.5;
+        font-size: $font-size-sm;
+    }
+
+    @include respond-down('sm') {
+        line-height: 1.4;
+        font-size: $font-size-sm;
+
+        // Prevent explanation overflow on mobile
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    @include respond-down('xs') {
+        line-height: 1.4;
+        font-size: $font-size-sm;
+
+        // Prevent explanation overflow on very small screens
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+.lm-examples {
+    display: grid;
+    gap: 16px;
+    list-style: none; // remove default numbers, we will use custom accessible counters
+    padding-left: 0;
+    counter-reset: lm-example-counter;
+
+    // Example item (card)
+    li {
+        display: grid;
+        grid-template-columns: 36px 1fr auto;
+        align-items: center; // center vertically alongside the text container
+        column-gap: 14px;
+        padding: 16px 18px;
+        background: $background-secondary;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-md;
+        color: $text-primary;
+        line-height: 1.6;
+        box-shadow: 0 2px 8px rgba($text-primary, 0.05);
+        transition: box-shadow $transition-normal, border-color $transition-fast, background-color $transition-fast, transform $transition-normal;
+
+        // accessible custom counter badge
+        &::before {
+            counter-increment: lm-example-counter;
+            content: counter(lm-example-counter);
+            position: static; // take part in grid flow for perfect alignment
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: $text-light;
+            background: linear-gradient(135deg, $accent-color, color.adjust($accent-color, $lightness: -8%));
+            box-shadow: 0 4px 10px rgba($accent-color, 0.25);
+        }
+
+        // Wrap text inside to prevent grid cells from stacking words line-by-line
+        .lm-example-text {
+            display: block;
+        }
+
+        .lm-example-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        // icon buttons use global .lm-icon-btn
+
+        // subtle emphasis for inline code and quotes coming from formatter
+        code,
+        .quoted-text {
+            background: rgba($accent-color, 0.08);
+            border: 1px solid color.adjust($accent-color, $lightness: 22%);
+            border-radius: $border-radius-sm;
+            padding: 2px 6px;
+            color: color.adjust($accent-color, $lightness: -10%);
+            font-weight: 600;
+        }
+
+        // Quoted text with pronunciation buttons
+        .quoted-text-with-pronunciation {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba($accent-color, 0.08);
+            border: 1px solid color.adjust($accent-color, $lightness: 22%);
+            border-radius: $border-radius-sm;
+            padding: 2px 6px;
+            color: color.adjust($accent-color, $lightness: -10%);
+            font-weight: 600;
+            transition: all 0.2s ease;
+
+            &:hover {
+                background: rgba($accent-color, 0.12);
+                border-color: color.adjust($accent-color, $lightness: 15%);
+                transform: translateY(-1px);
+                box-shadow: 0 2px 6px rgba($accent-color, 0.15);
+            }
+
+            .quoted-text-content {
+                color: inherit;
+                font-weight: inherit;
+            }
+
+            .quoted-text-pronunciation-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+                min-width: 16px;
+                min-height: 16px;
+                padding: 0;
+                border: none;
+                border-radius: 50%;
+                background: rgba($accent-color, 0.15);
+                color: $accent-color;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-size: 10px;
+
+                &:hover {
+                    background: rgba($accent-color, 0.25);
+                    color: color.adjust($accent-color, $lightness: -10%);
+                    transform: scale(1.1);
+                }
+
+                &:active {
+                    transform: scale(0.95);
+                }
+
+                &:focus {
+                    outline: 2px solid rgba($accent-color, 0.3);
+                    outline-offset: 1px;
+                }
+
+                svg {
+                    width: 10px;
+                    height: 10px;
+                }
+            }
+        }
+
+        // hover/focus only on larger screens to avoid jank on touch
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                box-shadow: 0 8px 24px rgba($text-primary, 0.1);
+                border-color: color.adjust($border-light, $lightness: -8%);
+                transform: translateY(-1px);
+            }
+        }
+    }
+
+    // zebra background for long lists
+    li:nth-child(even) {
+        background: color.adjust($background-secondary, $lightness: 3%);
+    }
+
+    // Mobile-first responsive examples
+    @include respond-down('md') {
+        gap: 12px;
+
+        li {
+            padding: 14px 16px;
+            grid-template-columns: 32px 1fr auto;
+
+            &::before {
+                width: 32px;
+                height: 32px;
+                font-size: 0.95rem;
+            }
+        }
+    }
+
+    @include respond-down('sm') {
+        gap: 10px;
+
+        li {
+            padding: 12px 14px;
+            font-size: $font-size-sm;
+            line-height: 1.5;
+            grid-template-columns: 28px 1fr auto;
+
+            // Prevent example overflow on mobile
+            overflow: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+
+            &::before {
+                width: 28px;
+                height: 28px;
+                font-size: 0.85rem;
+                box-shadow: 0 2px 6px rgba($accent-color, 0.2);
+            }
+
+            .lm-example-text {
+                // Prevent text overflow on mobile
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                hyphens: auto;
+            }
+        }
+    }
+
+    @include respond-down('xs') {
+        gap: 8px;
+
+        li {
+            padding: 10px 12px;
+            font-size: $font-size-sm;
+            line-height: 1.45;
+            grid-template-columns: 24px 1fr auto;
+
+            // Prevent example overflow on very small screens
+            overflow: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+
+            &::before {
+                width: 24px;
+                height: 24px;
+                font-size: 0.8rem;
+            }
+
+            .lm-example-text {
+                // Prevent text overflow on very small screens
+                overflow-wrap: break-word;
+                word-wrap: break-word;
+                hyphens: auto;
+            }
+        }
+    }
+}
+
+// Common mistakes list rendered inside LearnMode
+.lm-mistakes {
+    list-style: none;
+    padding-left: 0;
+    display: grid;
+    gap: 12px;
+
+    li {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 12px 14px;
+        border-radius: $border-radius-md;
+        border: 1px solid $border-light;
+        background: $background-secondary;
+    }
+
+    .lm-mistake-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .lm-mistake-bad {
+        background: color.adjust($danger-color, $lightness: 46%);
+        color: color.adjust($danger-color, $lightness: -10%);
+        border: 1px solid color.adjust($danger-color, $lightness: 16%);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+
+    .lm-mistake-sep {
+        color: $text-secondary;
+        font-weight: 700;
+    }
+
+    .lm-mistake-good {
+        background: color.adjust($success-color, $lightness: 48%);
+        color: color.adjust($success-color, $lightness: -18%);
+        border: 1px solid color.adjust($success-color, $lightness: 10%);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+
+    .lm-mistake-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    // buttons use global .lm-icon-btn
+
+    @include respond-down('sm') {
+        gap: 10px;
+
+        li {
+            padding: 10px 12px;
+
+            // Prevent mistake overflow on mobile
+            overflow: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .lm-mistake-bad,
+        .lm-mistake-good {
+            padding: 5px 8px;
+            font-size: $font-size-sm;
+
+            // Prevent badge overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    }
+
+    @include respond-down('xs') {
+        gap: 8px;
+
+        li {
+            padding: 8px 10px;
+
+            // Prevent mistake overflow on very small screens
+            overflow: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        .lm-mistake-bad,
+        .lm-mistake-good {
+            padding: 4px 7px;
+            font-size: $font-size-sm;
+
+            // Prevent badge overflow on very small screens
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+    }
+}
+
+// Additional mobile-first improvements for better touch experience
+@include respond-down('sm') {
+    .lm-slide {
+        border: none;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+        // Prevent content overflow on mobile
+        overflow: hidden;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+
+        // Improve touch targets
+        * {
+            touch-action: manipulation;
+        }
+
+        // Better spacing for mobile
+        >*+* {
+            margin-top: $spacing-sm;
+        }
+    }
+
+    .lm-slide-title {
+        // Ensure title is easily readable on mobile
+        word-break: break-word;
+        hyphens: auto;
+        border: none;
+        padding: 0;
+        padding-top: $spacing-sm;
+        overflow-wrap: break-word;
+    }
+
+    .lm-slide-body {
+        // Improve readability on small screens
+        text-align: justify;
+        text-justify: inter-word;
+
+        // Prevent body overflow on mobile
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+@include respond-down('xs') {
+    .lm-slide {
+        // Optimize for very small screens
+        min-height: 200px;
+
+        // Ensure content doesn't overflow
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+        overflow: hidden;
+    }
+
+    .lm-slide-title {
+        // Prevent title overflow on very small screens
+        font-size: $font-size-sm;
+        line-height: 1.3;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    .lm-list li {
+        // Ensure list items are properly spaced on very small screens
+        margin-bottom: 4px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        // Prevent list item overflow on very small screens
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+// Mobile-optimized slide class for additional overflow prevention
+.lm-slide-mobile-optimized {
+
+    // Ensure proper mobile behavior
+    @include respond-down('sm') {
+        // Prevent any horizontal overflow
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        // Ensure proper width constraints
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+
+        // Prevent content from breaking out of container
+        contain: layout style paint;
+
+        // Ensure proper text wrapping
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+
+    @include respond-down('xs') {
+        // Extra overflow prevention for very small screens
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        // Ensure proper width constraints
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+
+        // Prevent content from breaking out of container
+        contain: layout style paint;
+
+        // Ensure proper text wrapping
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+
+        // Optimize for very small screens
+        min-height: 180px;
+    }
+}
+
+// iOS-specific optimizations
+@supports (-webkit-touch-callout: none) {
+    @include respond-down('sm') {
+        .lm-slide {
+            // iOS Safari optimizations
+            -webkit-overflow-scrolling: touch;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+        }
+
+        .lm-slide-title {
+            // Prevent iOS Safari text rendering issues
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    }
+}
+
+// High DPI display optimizations
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    @include respond-down('sm') {
+        .lm-slide {
+            // Crisp borders on high DPI displays
+            border-width: 0.5px;
+        }
+    }
+}
+
+// No desktop hover change to preserve large-screen visuals
+
+// Respect reduced motion preferences
+@media (prefers-reduced-motion: reduce) {
+    .lm-slide {
+        transition: none;
+        transform: none;
+    }
+}
+
+// Minimal, unobtrusive toast used for Copy action within LearnMode
+// (legacy toast styles removed in favor of accent toast above)
+
+// =============================================================================
+// QUOTED TEXT RESPONSIVE STYLES
+// =============================================================================
+
+// Responsive styles for quoted text elements within LearnMode
+.lm-slide {
+    .quoted-text {
+
+        // Mobile-first responsive improvements for quoted text
+        @include respond-down('md') {
+            font-size: $font-size-sm;
+            padding: $spacing-xs $spacing-sm;
+            margin: $spacing-xs 0;
+        }
+
+        @include respond-down('sm') {
+            font-size: $font-size-sm;
+            padding: $spacing-xs $spacing-xs;
+            margin: $spacing-xs 0;
+            line-height: 1.4;
+
+            // Prevent quoted text overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        @include respond-down('xs') {
+            font-size: $font-size-xs;
+            padding: $spacing-xs $spacing-xs;
+            margin: $spacing-xs 0;
+            line-height: 1.3;
+
+            // Prevent quoted text overflow on very small screens
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        // Ensure proper touch targets on mobile
+        @include respond-down('sm') {
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    // Responsive styles for quoted text variants
+    .quoted-text-correct,
+    .quoted-text-incorrect {
+        @include respond-down('md') {
+            font-size: $font-size-sm;
+            padding: $spacing-xs $spacing-sm;
+        }
+
+        @include respond-down('sm') {
+            font-size: $font-size-sm;
+            padding: $spacing-xs $spacing-xs;
+            line-height: 1.4;
+
+            // Prevent quoted text overflow on mobile
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        @include respond-down('xs') {
+            font-size: $font-size-xs;
+            padding: $spacing-xs $spacing-xs;
+            line-height: 1.3;
+
+            // Prevent quoted text overflow on very small screens
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        // Ensure proper touch targets on mobile
+        @include respond-down('sm') {
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    // Responsive styles for quoted text with pronunciation buttons
+    @include respond-down('md') {
+        .quoted-text-pronunciation-btn {
+            width: 14px;
+            height: 14px;
+            min-width: 14px;
+            min-height: 14px;
+
+            svg {
+                width: 9px;
+                height: 9px;
+            }
+        }
+    }
+
+    @include respond-down('sm') {
+        .quoted-text-pronunciation-btn {
+            width: 12px;
+            height: 12px;
+            min-width: 12px;
+            min-height: 12px;
+
+            svg {
+                width: 8px;
+                height: 8px;
+            }
+        }
+    }
+
+    @include respond-down('xs') {
+        .quoted-text-pronunciation-btn {
+            width: 12px;
+            height: 12px;
+            min-width: 12px;
+            min-height: 12px;
+
+            svg {
+                width: 8px;
+                height: 8px;
+            }
+        }
+    }
+}

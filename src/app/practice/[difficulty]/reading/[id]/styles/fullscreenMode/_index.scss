@@ -1,0 +1,18 @@
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use "sass:color";
+
+// Fullscreen Mode Styles - Modular Structure
+// Main entry point for all fullscreen mode styles
+
+// Core fullscreen container and layout
+@use "core";
+
+// Header components
+@use "header";
+
+// Content sections
+@use "content";
+
+// Navigation components
+@use "navigation";

@@ -1,0 +1,83 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// =============================================================================
+// RESPONSIVE DESIGN (iOS OPTIMIZED)
+// =============================================================================
+
+@include respond-to('sm') {
+    .vocab-card-container {
+        padding: $spacing-md $spacing-lg;
+    }
+
+    .flashcard-container {
+        .card-content {
+            padding: $spacing-lg;
+        }
+    }
+}
+
+@include respond-down('md') {
+    .vocab-card-container {
+        padding: $spacing-md $spacing-lg;
+    }
+}
+
+// iOS specific media queries for better touch experience
+@media screen and (max-width: 480px) and (-webkit-min-device-pixel-ratio: 2) {
+    .vocabulary-card.modern-card {
+        .save-btn {
+            width: 44px; // Increased touch target
+            height: 44px;
+        }
+    }
+
+    .vocab-card-container {
+        .card-header .word-section .audio-btn {
+            width: 48px; // Increased touch target
+            height: 48px;
+        }
+    }
+
+    .flashcard-container {
+        .flashcard-front .word-section .audio-btn {
+            width: 66px; // Increased touch target
+            height: 66px;
+        }
+    }
+
+    .quiz-card-container {
+        .quiz-header .quiz-icon-container .audio-btn {
+            width: 48px; // Increased touch target
+            height: 48px;
+        }
+
+        .quiz-content .quiz-options .quiz-option {
+            padding: $spacing-sm $spacing-xl; // Increased touch area
+            min-height: 54px; // Ensure adequate touch target
+            font-size: $font-size-sm; // Smaller font size for mobile
+        }
+
+        .quiz-content {
+            padding-bottom: $spacing-lg; // More padding bottom for mobile
+        }
+    }
+}
+
+// iPad specific optimizations
+@media screen and (min-width: 784px) and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 1) {
+    .flashcard-container {
+        .flashcard-front .word-section .word-text {
+            font-size: clamp(2rem, 4vw, 2.8rem); // Better scaling for iPad
+            text-transform: capitalize;
+        }
+    }
+
+    .quiz-card-container {
+        .quiz-content .question-section .word-display .quiz-word {
+            font-size: 2.2rem; // Better scaling for iPad
+            text-transform: capitalize;
+        }
+    }
+}

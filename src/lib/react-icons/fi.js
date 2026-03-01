@@ -1,0 +1,27 @@
+import { createIcon } from "./_factory";
+
+export const FiX = createIcon("FiX");
+export const FiChevronLeft = createIcon("FiChevronLeft");
+export const FiInfo = createIcon("FiInfo");
+export const FiList = createIcon("FiList");
+export const FiHelpCircle = createIcon("FiHelpCircle");
+export const FiClock = createIcon("FiClock");
+export const FiFileText = createIcon("FiFileText");
+export const FiHeadphones = createIcon("FiHeadphones");
+export const FiXCircle = createIcon("FiXCircle");
+export const FiArrowLeft = createIcon("FiArrowLeft");
+export const FiArrowRight = createIcon("FiArrowRight");
+export const FiRefreshCw = createIcon("FiRefreshCw");
+export const FiChevronUp = createIcon("FiChevronUp");
+export const FiCheckCircle = createIcon("FiCheckCircle");
+export const FiTrash2 = createIcon("FiTrash2");
+export const FiChevronsRight = createIcon("FiChevronsRight");
+export const FiRotateCcw = createIcon("FiRotateCcw");
+export const FiEye = createIcon("FiEye");
+export const FiEdit3 = createIcon("FiEdit3");
+export const FiAlertTriangle = createIcon("FiAlertTriangle");
+export const FiDownload = createIcon("FiDownload");
+export const FiBookmark = createIcon("FiBookmark");
+export const FiPlus = createIcon("FiPlus");
+export const FiCheck = createIcon("FiCheck");
+export const FiChevronDown = createIcon("FiChevronDown");

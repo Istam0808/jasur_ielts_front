@@ -1,0 +1,229 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+
+.lm-table {
+    border: 1px solid $border-light;
+    border-radius: $border-radius-md;
+    // Allow sticky header to work relative to .lm-content scroll container
+    overflow: auto; // enables horizontal scroll if needed
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 2px 8px rgba($text-primary, 0.05);
+    margin-top: 16px;
+    background: $background-light;
+
+    // Mobile overflow prevention
+    @include respond-down('sm') {
+        overflow: visible;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+.lm-table-head,
+.lm-table-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(140px, 1fr);
+
+    // Mobile grid prevention
+    @include respond-down('sm') {
+        display: block;
+        grid-auto-flow: unset;
+        grid-auto-columns: unset;
+    }
+}
+
+.lm-table-head {
+    background: $background-secondary;
+    color: $text-primary;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.lm-table-head>div,
+.lm-table-row>div {
+    padding: 16px;
+    border-bottom: 1px solid $border-light;
+    display: flex;
+    align-items: center;
+    white-space: normal;
+    word-break: break-word;
+
+    // Mobile overflow prevention
+    @include respond-down('sm') {
+        padding: 12px 14px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    @include respond-down('xs') {
+        padding: 10px 12px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+.lm-table-row:nth-child(even) {
+    background: $background-secondary;
+}
+
+// Responsive behavior: turn grid table into stacked cards on small screens
+@include respond-down('sm') {
+    .lm-table {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        margin-top: 12px;
+        overflow: visible;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lm-table-head {
+        display: none;
+    }
+
+    .lm-table-body {
+        display: grid;
+        gap: 12px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .lm-table-row {
+        display: block;
+        background: $background-light;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-md;
+        box-shadow: 0 2px 6px rgba($text-primary, 0.04);
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lm-table-row>div {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 8px;
+        padding: 12px 14px;
+        border-bottom: 1px solid $border-light;
+        align-items: start;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+
+        // Prevent content overflow
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .lm-table-row>div:last-child {
+        border-bottom: none;
+    }
+
+    .lm-table-row>div::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: $text-primary;
+
+        // Prevent label overflow
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        hyphens: auto;
+    }
+}
+
+@include respond-down('xs') {
+    .lm-table-row>div {
+        grid-template-columns: 100px 1fr;
+        padding: 10px 12px;
+        gap: 6px;
+
+        // Prevent content overflow on very small screens
+        overflow: hidden;
+        width: 100%;
+        box-sizing: border-box;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    .lm-table-body {
+        gap: 10px;
+    }
+}
+
+// Additional mobile overflow prevention
+@include respond-down('sm') {
+    .lm-table {
+        // Ensure table doesn't cause horizontal overflow
+        max-width: 100vw;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+
+        // Prevent any horizontal scrolling
+        overflow-x: hidden;
+        overflow-y: visible;
+    }
+
+    .lm-table-body {
+        // Ensure body content fits within container
+        max-width: 100%;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .lm-table-row {
+        // Ensure rows don't overflow
+        max-width: 100%;
+        width: 100%;
+        overflow: hidden;
+
+        >div {
+            // Ensure grid items don't overflow
+            max-width: 100%;
+            width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+    }
+}
+
+@include respond-down('xs') {
+    .lm-table {
+        // Extra overflow prevention for very small screens
+        max-width: 100vw;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .lm-table-body {
+        gap: 8px;
+    }
+
+    .lm-table-row {
+        // Ensure rows fit on very small screens
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+
+        >div {
+            // Ensure grid items fit on very small screens
+            padding: 8px 10px;
+            gap: 4px;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+}

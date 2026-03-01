@@ -1,0 +1,272 @@
+@use '../../../assets/styles/mixins' as *;
+@use '../../../assets/styles/settings' as *;
+
+.testing-switcher {
+    position: relative;
+    margin-left: 0;
+    z-index: 10;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+
+    // When button inside is focused or expanded, style the container
+    &:has(.testing-switcher-button:focus),
+    &:has(.testing-switcher-button[aria-expanded="true"]) {
+        border-color: rgba($accent-color, 0.4);
+        background-color: rgba($primary-color, 0.1);
+    }
+
+    .testing-switcher-button {
+        border-radius: 4px;
+        padding: 0.375rem 0.5rem;
+        cursor: pointer;
+        color: $text-light;
+        transition: all 0.3s ease;
+        min-width: 80px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        flex-shrink: 0;
+        border: none;
+        outline: none;
+        background: transparent;
+
+        &:hover {
+            background-color: rgba($primary-color, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .testing-icon {
+            font-size: 16px;
+            color: $accent-color;
+            flex-shrink: 0;
+        }
+
+        // Animated bars icon container
+        .animated-bars-icon {
+            width: 16px;
+            height: 16px;
+            color: $accent-color;
+            flex-shrink: 0;
+            // Hardware acceleration
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            // Layout containment for performance
+            contain: layout style paint;
+        }
+
+        .testing-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .dropdown-arrow {
+            margin-left: auto;
+            opacity: 0.7;
+            transition: transform 0.3s ease;
+
+            svg {
+                display: block;
+            }
+        }
+
+        &[aria-expanded="true"] {
+            background-color: rgba($primary-color, 0.25);
+
+            .dropdown-arrow {
+                transform: rotate(180deg);
+            }
+        }
+    }
+}
+
+// Portal container for dropdown
+.testing-dropdown-portal {
+    // All positioning is handled via inline styles
+    // This ensures it appears above everything
+
+    .testing-dropdown {
+        width: 180px;
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        border: 1px solid rgba($primary-color, 0.15);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        padding: 0.5rem;
+        transform-origin: top center;
+        animation: dropdownAppear 0.2s ease-out forwards;
+        @include dropdown-gradient(0.9, 0.95);
+
+        &.open-upward {
+            transform-origin: bottom center;
+            animation: dropdownAppearUpward 0.2s ease-out forwards;
+        }
+
+        .testing-option {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: transparent;
+            border: none;
+            border-radius: 6px;
+            color: $text-light;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            @include flex(row, flex-start, center, nowrap, 0.75rem);
+
+            .flag-icon {
+                margin-right: 0.375rem;
+                @include flex(row, center, center);
+
+                svg {
+                    border-radius: 2px;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                }
+            }
+
+            span {
+                font-size: 0.9rem;
+            }
+
+            &:hover {
+                background-color: rgba($primary-color, 0.15);
+            }
+
+            &:not(:last-child) {
+                margin-bottom: 0.25rem;
+            }
+        }
+    }
+}
+
+// Animation for dropdown appearance
+@keyframes dropdownAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Animation for dropdown appearance upward
+@keyframes dropdownAppearUpward {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Media queries for mobile devices
+@media screen and (max-width: 784px) {
+    .testing-switcher {
+        width: 100%;
+        background-color: rgba($primary-color, 0.1);
+        border: 1px solid rgba($accent-color, 0.2);
+        border-radius: 6px;
+        padding: 0.5rem;
+        margin-left: 0;
+
+        .testing-switcher-button {
+            width: 100%;
+            justify-content: space-between;
+            flex: 1;
+        }
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .testing-switcher {
+        margin-left: 0;
+        margin-top: 1rem;
+        padding: 0.4rem;
+
+        .testing-switcher-button {
+            min-width: 70px;
+            padding: 0.4rem 0.6rem;
+
+            .testing-text {
+                font-size: 0.8rem;
+            }
+        }
+    }
+
+    .testing-dropdown {
+        width: 160px;
+
+        .testing-option {
+            padding: 0.6rem;
+        }
+    }
+}
+
+// Performance-optimized animated bars icon styles
+.animated-bars-icon {
+    // Hardware acceleration
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    // Layout containment for performance
+    contain: layout style paint;
+    // Optimize rendering
+    will-change: transform;
+
+    .animated-bar {
+        fill: currentColor;
+        // Use transform-origin at bottom for scaleY animation
+        transform-origin: center bottom;
+        // Hardware acceleration per bar
+        transform: translateZ(0);
+        // Initial state - bars start at 40% height
+        transform: scaleY(0.4);
+        // Smooth animation
+        animation: barWave 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        // Respect reduced motion
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+            transform: scaleY(1);
+        }
+    }
+
+    // Staggered animation delays for wave effect
+    .bar-1 {
+        animation-delay: 0s;
+    }
+
+    .bar-2 {
+        animation-delay: 0.15s;
+    }
+
+    .bar-3 {
+        animation-delay: 0.3s;
+    }
+}
+
+// GPU-accelerated bar wave animation using scaleY transform
+@keyframes barWave {
+    0%,
+    100% {
+        transform: scaleY(0.4) translateZ(0);
+    }
+
+    50% {
+        transform: scaleY(1) translateZ(0);
+    }
+}
+
+// Respect reduced motion preferences globally
+@media (prefers-reduced-motion: reduce) {
+    .animated-bars-icon .animated-bar {
+        animation: none;
+        transform: scaleY(1) translateZ(0);
+    }
+}

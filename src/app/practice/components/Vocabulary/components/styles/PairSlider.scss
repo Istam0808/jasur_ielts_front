@@ -1,0 +1,297 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as settings;
+@use "@/assets/styles/mixins" as mixins;
+
+.pair-slider {
+    .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: settings.$spacing-lg;
+        width: 100%;
+
+        .slider-value-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(135deg, settings.$accent-color 0%, color.adjust(settings.$accent-color, $lightness: -10%) 100%);
+            border-radius: settings.$border-radius-md;
+            box-shadow: 0 4px 12px rgba(settings.$accent-color, 0.25);
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+                border-radius: settings.$border-radius-md;
+            }
+
+            .current-value {
+                font-size: settings.$font-size-xl;
+                font-weight: settings.$font-weight-bold;
+                color: white;
+                text-align: center;
+                line-height: 1;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+                position: relative;
+                z-index: 1;
+            }
+        }
+
+        .pairs-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right,
+                    settings.$neutral-200 0%,
+                    settings.$neutral-200 100%);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: none;
+
+            // Progress fill effect
+            &::-webkit-slider-runnable-track {
+                background: linear-gradient(to right,
+                        settings.$accent-color 0%,
+                        settings.$accent-color var(--slider-progress, 50%),
+                        settings.$neutral-200 var(--slider-progress, 50%),
+                        settings.$neutral-200 100%);
+                height: 6px;
+                border-radius: 3px;
+                border: none;
+            }
+
+            &::-moz-range-track {
+                background: linear-gradient(to right,
+                        settings.$accent-color 0%,
+                        settings.$accent-color var(--slider-progress, 50%),
+                        settings.$neutral-200 var(--slider-progress, 50%),
+                        settings.$neutral-200 100%);
+                height: 6px;
+                border-radius: 3px;
+                border: none;
+            }
+
+            &::-webkit-slider-thumb {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, settings.$accent-color 0%, color.adjust(settings.$accent-color, $lightness: -8%) 100%);
+                cursor: pointer;
+                box-shadow:
+                    0 2px 8px rgba(settings.$accent-color, 0.3),
+                    0 0 0 3px rgba(255, 255, 255, 0.9),
+                    0 0 0 1px rgba(settings.$accent-color, 0.2);
+                border: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                margin-top: -7px; // Move thumb up to center on track
+
+                &:hover {
+                    transform: scale(1.15);
+                    box-shadow:
+                        0 4px 12px rgba(settings.$accent-color, 0.4),
+                        0 0 0 3px rgba(255, 255, 255, 0.95),
+                        0 0 0 1px rgba(settings.$accent-color, 0.3);
+                }
+
+                &:active {
+                    transform: scale(1.1);
+                    box-shadow:
+                        0 2px 6px rgba(settings.$accent-color, 0.5),
+                        0 0 0 3px rgba(255, 255, 255, 0.9),
+                        0 0 0 1px rgba(settings.$accent-color, 0.4);
+                }
+            }
+
+            &::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, settings.$accent-color 0%, color.adjust(settings.$accent-color, $lightness: -8%) 100%);
+                cursor: pointer;
+                box-shadow:
+                    0 2px 8px rgba(settings.$accent-color, 0.3),
+                    0 0 0 3px rgba(255, 255, 255, 0.9),
+                    0 0 0 1px rgba(settings.$accent-color, 0.2);
+                border: none;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &:hover {
+                    transform: scale(1.15);
+                    box-shadow:
+                        0 4px 12px rgba(settings.$accent-color, 0.4),
+                        0 0 0 3px rgba(255, 255, 255, 0.95),
+                        0 0 0 1px rgba(settings.$accent-color, 0.3);
+                }
+
+                &:active {
+                    transform: scale(1.1);
+                    box-shadow:
+                        0 2px 6px rgba(settings.$accent-color, 0.5),
+                        0 0 0 3px rgba(255, 255, 255, 0.9),
+                        0 0 0 1px rgba(settings.$accent-color, 0.4);
+                }
+            }
+
+            &:focus {
+                outline: none;
+                box-shadow:
+                    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+                    0 0 0 3px rgba(settings.$accent-color, 0.15);
+            }
+
+            // Add subtle glow effect on focus
+            &:focus-visible {
+                box-shadow:
+                    inset 0 1px 3px rgba(0, 0, 0, 0.1),
+                    0 0 0 3px rgba(settings.$accent-color, 0.15),
+                    0 0 0 1px rgba(settings.$accent-color, 0.1);
+            }
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: settings.$font-size-sm;
+            color: settings.$text-secondary;
+            font-weight: settings.$font-weight-medium;
+            margin-top: settings.$spacing-sm;
+
+            .slider-min,
+            .slider-max {
+                font-size: settings.$font-size-xs;
+                opacity: 0.7;
+                font-weight: settings.$font-weight-medium;
+                color: settings.$text-muted;
+                transition: color 0.2s ease;
+
+                &:hover {
+                    color: settings.$text-secondary;
+                }
+            }
+        }
+    }
+
+    // Responsive breakpoints
+    @include mixins.respond-down('md') {
+        .slider-container {
+            .slider-value-display {
+                width: 60px;
+                height: 32px;
+
+                .current-value {
+                    font-size: settings.$font-size-lg;
+                }
+            }
+
+            .pairs-slider {
+                height: 5px;
+
+                &::-webkit-slider-thumb {
+                    width: 18px;
+                    height: 18px;
+                    margin-top: -6.5px; // Adjust for smaller track height
+                }
+
+                &::-moz-range-thumb {
+                    width: 18px;
+                    height: 18px;
+                }
+            }
+        }
+    }
+
+    @include mixins.respond-down('sm') {
+        .slider-container {
+            gap: settings.$spacing-md;
+            
+            .slider-value-display {
+                width: 50px;
+                height: 28px;
+
+                .current-value {
+                    font-size: settings.$font-size-md;
+                }
+            }
+
+            .pairs-slider {
+                height: 6px;
+
+                &::-webkit-slider-thumb {
+                    width: 20px;
+                    height: 20px;
+                    margin-top: -7px; // Adjust for smaller track height
+                }
+
+                &::-moz-range-thumb {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+            
+            .slider-labels {
+                font-size: settings.$font-size-xs;
+                
+                .slider-min,
+                .slider-max {
+                    font-size: settings.$font-size-xs;
+                }
+            }
+        }
+    }
+    
+    @include mixins.respond-down('xs') {
+        .slider-container {
+            gap: settings.$spacing-sm;
+            
+            .slider-value-display {
+                width: 45px;
+                height: 25px;
+
+                .current-value {
+                    font-size: settings.$font-size-sm;
+                }
+            }
+
+            .pairs-slider {
+                height: 6px;
+
+                &::-webkit-slider-thumb {
+                    width: 22px;
+                    height: 22px;
+                    margin-top: -8px; // Adjust for smaller track height
+                }
+
+                &::-moz-range-thumb {
+                    width: 22px;
+                    height: 22px;
+                }
+            }
+            
+            .slider-labels {
+                font-size: settings.$font-size-xs;
+                margin-top: settings.$spacing-xs;
+                
+                .slider-min,
+                .slider-max {
+                    font-size: settings.$font-size-xs;
+                }
+            }
+        }
+    }
+}

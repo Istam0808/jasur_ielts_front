@@ -1,0 +1,138 @@
+@use "sass:color";
+@use '../../../assets/styles/_settings' as *;
+@use '../../../assets/styles/_mixins' as *;
+@forward '../../../assets/styles/_settings';
+@forward '../../../assets/styles/_mixins';
+
+// Common variables for all input-types components
+$input-height: 44px;
+$input-padding-y: 0.625rem; // 10px
+$input-padding-x: 0.75rem; // 12px
+$input-gap: $spacing-sm; // 8px
+$input-radius: $border-radius-sm;
+$input-font-size: $font-size-base;
+$label-font-size: $font-size-sm;
+$help-font-size: 0.8125rem; // 13px
+$control-bg: $background-light;
+$control-border: $border-light;
+$control-border-hover: $neutral-400;
+$control-border-focus: $primary-color;
+$control-text: $text-primary;
+$placeholder-color: $neutral-500;
+$disabled-bg: $neutral-100;
+$disabled-text: $neutral-400;
+$error-color: $danger-color; // follow project convention for error color naming
+
+// Focus ring utility using primary color with subtle alpha
+@mixin focus-ring {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(86, 79, 253, 0.12); // fallback for browsers without color.mix
+    box-shadow: 0 0 0 3px color.change($primary-color, $alpha: 0.15);
+}
+
+// Base form-control styles for inputs and custom controls
+@mixin form-control {
+    width: 100%;
+    height: $input-height;
+    padding: $input-padding-y $input-padding-x;
+    border-radius: $input-radius;
+    background-color: $control-bg;
+    border: 1px solid $control-border;
+    color: $control-text;
+    font-size: $input-font-size;
+    line-height: 1.25;
+    transition: border-color $transition-fast, box-shadow $transition-fast, background-color $transition-fast;
+
+    &::placeholder {
+        color: $placeholder-color;
+    }
+
+    &:hover:not(:disabled):not(.is-invalid):not(.is-readonly) {
+        border-color: $control-border-hover;
+    }
+
+    &:focus-visible {
+        border-color: $control-border-focus;
+        @include focus-ring;
+    }
+
+    &:disabled {
+        background-color: $disabled-bg;
+        color: $disabled-text;
+        cursor: not-allowed;
+    }
+
+    &.is-invalid {
+        border-color: $error-color;
+        box-shadow: 0 0 0 3px color.change($error-color, $alpha: 0.12);
+    }
+}
+
+// Label and help text
+@mixin field-label {
+    display: inline-block;
+    margin-bottom: $spacing-xs;
+    font-size: $label-font-size;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+}
+
+@mixin field-hint {
+    margin-top: $spacing-xs;
+    font-size: $help-font-size;
+    color: $text-muted;
+}
+
+@mixin field-error {
+    margin-top: $spacing-xs;
+    font-size: $help-font-size;
+    color: $error-color;
+}
+
+// Control group layout
+@mixin field-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+}
+
+// Custom checkbox / radio tokens
+@mixin token {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid $control-border;
+    background-color: $control-bg;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+}
+
+@mixin token-hover {
+    border-color: $control-border-hover;
+}
+
+@mixin token-checked {
+    border-color: $primary-color;
+    background-color: color.mix($primary-color, #ffffff, 15%);
+}
+
+@mixin token-invalid {
+    border-color: $error-color;
+}
+
+// Select dropdown panel
+@mixin dropdown-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: $background-light;
+    border: 1px solid $control-border;
+    border-radius: $input-radius;
+    box-shadow: $shadow-lg;
+    z-index: 20;
+    max-height: 260px;
+    overflow: auto;
+}

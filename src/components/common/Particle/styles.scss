@@ -1,0 +1,50 @@
+@use "../../../assets/styles/mixins" as *;
+@use "../../../assets/styles/settings" as *;
+
+.accent-shape {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    z-index: -2;
+
+    // Ensure the particle doesn't cause overflow
+    pointer-events: none;
+    overflow: hidden;
+    animation: infinite-spin 5s linear 0s infinite normal none;
+
+    // position:  top-left, top-right, bottom-left, bottom-right
+
+    &.top-left {
+        top: -100px;
+        left: -100px;
+        clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%);
+    }
+
+    &.top-right {
+        top: -100px;
+        right: -100px;
+        clip-path: polygon(0% 50%, 50% 50%, 50% 100%, 0% 100%);
+    }
+
+    &.bottom-left {
+        bottom: -100px;
+        left: -100px;
+        clip-path: polygon(50% 0%, 100% 0%, 100% 50%, 50% 50%);
+    }
+
+    &.bottom-right {
+        bottom: -100px;
+        right: -100px;
+        clip-path: polygon(0% 0%, 50% 0%, 50% 50%, 0% 50%);
+    }
+}
+
+@keyframes infinite-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

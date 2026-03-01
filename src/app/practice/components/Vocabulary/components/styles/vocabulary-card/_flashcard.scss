@@ -1,0 +1,407 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// =============================================================================
+// FLASHCARD & QUIZ STYLES (iOS COMPATIBILITY FIXES)
+// =============================================================================
+
+.flashcard-container {
+    height: 100%;
+    perspective: 1000px;
+    cursor: pointer;
+    // iOS touch improvements
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+
+    .flashcard-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        // iOS 3D transform fix
+        -webkit-transform-style: preserve-3d;
+        -webkit-transition: -webkit-transform 0.8s;
+        // iOS Safari transform origin fix
+        transform-origin: center center;
+        -webkit-transform-origin: center center;
+        // Force hardware acceleration
+        will-change: transform;
+        -webkit-will-change: transform;
+    }
+
+    &.flipped .flashcard-inner {
+        transform: rotateY(180deg);
+        -webkit-transform: rotateY(180deg);
+    }
+
+    // Pointer-events fix for flip interaction
+    .flashcard-front {
+        pointer-events: auto;
+        z-index: 2;
+        // Ensure front face is visible when not flipped
+        -webkit-transform: rotateY(0deg) translateZ(1px);
+        transform: rotateY(0deg) translateZ(1px);
+    }
+
+    .flashcard-back {
+        pointer-events: none;
+        z-index: 1;
+        // Ensure back face is hidden when not flipped
+        -webkit-transform: rotateY(180deg) translateZ(-1px);
+        transform: rotateY(180deg) translateZ(-1px);
+    }
+
+    &.flipped {
+        .flashcard-front {
+            pointer-events: none;
+            z-index: 1;
+            // iOS Safari: Force front face to be hidden when flipped
+            -webkit-transform: rotateY(0deg) translateZ(-1px);
+            transform: rotateY(0deg) translateZ(-1px);
+        }
+
+        .flashcard-back {
+            pointer-events: auto;
+            z-index: 2;
+            // iOS Safari: Ensure back face is visible when flipped
+            -webkit-transform: rotateY(180deg) translateZ(1px);
+            transform: rotateY(180deg) translateZ(1px);
+        }
+    }
+
+    .flashcard-front,
+    .flashcard-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden; // iOS Safari support
+        border-radius: $border-radius-xl;
+        overflow: hidden;
+        // iOS Safari z-index fix for backface visibility
+        -webkit-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+
+        .card-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.95;
+            // Background will be set via inline style from React component
+            // This ensures consistency with our design system colors
+
+            // Add subtle texture for premium feel
+            background-blend-mode: multiply;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="0.5" fill="rgba(255,255,255,0.03)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+                opacity: 0.6;
+                mix-blend-mode: soft-light;
+            }
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            padding: $spacing-md;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: $text-light;
+        }
+    }
+
+    .flashcard-front {
+        .topic-badge {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            background: rgba($background-light, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); // iOS Safari support
+            padding: $spacing-sm $spacing-md;
+            border-radius: $border-radius-full;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            align-self: flex-start;
+
+            .topic-icon {
+                font-size: $font-size-sm;
+            }
+        }
+
+        .word-section {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-lg;
+
+            .audio-btn {
+                background: rgba($background-light, 0.15);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px); // iOS Safari support
+                border: 2px solid rgba($background-light, 0.3);
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: $text-light;
+                cursor: pointer;
+                transition: all $transition-normal;
+                position: relative;
+                // iOS button fixes
+                -webkit-appearance: none;
+                appearance: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+
+                &:hover,
+                &.playing {
+                    background: rgba($background-light, 0.25);
+                }
+
+                // iOS touch feedback
+                @media (hover: none) and (pointer: coarse) {
+                    &:active {
+                        background: rgba($background-light, 0.25);
+                    }
+                }
+
+                .audio-pulse {
+                    position: absolute;
+                    display: flex;
+                    gap: 2px;
+
+                    span {
+                        width: 3px;
+                        height: 15px;
+                        background: currentColor;
+                        border-radius: 2px;
+                        animation: audioPulse 1s infinite;
+                        // iOS animation optimization
+                        -webkit-animation: audioPulse 1s infinite;
+
+                        &:nth-child(2) {
+                            animation-delay: 0.2s;
+                            -webkit-animation-delay: 0.2s;
+                        }
+
+                        &:nth-child(3) {
+                            animation-delay: 0.4s;
+                            -webkit-animation-delay: 0.4s;
+                        }
+                    }
+                }
+            }
+
+            .word-text {
+                font-size: clamp(1.25rem, 4vw, 1.75rem);
+                font-weight: $font-weight-bold;
+                margin: 0;
+                padding: 0 $spacing-sm;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                line-height: 1.2;
+                word-break: break-word;
+                hyphens: auto;
+                color: $text-light;
+                text-transform: capitalize;
+                -webkit-hyphens: auto; // iOS Safari support
+                // iOS text rendering
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+
+        .flip-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-sm;
+            background: rgba($background-light, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); // iOS Safari support
+            padding: $spacing-sm;
+            border-radius: $border-radius-md;
+            font-size: $font-size-sm;
+            opacity: 0.8;
+
+            svg {
+                animation: flipHint 2s infinite;
+                -webkit-animation: flipHint 2s infinite;
+            }
+        }
+    }
+
+    .flashcard-back {
+        // iOS Safari specific fixes for backface visibility
+        -webkit-transform-origin: center center;
+        transform-origin: center center;
+
+        .card-gradient {
+            // Background will be set via inline style from React component
+            // This ensures consistency with our design system colors
+            opacity: 1;
+        }
+
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            color: $text-light;
+            padding: $spacing-md;
+        }
+
+        .back-header {
+            text-align: left;
+            flex-shrink: 0; // Prevent header from shrinking
+            padding-bottom: $spacing-md;
+
+            .header-icon {
+                font-size: 2rem;
+                color: rgba($background-light, 0.8);
+            }
+        }
+
+        .back-body {
+            flex: 1; // Allow body to take up available space
+            overflow-y: auto; // Enable vertical scrolling for overflow
+            min-height: 0; // Crucial for allowing overflow in flex children
+            padding: $spacing-sm; // Add some padding
+            margin: 0; // Reset margin
+            // iOS scrolling improvements
+            -webkit-overflow-scrolling: touch;
+            // Custom scrollbar for a better look
+            @include custom-scrollbar($thumb-color: rgba($background-light, 0.3),
+                $track-color: rgba(0, 0, 0, 0.2));
+
+            // Custom webkit scrollbar styling for flashcard back
+            &::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: rgba(0, 0, 0, 0.1);
+                border-radius: 4px;
+                margin: 4px 0;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: rgba($background-light, 0.3);
+                border-radius: 4px;
+                transition: background 0.2s ease;
+
+                &:hover {
+                    background: rgba($background-light, 0.5);
+                }
+            }
+
+            &::-webkit-scrollbar-corner {
+                background: transparent;
+            }
+
+            .definition-text {
+                font-size: 1.3rem; // Reduced font size
+                line-height: $line-height-relaxed;
+                color: rgba($text-light, 0.95);
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                white-space: pre-wrap; // Respect newlines in definition
+                word-wrap: break-word;
+                // iOS text rendering
+                -webkit-font-smoothing: antialiased;
+                // iOS text selection
+                -webkit-user-select: text;
+                user-select: text;
+            }
+
+            .example-container {
+                margin-top: $spacing-md;
+                background: rgba(0, 0, 0, 0.2);
+                border-radius: $border-radius-lg;
+                padding: $spacing-sm;
+                cursor: pointer;
+                transition: background $transition-fast;
+                border: 1px solid rgba($background-light, 0.1);
+                // iOS touch improvements
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.3);
+                }
+
+                // iOS touch feedback
+                @media (hover: none) and (pointer: coarse) {
+                    &:active {
+                        background: rgba(0, 0, 0, 0.3);
+                    }
+                }
+
+                .example-content {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: $spacing-sm;
+
+                    .quote-icon {
+                        font-size: 1.2rem;
+                        color: rgba($background-light, 0.6);
+                        flex-shrink: 0;
+                        margin-top: 4px;
+                    }
+
+                    .example-text {
+                        font-style: italic;
+                        font-size: $font-size-md;
+                        color: rgba($text-light, 0.85);
+                        margin: 0;
+                        // iOS text selection
+                        -webkit-user-select: text;
+                        user-select: text;
+                    }
+                }
+
+                .more-examples-badge {
+                    margin-top: $spacing-sm;
+                    text-align: right;
+                    font-size: $font-size-xs;
+                    font-weight: $font-weight-medium;
+                    color: rgba($text-light, 0.7);
+                    background-color: rgba($background-light, 0.1);
+                    padding: $spacing-xs $spacing-sm;
+                    border-radius: $border-radius-sm;
+                    display: inline-block;
+                }
+            }
+        }
+
+        .back-footer {
+            flex-shrink: 0; // Prevent footer from shrinking
+            padding-top: $spacing-md;
+            border-top: 1px solid rgba($background-light, 0.1);
+        }
+
+        .flip-hint {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: rgba($text-light, 0.7);
+        }
+    }
+}

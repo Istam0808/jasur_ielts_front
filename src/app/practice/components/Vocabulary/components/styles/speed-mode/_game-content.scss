@@ -1,0 +1,447 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+.speed-mode {
+
+    // Game Content
+    .game-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+
+        @include respond-down('md') {
+            min-height: 350px;
+        }
+
+        @include respond-down('sm') {
+            min-height: 300px;
+        }
+
+        @include respond-down('xs') {
+            min-height: 250px;
+        }
+
+        .game-card {
+            width: 100%;
+            padding: $spacing-xl;
+            background: linear-gradient(135deg, $background-light 0%, $background-primary 100%);
+            border-radius: $border-radius-xl;
+            box-shadow: $shadow-lg;
+            border: 1px solid rgba($accent-color, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-lg;
+
+            // Mobile optimization
+            @include respond-down('sm') {
+                background: $background-primary;
+                box-shadow: $shadow-md;
+            }
+
+            .word-progress {
+                display: flex;
+                align-items: center;
+                gap: $spacing-md;
+                margin-bottom: $spacing-lg;
+                padding-bottom: $spacing-md;
+                border-bottom: 1px solid $border-light;
+
+                .progress-bar {
+                    flex: 1;
+                    height: 6px;
+                    background: rgba($accent-color, 0.1);
+                    border-radius: 4px;
+                    overflow: hidden;
+
+                    .progress-fill {
+                        height: 100%;
+                        background: linear-gradient(90deg, $accent-color 0%, color.adjust($accent-color, $lightness: 15%) 100%);
+                        border-radius: 4px;
+                        transition: width 0.3s ease;
+                    }
+                }
+
+                .progress-text {
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-medium;
+                    color: $accent-color;
+                    background: rgba($accent-color, 0.08);
+                    padding: $spacing-xs $spacing-sm;
+                    border-radius: $border-radius-sm;
+                    min-width: 60px;
+                    text-align: center;
+                }
+
+                @include respond-down('md') {
+                    flex-direction: column;
+                    gap: $spacing-sm;
+                    align-items: stretch;
+
+                    .progress-text {
+                        align-self: center;
+                    }
+                }
+
+                @include respond-down('sm') {
+                    flex-direction: row;
+                    gap: $spacing-md;
+                    align-items: center;
+
+                    .progress-text {
+                        align-self: auto;
+                    }
+                }
+
+                @include respond-down('xs') {
+                    flex-direction: column;
+                    gap: $spacing-sm;
+                    align-items: stretch;
+
+                    .progress-text {
+                        align-self: center;
+                    }
+                }
+            }
+
+            .definition-section {
+                text-align: center;
+                margin-bottom: $spacing-lg;
+
+                .definition-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: $spacing-md;
+                    align-items: center;
+
+                    .definition-text {
+                        font-size: $font-size-xl;
+                        font-weight: $font-weight-bold;
+                        margin: 0;
+                        color: $text-primary;
+                        line-height: 1.6;
+                        text-align: center;
+                        padding: $spacing-lg;
+                        background: rgba($accent-color, 0.03);
+                        border-radius: $border-radius-lg;
+                        border: 1px solid rgba($accent-color, 0.1);
+                        position: relative;
+                        width: 100%;
+                        text-transform: capitalize;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+
+                        // Mobile optimization
+                        @include respond-down('sm') {
+                            background: rgba($accent-color, 0.02);
+                            border: 1px solid rgba($accent-color, 0.08);
+                        }
+                    }
+
+                    .translation-container {
+                        margin-top: $spacing-sm;
+
+                        .translation-badge {
+                            background: rgba($accent-color, 0.08);
+                            color: $accent-color;
+                            padding: $spacing-sm $spacing-md;
+                            border-radius: $border-radius-md;
+                            font-size: $font-size-sm;
+                            font-weight: $font-weight-medium;
+                            white-space: nowrap;
+                            border: 1px solid rgba($accent-color, 0.15);
+                            display: inline-block;
+                        }
+                    }
+
+                    .pronunciation {
+                        display: flex;
+                        align-items: center;
+                        gap: $spacing-xs;
+                        color: $text-secondary;
+                        font-size: $font-size-sm;
+                        font-style: italic;
+                        margin-top: $spacing-sm;
+
+                        svg {
+                            color: $accent-color;
+                            font-size: $font-size-sm;
+                        }
+                    }
+                }
+
+                @include respond-down('md') {
+                    .definition-content {
+                        .definition-text {
+                            font-size: $font-size-lg;
+                            padding: $spacing-md;
+                        }
+
+                        .translation-badge {
+                            font-size: $font-size-xs;
+                            padding: $spacing-xs $spacing-sm;
+                        }
+                    }
+                }
+
+                @include respond-down('sm') {
+                    .definition-content {
+                        .definition-text {
+                            font-size: $font-size-md;
+                            padding: $spacing-sm;
+                        }
+
+                        .translation-badge {
+                            font-size: $font-size-xs;
+                            padding: $spacing-xs $spacing-sm;
+                        }
+                    }
+                }
+
+                @include respond-down('xs') {
+                    .definition-content {
+                        .definition-text {
+                            font-size: $font-size-sm;
+                            padding: $spacing-xs;
+                        }
+
+                        .translation-badge {
+                            font-size: 10px;
+                            padding: $spacing-xs;
+                        }
+                    }
+                }
+            }
+
+            .typing-section {
+                position: relative;
+                margin: $spacing-md 0;
+
+                .typing-area {
+                    position: relative;
+                    padding: $spacing-lg;
+                    background: rgba($accent-color, 0.02);
+                    border: 2px solid rgba($accent-color, 0.15);
+                    border-radius: $border-radius-lg;
+                    transition: all 0.3s ease;
+                    min-height: 80px;
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    // Mobile optimization
+                    @include respond-down('sm') {
+                        background: rgba($accent-color, 0.01);
+                        border: 1px solid rgba($accent-color, 0.1);
+                    }
+
+                    &:focus-within {
+                        border-color: $accent-color;
+                        background: rgba($accent-color, 0.05);
+                        box-shadow: 0 0 0 4px rgba($accent-color, 0.1);
+
+                        @include respond-down('sm') {
+                            box-shadow: 0 0 0 2px rgba($accent-color, 0.1);
+                        }
+                    }
+
+                    &.error {
+                        border-color: #f44336;
+                        background: rgba(#f44336, 0.05);
+                        box-shadow: 0 0 0 4px rgba(#f44336, 0.1);
+                        animation: error-shake 0.2s ease-in-out;
+
+                        @include respond-down('sm') {
+                            box-shadow: 0 0 0 2px rgba(#f44336, 0.1);
+                        }
+                    }
+
+                    .typing-input {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        opacity: 0;
+                        z-index: 10;
+                        cursor: text;
+                        border: none;
+                        outline: none;
+                        background: transparent;
+                        font-size: $font-size-lg;
+                        color: transparent;
+                        caret-color: transparent;
+                    }
+
+                    .word-display {
+                        font-size: $font-size-xl;
+                        font-weight: $font-weight-bold;
+                        color: $text-primary;
+                        text-align: center;
+                        line-height: 1.4;
+                        min-height: 60px;
+                        width: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        gap: 2px;
+                        font-family: 'Courier New', monospace;
+                        letter-spacing: 1px;
+
+                        .typed-text {
+                            color: $accent-color;
+                            background: rgba($accent-color, 0.1);
+                            border-radius: 4px;
+                            padding: 2px 4px;
+                            min-width: 0;
+                            flex-shrink: 0;
+                        }
+
+                        .remaining-text {
+                            color: $text-secondary;
+                            min-width: 0;
+                            flex-shrink: 0;
+                        }
+
+                        .cursor {
+                            color: $accent-color;
+                            animation: cursor-blink 1s infinite;
+                            font-weight: $font-weight-bold;
+                            margin-left: 2px;
+                        }
+                    }
+
+                    .typing-hint {
+                        position: absolute;
+                        bottom: -50px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        display: flex;
+                        align-items: center;
+                        gap: $spacing-xs;
+                        color: $text-secondary;
+                        font-size: $font-size-xs;
+                        font-weight: $font-weight-medium;
+                        opacity: 0.7;
+                        pointer-events: none;
+                        transition: opacity 0.3s ease;
+                        background: rgba($background-primary, 0.9);
+                        padding: $spacing-xs $spacing-sm;
+                        border-radius: $border-radius-sm;
+                        border: 1px solid rgba($accent-color, 0.15);
+                        white-space: nowrap;
+                        z-index: 5;
+                        box-shadow: 0 2px 8px rgba($text-primary, 0.1);
+
+                        svg {
+                            font-size: $font-size-xs;
+                            color: $accent-color;
+                        }
+
+                        // Hide on very small screens
+                        @include respond-down('xs') {
+                            display: none;
+                        }
+                    }
+
+                    @include respond-down('md') {
+                        padding: $spacing-lg;
+                        min-height: 100px;
+
+                        .word-display {
+                            font-size: $font-size-xl;
+                            min-height: 60px;
+                        }
+                    }
+
+                    @include respond-down('sm') {
+                        padding: $spacing-md;
+                        min-height: 120px;
+
+                        .word-display {
+                            font-size: $font-size-lg;
+                            min-height: 80px;
+                        }
+                    }
+
+                    @include respond-down('xs') {
+                        padding: $spacing-sm;
+                        min-height: 100px;
+
+                        .word-display {
+                            font-size: $font-size-md;
+                            min-height: 60px;
+                        }
+                    }
+                }
+            }
+
+            // Sticky bottom typing bar on mobile for better keyboard ergonomics
+            @include respond-down('sm') {
+                .typing-section {
+                    position: sticky;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    margin: 0;
+                    background: $background-primary;
+                    padding: $spacing-sm calc($spacing-sm + env(safe-area-inset-right)) calc($spacing-sm + env(safe-area-inset-bottom)) calc($spacing-sm + env(safe-area-inset-left));
+                    border-top-left-radius: $border-radius-lg;
+                    border-top-right-radius: $border-radius-lg;
+                    box-shadow: 0 -6px 12px rgba($text-primary, 0.06);
+
+                    .typing-area {
+                        max-width: none;
+                    }
+                }
+            }
+
+            .topic-section {
+                display: flex;
+                justify-content: center;
+                margin-top: $spacing-md;
+
+                .topic-badge {
+                    font-size: $font-size-sm;
+                    color: $text-secondary;
+                    background: rgba($text-secondary, 0.08);
+                    padding: $spacing-sm $spacing-lg;
+                    border-radius: $border-radius-md;
+                    border: 1px solid rgba($text-secondary, 0.15);
+                    transition: all 0.3s ease;
+
+                    &:hover {
+                        background: rgba($text-secondary, 0.12);
+                        border-color: rgba($text-secondary, 0.25);
+
+                        @include respond-down('sm') {
+                            background: rgba($text-secondary, 0.08);
+                            border-color: rgba($text-secondary, 0.15);
+                        }
+                    }
+                }
+            }
+
+            @include respond-down('md') {
+                padding: $spacing-lg;
+                gap: $spacing-lg;
+            }
+
+            @include respond-down('sm') {
+                padding: $spacing-md;
+                gap: $spacing-md;
+            }
+
+            @include respond-down('xs') {
+                padding: $spacing-sm;
+                gap: $spacing-sm;
+            }
+        }
+    }
+}

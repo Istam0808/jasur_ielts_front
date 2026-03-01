@@ -1,0 +1,959 @@
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useUser } from '@/contexts/UserContext';
+import { useUserDataMirror } from '@/hooks/useUserDataMirror';
+import { useRouter } from 'next/navigation';
+import { useLoading } from '@/components/common/LoadingContext';
+import { checkAnswer, getCorrectAnswerTextForScoring, checkAnswerVariants, normalizeText } from '@/utils/answerChecker';
+import { getQuestionAnswerCount, getProvidedAnswerCount } from '../helpers/questionUtils';
+import { groupQuestionsByType } from '../helpers/QuestionGrouping';
+
+// Constants
+const HIGHLIGHT_DURATION = 2000;
+const LOADING_DELAY = 300;
+const SCROLL_DELAY = 200;
+
+// Storage utility functions
+const storageUtils = {
+    getGuestReadingData: () => {
+        try {
+            const raw = localStorage.getItem('guest_reading') || '{}';
+            return JSON.parse(raw);
+        } catch {
+            return {};
+        }
+    },
+
+    updateGuestCompletion: (readingId, score, totalQuestions) => {
+        try {
+            const data = storageUtils.getGuestReadingData();
+            const completedReadings = data?.completed_readings || {};
+            const current = completedReadings[readingId];
+
+            const isNewOrBetter = !current || current.bestScore < score;
+
+            completedReadings[readingId] = {
+                completed: true,
+                bestScore: isNewOrBetter ? score : current.bestScore,
+                totalQuestions: isNewOrBetter ? totalQuestions : current.totalQuestions,
+                totalAttempts: (current?.totalAttempts || 0) + 1,
+            };
+
+            localStorage.setItem('guest_reading', JSON.stringify({
+                ...data,
+                completed_readings: completedReadings
+            }));
+
+            window.dispatchEvent(new Event('reading-completion-changed'));
+        } catch (error) {
+            console.error('Failed to update guest completion:', error);
+        }
+    }
+};
+
+// Score calculation helper
+const calculateQuestionScore = (question, userAnswer, readingId) => {
+    if (!userAnswer) return 0;
+
+    const { type } = question;
+
+    switch (type) {
+        case 'multiple_choice':
+        case 'true_false':
+        case 'true_false_not_given':
+        case 'yes_no_not_given':
+            return checkAnswer(question, userAnswer, readingId) ? 1 : 0;
+
+        case 'multiple_choice_multiple':
+            if (!Array.isArray(userAnswer)) return 0;
+            const correctAnswers = getCorrectAnswerTextForScoring(question, readingId);
+            if (!Array.isArray(correctAnswers)) return 0;
+            return userAnswer.filter(ans =>
+                correctAnswers.some(correct =>
+                    normalizeText(ans) === normalizeText(correct)
+                )
+            ).length;
+
+        case 'matching_headings':
+        case 'matching_information':
+        case 'matching_features':
+            if (typeof userAnswer !== 'object' || userAnswer === null) return 0;
+            return countMatchingAnswers(userAnswer, getCorrectAnswerTextForScoring(question, readingId));
+
+        case 'short_answer':
+            if (question.instruction && Array.isArray(question.questions)) {
+                return countCompletionAnswers(userAnswer, getCorrectAnswerTextForScoring(question, readingId));
+            }
+            return checkAnswer(question, userAnswer, readingId) ? 1 : 0;
+
+        case 'sentence_completion':
+        case 'summary_completion':
+        case 'table_completion':
+        case 'flow_chart_completion':
+        case 'note_completion':
+        case 'diagram_labelling':
+            if (typeof userAnswer !== 'object' || userAnswer === null) return 0;
+            return countCompletionAnswers(userAnswer, getCorrectAnswerTextForScoring(question, readingId));
+
+        default:
+            return checkAnswer(question, userAnswer, readingId) ? getQuestionAnswerCount(question) : 0;
+    }
+};
+
+// Helper for matching questions
+const countMatchingAnswers = (userAnswers, correctAnswers) => {
+    return Object.entries(userAnswers).filter(([key, value]) => {
+        const correctValue = correctAnswers[key];
+        if (!correctValue) return false;
+
+        const userVal = typeof value === 'string' ? value.trim() : String(value || '');
+        const token = typeof correctValue === 'string'
+            ? String(correctValue).replace(/\./g, '').trim()
+            : String(correctValue);
+
+        const isRoman = /^[ivxlcdm]+$/i.test(token);
+        const isSingleLetter = /^[A-Za-z]$/.test(token);
+
+        if ((isRoman || isSingleLetter) && userVal) {
+            const trailing = userVal.match(/([A-Za-z]|[ivxlcdm]{1,4})\.?$/i)?.[1];
+            const leading = userVal.match(/^([A-Za-z]|[ivxlcdm]{1,4})\.?/i)?.[1];
+            const extracted = (trailing || leading || '').toString().trim();
+
+            if (extracted) {
+                return normalizeText(extracted) === normalizeText(token);
+            }
+        }
+
+        return normalizeText(userVal) === normalizeText(String(correctValue));
+    }).length;
+};
+
+// Helper for completion questions
+const countCompletionAnswers = (userAnswers, correctAnswers) => {
+    return Object.entries(userAnswers || {}).filter(([key, value]) => {
+        const correctValue = correctAnswers[key];
+        return correctValue && checkAnswerVariants(value, correctValue);
+    }).length;
+};
+
+export const useReadingState = (readingExercise, difficulty, id, externalStartTime = null) => {
+    const { isAuthenticated } = useUser();
+    const { queueReadingCompletionUpdate, upsertReadingBestResult } = useUserDataMirror();
+    const router = useRouter();
+    const { setIsLoading } = useLoading();
+
+    // Refs
+    const startTimeRef = useRef(externalStartTime || Date.now());
+    const timeoutRefs = useRef(new Set());
+
+    // Core state
+    const [readingData, setReadingData] = useState(null);
+    const [userAnswers, setUserAnswers] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // UI state
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showResults, setShowResults] = useState(false);
+    const [isReviewMode, setIsReviewMode] = useState(false);
+    const [results, setResults] = useState(null);
+    const [reviewMap, setReviewMap] = useState(null);
+    const [columnWidth, setColumnWidth] = useState(50);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    // Timer state
+    const [timerStartTime, setTimerStartTime] = useState(null);
+    const [finalTimerState, setFinalTimerState] = useState(null);
+    const [adjustedTimeLimit, setAdjustedTimeLimit] = useState(null);
+    const [isTimerPaused, setIsTimerPaused] = useState(false);
+
+    // Filter and navigation state
+    const [selectedQuestionTypes, setSelectedQuestionTypes] = useState([]);
+    const [activePassageId, setActivePassageId] = useState(1);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(false);
+
+    // Cleanup timeouts on unmount
+    useEffect(() => {
+        const timeouts = timeoutRefs.current;
+        return () => {
+            timeouts.forEach(clearTimeout);
+            timeouts.clear();
+        };
+    }, []);
+
+    // Timeout manager
+    const createTimeout = useCallback((callback, delay) => {
+        const timeoutId = setTimeout(() => {
+            timeoutRefs.current.delete(timeoutId);
+            callback();
+        }, delay);
+        timeoutRefs.current.add(timeoutId);
+        return timeoutId;
+    }, []);
+
+    // Detect multi-passage format
+    const isMultiPassage = useMemo(() =>
+        readingExercise?.passages?.length > 1,
+        [readingExercise]
+    );
+
+    // Process reading data
+    const processedReadingData = useMemo(() => {
+        if (!readingExercise) return null;
+
+        const baseData = {
+            id: parseInt(id),
+            level: difficulty,
+            title: readingExercise.title,
+            metadata: {
+                timeLimit: readingExercise.metadata?.timeLimit,
+                skills: readingExercise.metadata?.skills
+            }
+        };
+
+        if (isMultiPassage) {
+            return {
+                ...baseData,
+                topic: readingExercise.topic,
+                total_questions: readingExercise.total_questions,
+                total_passages: readingExercise.total_passages,
+                passages: readingExercise.passages,
+                questions: readingExercise.passages.flatMap(p => p.questions || []),
+                isMultiPassage: true
+            };
+        }
+
+        return {
+            ...baseData,
+            passage: readingExercise.passage,
+            questions: readingExercise.questions,
+            isMultiPassage: false
+        };
+    }, [id, difficulty, readingExercise, isMultiPassage]);
+
+    // All questions
+    const allQuestions = useMemo(() => {
+        if (!readingData) return [];
+        return readingData.isMultiPassage
+            ? readingData.passages?.flatMap(p => p.questions || []) || []
+            : readingData.questions || [];
+    }, [readingData]);
+
+    // Individual answer slots
+    const allAnswersData = useMemo(() => {
+        if (!allQuestions.length) {
+            return { questionsWithAnswerCounts: [], totalAnswers: 0, individualAnswerSlots: [] };
+        }
+
+        const questionsWithAnswerCounts = allQuestions.map(q => ({
+            ...q,
+            answerCount: getQuestionAnswerCount(q)
+        }));
+
+        const totalAnswers = questionsWithAnswerCounts.reduce((sum, q) => sum + q.answerCount, 0);
+        const individualAnswerSlots = [];
+        let sequentialIndex = 1;
+
+        questionsWithAnswerCounts.forEach(question => {
+            for (let i = 0; i < question.answerCount; i++) {
+                individualAnswerSlots.push({
+                    sequentialNumber: sequentialIndex++,
+                    questionId: question.id,
+                    questionType: question.type,
+                    answerIndex: i,
+                    isAnswered: false
+                });
+            }
+        });
+
+        return { questionsWithAnswerCounts, totalAnswers, individualAnswerSlots };
+    }, [allQuestions]);
+
+    // Question ranges for navigation
+    const questionRanges = useMemo(() => {
+        const ranges = {};
+        allAnswersData.individualAnswerSlots.forEach(slot => {
+            if (slot.questionId !== -1) {
+                if (!ranges[slot.questionId]) {
+                    ranges[slot.questionId] = {
+                        start: slot.sequentialNumber,
+                        end: slot.sequentialNumber
+                    };
+                } else {
+                    ranges[slot.questionId].end = slot.sequentialNumber;
+                }
+            }
+        });
+        return ranges;
+    }, [allAnswersData.individualAnswerSlots]);
+
+    // Visible passages
+    const visiblePassages = useMemo(() => {
+        if (!readingData?.isMultiPassage || !readingData.passages) return [];
+        if (!selectedQuestionTypes?.length) return readingData.passages;
+        return readingData.passages.filter(passage =>
+            passage?.questions?.some(q => selectedQuestionTypes.includes(q.type))
+        );
+    }, [readingData, selectedQuestionTypes]);
+
+    // Current passage
+    const currentPassage = useMemo(() => {
+        if (!readingData?.isMultiPassage || !readingData.passages) return null;
+        const sourcePassages = selectedQuestionTypes?.length ? visiblePassages : readingData.passages;
+        if (!sourcePassages?.length) return null;
+        return sourcePassages.find(p => p.passage_id === activePassageId) || sourcePassages[0];
+    }, [readingData, activePassageId, selectedQuestionTypes, visiblePassages]);
+
+    // Current passage questions
+    const currentPassageQuestions = useMemo(() => {
+        if (!readingData) return [];
+        return readingData.isMultiPassage
+            ? (currentPassage?.questions || [])
+            : (readingData.questions || []);
+    }, [readingData, currentPassage]);
+
+    // Filtered questions (current passage)
+    const filteredQuestions = useMemo(() => {
+        if (!currentPassageQuestions.length) return [];
+        return selectedQuestionTypes.length === 0
+            ? currentPassageQuestions
+            : currentPassageQuestions.filter(q => selectedQuestionTypes.includes(q.type));
+    }, [currentPassageQuestions, selectedQuestionTypes]);
+
+    // Filtered questions (all passages)
+    const filteredQuestionsGlobal = useMemo(() => {
+        if (!allQuestions.length) return [];
+        return selectedQuestionTypes.length === 0
+            ? allQuestions
+            : allQuestions.filter(q => selectedQuestionTypes.includes(q.type));
+    }, [allQuestions, selectedQuestionTypes]);
+
+    // Grouped questions
+    const groupedQuestions = useMemo(() =>
+        groupQuestionsByType(filteredQuestions),
+        [filteredQuestions]
+    );
+
+    // Answer counts
+    const answerCounts = useMemo(() => {
+        const counts = {
+            totalAnsweredCount: 0,
+            currentPassageAnsweredCount: 0,
+            filteredGlobalAnsweredCount: 0
+        };
+
+        allQuestions.forEach(question => {
+            const answer = userAnswers[question.id];
+            counts.totalAnsweredCount += getProvidedAnswerCount(answer, question);
+        });
+
+        filteredQuestions.forEach(question => {
+            const answer = userAnswers[question.id];
+            counts.currentPassageAnsweredCount += getProvidedAnswerCount(answer, question);
+        });
+
+        filteredQuestionsGlobal.forEach(question => {
+            const answer = userAnswers[question.id];
+            counts.filteredGlobalAnsweredCount += getProvidedAnswerCount(answer, question);
+        });
+
+        const totalQuestions = filteredQuestions.reduce(
+            (sum, q) => sum + getQuestionAnswerCount(q), 0
+        );
+
+        const filteredGlobalTotalQuestions = filteredQuestionsGlobal.reduce(
+            (sum, q) => sum + getQuestionAnswerCount(q), 0
+        );
+
+        return {
+            ...counts,
+            answeredCount: counts.currentPassageAnsweredCount,
+            totalQuestions,
+            totalAllQuestions: allAnswersData.individualAnswerSlots.length,
+            allQuestionsAnswered: counts.totalAnsweredCount === allAnswersData.totalAnswers && allAnswersData.totalAnswers > 0,
+            currentPassageCompleted: counts.currentPassageAnsweredCount === totalQuestions && totalQuestions > 0,
+            filteredGlobalTotalQuestions
+        };
+    }, [userAnswers, allQuestions, filteredQuestions, filteredQuestionsGlobal, allAnswersData]);
+
+    // Question sequence mapping
+    const questionSequenceMap = useMemo(() => {
+        const toSequential = new Map();
+        const toActual = new Map();
+
+        allQuestions.forEach((question, index) => {
+            const sequentialNumber = index + 1;
+            toSequential.set(question.id, sequentialNumber);
+            toActual.set(sequentialNumber, question.id);
+        });
+
+        return { toSequential, toActual };
+    }, [allQuestions]);
+
+    // Passage content
+    const passageContent = useMemo(() => {
+        const text = readingData?.isMultiPassage ? currentPassage?.text : readingData?.passage;
+        const title = readingData?.isMultiPassage
+            ? (currentPassage?.title || readingData.title)
+            : readingData?.title;
+
+        const wordCount = text
+            ? text.trim().split(/\s+/).filter(word => word.length > 0).length
+            : 0;
+
+        return {
+            text,
+            title,
+            wordCount,
+            paragraphs: text?.split('\n\n') || []
+        };
+    }, [readingData, currentPassage]);
+
+    // Load reading data
+    const loadReadingData = useCallback(() => {
+        try {
+            if (!processedReadingData) {
+                console.warn('⚠️ loadReadingData: processedReadingData is null/undefined');
+                return;
+            }
+
+            const questionsCount = processedReadingData.questions?.length || 0;
+            if (questionsCount === 0) {
+                console.warn('⚠️ loadReadingData: processedReadingData has no questions', {
+                    passageId: processedReadingData.id,
+                    title: processedReadingData.title
+                });
+            }
+
+            setLoading(true);
+            setReadingData(processedReadingData);
+
+            const currentTime = externalStartTime || Date.now();
+            startTimeRef.current = currentTime;
+            setTimerStartTime(currentTime);
+            setLoading(false);
+        } catch (error) {
+            setError(error.message);
+            setLoading(false);
+        }
+    }, [processedReadingData, externalStartTime]);
+
+    // Calculate results
+    const calculateResults = useCallback(() => {
+        const questionsToScore = selectedQuestionTypes.length === 0
+            ? allQuestions
+            : filteredQuestionsGlobal;
+
+        if (!questionsToScore.length) return null;
+
+        try {
+            const endTime = Date.now();
+            const timeTakenMs = endTime - startTimeRef.current;
+            const timeTakenMinutes = Math.floor(timeTakenMs / 60000);
+            const timeTakenSeconds = Math.floor((timeTakenMs % 60000) / 1000);
+
+            const totalIndividualAnswers = questionsToScore.reduce(
+                (sum, q) => sum + getQuestionAnswerCount(q), 0
+            );
+
+            let correctIndividualAnswers = 0;
+            let providedIndividualAnswers = 0;
+
+            const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
+            const readingId = isAdvancedReading ? readingData?.id : null;
+
+            for (const question of questionsToScore) {
+                const userAnswer = userAnswers[question.id];
+                const providedCount = getProvidedAnswerCount(userAnswer, question);
+
+                providedIndividualAnswers += providedCount;
+
+                if (userAnswer && providedCount > 0) {
+                    correctIndividualAnswers += calculateQuestionScore(question, userAnswer, readingId);
+                }
+            }
+
+            const skipped = totalIndividualAnswers - providedIndividualAnswers;
+
+            return {
+                totalQuestions: totalIndividualAnswers,
+                correctAnswers: correctIndividualAnswers,
+                answered: providedIndividualAnswers,
+                skipped,
+                percentageCorrect: totalIndividualAnswers > 0
+                    ? (correctIndividualAnswers / totalIndividualAnswers) * 100
+                    : 0,
+                timeTaken: `${timeTakenMinutes}m ${timeTakenSeconds}s`,
+            };
+        } catch (error) {
+            console.error('Error calculating results:', error);
+            return null;
+        }
+    }, [allQuestions, filteredQuestionsGlobal, selectedQuestionTypes, userAnswers, readingData?.id, difficulty]);
+
+    // Mark completion helper
+    const markCompletion = useCallback(async (readingIdStr, score, totalQuestions) => {
+        try {
+            if (isAuthenticated) {
+                await queueReadingCompletionUpdate(readingIdStr, { priority: 'high' });
+                await upsertReadingBestResult(readingIdStr, score, totalQuestions);
+            } else {
+                storageUtils.updateGuestCompletion(readingIdStr, score, totalQuestions);
+            }
+        } catch (error) {
+            console.error('Failed to mark completion:', error);
+        }
+    }, [isAuthenticated, queueReadingCompletionUpdate, upsertReadingBestResult]);
+
+    // Submit handler
+    const handleSubmit = useCallback(async () => {
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+
+        // Preserve timer state
+        const currentTimeLimit = adjustedTimeLimit || readingData?.metadata?.timeLimit;
+        if (currentTimeLimit && timerStartTime) {
+            const elapsedSeconds = Math.floor((Date.now() - timerStartTime) / 1000);
+            const totalSeconds = currentTimeLimit * 60;
+            const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+            setFinalTimerState(remainingSeconds);
+        }
+
+        try {
+            const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
+            const readingIdStr = String(id);
+
+            if (isAdvancedReading && readingData?.id) {
+                // Server-side validation
+                const res = await fetch(`/api/practice/reading/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    cache: 'no-store',
+                    body: JSON.stringify({ readingId: readingData.id, answers: userAnswers }),
+                });
+
+                if (!res.ok) throw new Error('Failed to validate answers');
+                const payload = await res.json();
+
+                // Compute local stats
+                const questionsToScore = selectedQuestionTypes.length === 0
+                    ? allQuestions
+                    : filteredQuestionsGlobal;
+
+                const totalIndividualAnswers = questionsToScore.reduce(
+                    (sum, q) => sum + getQuestionAnswerCount(q), 0
+                );
+
+                let providedIndividualAnswers = 0;
+                for (const q of questionsToScore) {
+                    providedIndividualAnswers += getProvidedAnswerCount(userAnswers[q.id], q);
+                }
+
+                const endTime = Date.now();
+                const timeTakenMs = endTime - (timerStartTime || endTime);
+                const timeTakenMinutes = Math.floor(timeTakenMs / 60000);
+                const timeTakenSeconds = Math.floor((timeTakenMs % 60000) / 1000);
+
+                setResults({
+                    totalQuestions: payload.total,
+                    correctAnswers: payload.correctCount,
+                    answered: providedIndividualAnswers,
+                    skipped: Math.max(0, totalIndividualAnswers - providedIndividualAnswers),
+                    percentageCorrect: payload.score,
+                    timeTaken: `${timeTakenMinutes}m ${timeTakenSeconds}s`,
+                    reviewToken: payload.reviewToken || null,
+                });
+                setShowResults(true);
+
+                await markCompletion(readingIdStr, payload.score, payload.total);
+            } else {
+                // Basic levels: local calculation
+                const calculatedResults = calculateResults();
+                setResults(calculatedResults);
+                setShowResults(true);
+
+                if (calculatedResults) {
+                    await markCompletion(
+                        readingIdStr,
+                        calculatedResults.percentageCorrect,
+                        calculatedResults.totalQuestions
+                    );
+                }
+            }
+        } catch (error) {
+            setError(error.message || 'Failed to submit answers');
+            setIsSubmitting(false);
+        }
+    }, [
+        isSubmitting, adjustedTimeLimit, readingData, timerStartTime, difficulty,
+        userAnswers, selectedQuestionTypes, allQuestions, filteredQuestionsGlobal,
+        calculateResults, markCompletion, id
+    ]);
+
+    // Timer callback
+    const handleTimeUp = useCallback(() => {
+        setFinalTimerState(0);
+        handleSubmit();
+    }, [handleSubmit]);
+
+    // Review mode handler
+    const handleReview = useCallback(async () => {
+        setIsReviewMode(true);
+        setIsSubmitting(false);
+        setShowResults(false);
+
+        try {
+            const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
+
+            if (isAdvancedReading) {
+                setActivePassageId(1);
+
+                if (readingData?.id) {
+                    const headers = results?.reviewToken
+                        ? { 'x-review-token': results.reviewToken }
+                        : {};
+
+                    const res = await fetch(
+                        `/api/practice/reading/review/${readingData.id}`,
+                        { headers, cache: 'no-store' }
+                    );
+
+                    if (res.ok) {
+                        const review = await res.json();
+                        setReviewMap(review?.answers || null);
+                    } else {
+                        setError(`Review fetch failed (${res.status}). Please resubmit to review answers.`);
+                    }
+                }
+            }
+        } catch (error) {
+            setError('Unable to load review data. Please try again.');
+        }
+    }, [difficulty, readingData?.id, results?.reviewToken]);
+
+    // Retry handler
+    const handleRetry = useCallback(() => {
+        // Clear timeouts
+        timeoutRefs.current.forEach(clearTimeout);
+        timeoutRefs.current.clear();
+
+        // Reset all state
+        setUserAnswers({});
+        setResults(null);
+        setShowResults(false);
+        setIsSubmitting(false);
+        setIsReviewMode(false);
+        setReviewMap(null);
+        setError(null);
+        setFinalTimerState(null);
+        setIsTimerPaused(false);
+        setSelectedQuestionTypes([]);
+        setAdjustedTimeLimit(null);
+
+        // Reset timer
+        const currentTime = Date.now();
+        startTimeRef.current = currentTime;
+        setTimerStartTime(currentTime);
+
+        // Force re-render
+        setLoading(true);
+        createTimeout(() => {
+            setLoading(false);
+            if (processedReadingData) {
+                setReadingData(processedReadingData);
+            }
+        }, LOADING_DELAY);
+    }, [processedReadingData, createTimeout]);
+
+    // Answer change handler
+    const handleAnswerChange = useCallback((questionId, answer) => {
+        setUserAnswers(prev => {
+            if (prev[questionId] === answer) return prev;
+            return { ...prev, [questionId]: answer };
+        });
+    }, []);
+
+    // Back handler
+    const handleBack = useCallback(() => {
+        setIsLoading(true);
+        router.back();
+    }, [router, setIsLoading]);
+
+    // Scroll to question
+    const scrollToQuestion = useCallback((questionId, blankId = null) => {
+        const questionsContent = document.querySelector('.questions-content');
+        if (!questionsContent) return;
+
+        let targetElement = null;
+
+        if (blankId) {
+            targetElement = questionsContent.querySelector(
+                `[data-question-id="${questionId}"][data-blank-id="${blankId}"]`
+            );
+        }
+
+        if (!targetElement) {
+            targetElement = questionsContent.querySelector(`[data-question-id="${questionId}"]`);
+        }
+
+        if (!targetElement) return;
+
+        const isFullScreenMode = document.querySelector('.fullscreen-questions') !== null;
+
+        if (isFullScreenMode) {
+            const containerRect = questionsContent.getBoundingClientRect();
+            const elementRect = targetElement.getBoundingClientRect();
+            const scrollTop = questionsContent.scrollTop +
+                (elementRect.top - containerRect.top) -
+                (containerRect.height / 2) +
+                (elementRect.height / 2);
+
+            questionsContent.scrollTo({ top: scrollTop, behavior: 'smooth' });
+        } else {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Highlight effect
+        targetElement.classList.add('highlight-question');
+        createTimeout(() => {
+            targetElement.classList.remove('highlight-question');
+        }, HIGHLIGHT_DURATION);
+    }, [createTimeout]);
+
+    // Extract blank ID helper
+    const extractBlankId = useCallback((answerSlot) => {
+        if (answerSlot.questionType !== 'note_completion' || !answerSlot.question) {
+            return null;
+        }
+
+        let blankIndex = 0;
+        for (const note of answerSlot.question.notes) {
+            const blankMatches = note.match(/(?:___(\d+)___|(\d+)\.{2,})/g) || [];
+            for (const match of blankMatches) {
+                if (blankIndex === answerSlot.answerIndex) {
+                    const numberMatch = match.match(/(\d+)/);
+                    return numberMatch ? numberMatch[1] : null;
+                }
+                blankIndex++;
+            }
+        }
+        return null;
+    }, []);
+
+    // Question click handler
+    const handleQuestionClick = useCallback((questionIdOrAnswerSlot, blankId = null) => {
+        let questionId = questionIdOrAnswerSlot;
+        let actualBlankId = blankId;
+
+        // Handle answerSlot object format
+        if (typeof questionIdOrAnswerSlot === 'object' && questionIdOrAnswerSlot.questionId) {
+            const answerSlot = questionIdOrAnswerSlot;
+            questionId = answerSlot.questionId;
+            actualBlankId = extractBlankId(answerSlot);
+        }
+
+        const targetQuestion = allQuestions.find(q => q.id === questionId);
+        if (!targetQuestion) return;
+
+        // Handle multi-passage navigation
+        if (readingData?.isMultiPassage) {
+            const questionPassage = readingData.passages?.find(passage =>
+                passage.questions?.some(q => q.id === questionId)
+            );
+
+            if (questionPassage && questionPassage.passage_id !== activePassageId) {
+                setActivePassageId(questionPassage.passage_id);
+                createTimeout(() => scrollToQuestion(questionId, actualBlankId), SCROLL_DELAY);
+                return;
+            }
+        }
+
+        // Check question visibility
+        const questionsToCheck = isFullScreen ? allQuestions : filteredQuestions;
+        const isQuestionVisible = questionsToCheck.some(q => q.id === questionId);
+
+        if (!isQuestionVisible && selectedQuestionTypes.length > 0 &&
+            !selectedQuestionTypes.includes(targetQuestion.type)) {
+            setSelectedQuestionTypes([]);
+            createTimeout(() => scrollToQuestion(questionId, actualBlankId), SCROLL_DELAY);
+            return;
+        }
+
+        scrollToQuestion(questionId, actualBlankId);
+    }, [
+        allQuestions, readingData, activePassageId, selectedQuestionTypes,
+        filteredQuestions, scrollToQuestion, isFullScreen, createTimeout, extractBlankId
+    ]);
+
+    // Question type filter handler
+    const handleQuestionTypeFilter = useCallback((selectedTypes) => {
+        setSelectedQuestionTypes(selectedTypes);
+
+        if (selectedTypes.length > 0) {
+            const filteredQuestionIds = new Set(
+                readingData?.questions
+                    ?.filter(q => selectedTypes.includes(q.type))
+                    ?.map(q => q.id) || []
+            );
+
+            setUserAnswers(prev => {
+                const newAnswers = {};
+                Object.entries(prev).forEach(([questionId, answer]) => {
+                    if (filteredQuestionIds.has(parseInt(questionId))) {
+                        newAnswers[questionId] = answer;
+                    }
+                });
+                return newAnswers;
+            });
+
+            // Multi-passage navigation
+            if (readingData?.isMultiPassage && Array.isArray(readingData.passages)) {
+                const activeHasMatch = readingData.passages
+                    .find(p => p.passage_id === activePassageId)
+                    ?.questions?.some(q => selectedTypes.includes(q.type));
+
+                if (!activeHasMatch) {
+                    const firstMatchingPassage = readingData.passages.find(p =>
+                        p.questions?.some(q => selectedTypes.includes(q.type))
+                    );
+                    if (firstMatchingPassage) {
+                        setActivePassageId(firstMatchingPassage.passage_id);
+                    }
+                }
+            }
+        }
+    }, [readingData, activePassageId]);
+
+    // Time adjustment handler
+    const handleTimeAdjustment = useCallback((newTimeLimit) => {
+        setAdjustedTimeLimit(newTimeLimit);
+    }, []);
+
+    // Timer pause handler
+    const setTimerPaused = useCallback((paused) => {
+        setIsTimerPaused(paused);
+    }, []);
+
+    // Passage change handler
+    const handlePassageChange = useCallback((passageId) => {
+        setActivePassageId(passageId);
+
+        const passageSection = document.querySelector('.passage-content');
+        if (passageSection) {
+            passageSection.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, []);
+
+    // Horizontal scroll handler
+    const handleScrollDots = useCallback((direction) => {
+        const container = document.querySelector('.question-dots');
+        if (container) {
+            const scrollAmount = container.clientWidth * 0.8;
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }, []);
+
+    return {
+        // State
+        readingData,
+        userAnswers,
+        isSubmitting,
+        showResults,
+        isReviewMode,
+        results,
+        loading,
+        error,
+        columnWidth,
+        isFullScreen,
+        timerStartTime,
+        finalTimerState,
+        selectedQuestionTypes,
+        adjustedTimeLimit,
+        isTimerPaused,
+        activePassageId,
+        showLeftArrow,
+        showRightArrow,
+        reviewMap,
+
+        // Computed values
+        isMultiPassage,
+        processedReadingData,
+        currentPassage,
+        allQuestions,
+        allAnswersData,
+        questionRanges,
+        currentPassageQuestions,
+        filteredQuestions,
+        filteredQuestionsGlobal,
+        groupedQuestions,
+        questionSequenceMap,
+        visiblePassages,
+
+        // Answer counts
+        totalAnsweredCount: answerCounts.totalAnsweredCount,
+        answeredCount: answerCounts.answeredCount,
+        totalQuestions: answerCounts.totalQuestions,
+        totalAllQuestions: answerCounts.totalAllQuestions,
+        allQuestionsAnswered: answerCounts.allQuestionsAnswered,
+        currentPassageCompleted: answerCounts.currentPassageCompleted,
+        filteredGlobalAnsweredCount: answerCounts.filteredGlobalAnsweredCount,
+        filteredGlobalTotalQuestions: answerCounts.filteredGlobalTotalQuestions,
+
+        // Submit state
+        canSubmit: selectedQuestionTypes.length === 0
+            ? answerCounts.allQuestionsAnswered
+            : (answerCounts.filteredGlobalTotalQuestions > 0 &&
+                answerCounts.filteredGlobalAnsweredCount === answerCounts.filteredGlobalTotalQuestions),
+        submitAnsweredCount: selectedQuestionTypes.length === 0
+            ? answerCounts.totalAnsweredCount
+            : answerCounts.filteredGlobalAnsweredCount,
+        submitTotalCount: selectedQuestionTypes.length === 0
+            ? allAnswersData.totalAnswers
+            : answerCounts.filteredGlobalTotalQuestions,
+
+        // Passage content
+        passageParagraphs: passageContent.paragraphs,
+        wordCount: passageContent.wordCount,
+        passageTitle: passageContent.title,
+
+        // Actions
+        loadReadingData,
+        calculateResults,
+        handleSubmit,
+        handleTimeUp,
+        handleReview,
+        handleRetry,
+        handleAnswerChange,
+        handleBack,
+        scrollToQuestion,
+        handleQuestionClick,
+        handleQuestionTypeFilter,
+        handleTimeAdjustment,
+        handlePassageChange,
+        handleScrollDots,
+        setTimerPaused,
+
+        // Setters
+        setReadingData,
+        setUserAnswers,
+        setIsSubmitting,
+        setShowResults,
+        setIsReviewMode,
+        setResults,
+        setLoading,
+        setError,
+        setColumnWidth,
+        setIsFullScreen,
+        setTimerStartTime,
+        setFinalTimerState,
+        setSelectedQuestionTypes,
+        setAdjustedTimeLimit,
+        setActivePassageId,
+        setShowLeftArrow,
+        setShowRightArrow,
+    };
+};

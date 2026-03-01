@@ -1,0 +1,1339 @@
+{
+    "id": "cambridge-19",
+    "tests": [
+        {
+            "id": 1,
+            "name": "Country Parks & Community Connections",
+            "type": "LISTENING",
+            "parts": [
+                {
+                    "part": 1,
+                    "questionRange": "1-10",
+                    "instruction": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
+                    "context": "Hinchingbrooke Country Park",
+                    "questions": [
+                        {
+                            "number": 1,
+                            "text": "Area: 1 _________ hectares",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 2,
+                            "text": "Wetland: lakes, ponds and a 2 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 3,
+                            "text": "Science: Children look at 3 _________ about plants, etc.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 4,
+                            "text": "Geography: includes learning to use a 4 _________ and compass",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 5,
+                            "text": "Leisure and tourism: mostly concentrates on the park's 5 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 6,
+                            "text": "Music: Children make 6 _________ with natural materials, and experiment with rhythm and speed.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 7,
+                            "text": "They give children a feeling of 7 _________ that they may not have elsewhere.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 8,
+                            "text": "Children learn new 8 _________ and gain self-confidence.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 9,
+                            "text": "Cost per child: 9 £_________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 10,
+                            "text": "Adults, such as 10 _________, free",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                },
+                {
+                    "part": 2,
+                    "questions": "11-20",
+                    "sections": [
+                        {
+                            "questionRange": "11-15",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "context": "Stanthorpe Twinning Association",
+                            "questions": [
+                                {
+                                    "number": 11,
+                                    "text": "During the visit to Malatte, in France, members especially enjoyed",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) going to a theme park.",
+                                        "B) experiencing a river trip.",
+                                        "C) visiting a cheese factory."
+                                    ]
+                                },
+                                {
+                                    "number": 12,
+                                    "text": "What will happen in Stanthorpe to mark the 25th anniversary of the Twinning Association?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) A tree will be planted.",
+                                        "B) A garden seat will be bought.",
+                                        "C) A footbridge will be built."
+                                    ]
+                                },
+                                {
+                                    "number": 13,
+                                    "text": "Which event raised most funds this year?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) the film show",
+                                        "B) the pancake evening",
+                                        "C) the cookery demonstration"
+                                    ]
+                                },
+                                {
+                                    "number": 14,
+                                    "text": "For the first evening with the French visitors host families are advised to",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) take them for a walk round the town.",
+                                        "B) go to a local restaurant.",
+                                        "C) have a meal at home."
+                                    ]
+                                },
+                                {
+                                    "number": 15,
+                                    "text": "On Saturday evening there will be the chance to",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) listen to a concert.",
+                                        "B) watch a match.",
+                                        "C) take part in a competition."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "16-20",
+                            "instruction": "Label the map below. Write the correct letter, A-H, next to Questions 16-20.",
+                            "context": "Farley House",
+                            "imageLocalUrl": "/images/practice/listening/test-1-image.webp",
+                            "questions": [
+                                {
+                                    "number": 16,
+                                    "text": "Farm shop",
+                                    "type": "map_labeling"
+                                },
+                                {
+                                    "number": 17,
+                                    "text": "Disabled entry",
+                                    "type": "map_labeling"
+                                },
+                                {
+                                    "number": 18,
+                                    "text": "Adventure playground",
+                                    "type": "map_labeling"
+                                },
+                                {
+                                    "number": 19,
+                                    "text": "Kitchen gardens",
+                                    "type": "map_labeling"
+                                },
+                                {
+                                    "number": 20,
+                                    "text": "The Temple of the Four Winds",
+                                    "type": "map_labeling"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 3,
+                    "questions": "21-30",
+                    "sections": [
+                        {
+                            "questions": "21-22",
+                            "instruction": "Choose TWO letters, A-E. Which TWO things did Colin find most satisfying about his bread reuse project?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) receiving support from local restaurants",
+                                "B) finding a good way to prevent waste",
+                                "C) overcoming problems in a basic process",
+                                "D) experimenting with designs and colours",
+                                "E) learning how to apply 3-D printing"
+                            ]
+                        },
+                        {
+                            "questionRange": "23-24",
+                            "instruction": "Choose TWO letters, A-E. Which TWO ways do the students agree that touch-sensitive sensors for food labels could be developed in future?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) for use on medical products",
+                                "B) to show that food is no longer fit to eat",
+                                "C) for use with drinks as well as foods",
+                                "D) to provide applications for blind people",
+                                "E) to indicate the weight of certain foods"
+                            ]
+                        },
+                        {
+                            "questionRange": "25-30",
+                            "instruction": "What is the students' opinion about each of the following food trends? Choose SIX answers from the box and write the correct letter, A-H, next to Questions 25-30.",
+                            "options_box": [
+                                "A) This is only relevant to young people.",
+                                "B) This may have disappointing results.",
+                                "C) This already seems to be widespread.",
+                                "D) Retailers should do more to encourage this.",
+                                "E) More financial support is needed for this.",
+                                "F) Most people know little about this.",
+                                "G) There should be stricter regulations about this.",
+                                "H) This could be dangerous."
+                            ],
+                            "questions": [
+                                {
+                                    "number": 25,
+                                    "text": "Use of local products",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 26,
+                                    "text": "Reduction in unnecessary packaging",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 27,
+                                    "text": "Gluten-free and lactose-free food",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 28,
+                                    "text": "Use of branded products related to celebrity chefs",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 29,
+                                    "text": "Development of 'ghost kitchens' for takeaway food",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 30,
+                                    "text": "Use of mushrooms for common health concerns",
+                                    "type": "matching"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 4,
+                    "questionRange": "31-40",
+                    "instruction": "Complete the notes below. Write ONE WORD ONLY for each answer.",
+                    "context": "Ceide Fields - an important Neolithic archaeological site in the northwest of Ireland",
+                    "questions": [
+                        {
+                            "number": 31,
+                            "text": "In the 1930s, a local teacher realised that stones beneath the bog surface were once 31 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 32,
+                            "text": "His 32 _________ became an archaeologist and undertook an investigation of the site:",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 33,
+                            "text": "- a traditional method used by local people to dig for 33 _________ was used to identify where stones were located",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 34,
+                            "text": "Items are well preserved in the bog because of a lack of 34 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 35,
+                            "text": "Houses were 35 _________ in shape and had a hole in the roof.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 36,
+                            "text": "- pots used for storage and to make 36 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 37,
+                            "text": "Each field at Ceide was large enough to support a big 37 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 38,
+                            "text": "The fields were probably used to restrict the grazing of animals - no evidence of structures to house them during 38 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 39,
+                            "text": "a decline in 39 _________ quality",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 40,
+                            "text": "an increase in 40 _________",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Creative Skills & Volunteer Spirit",
+            "type": "LISTENING",
+            "parts": [
+                {
+                    "part": 1,
+                    "questionRange": "1-10",
+                    "sections": [
+                        {
+                            "questionRange": "1-6",
+                            "instruction": "Complete the form below. Write ONE WORD AND/OR A NUMBER for each answer.",
+                            "context": "Guitar Group",
+                            "questions": [
+                                {
+                                    "number": 1,
+                                    "text": "Coordinator: Gary 1 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 2,
+                                    "text": "Level: 2 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 3,
+                                    "text": "Place: the 3 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 4,
+                                    "text": "4 _________ Street",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 5,
+                                    "text": "Time: Thursday morning at 5 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 6,
+                                    "text": "Recommended website: 'The perfect 6 _________'",
+                                    "type": "fill_in_blank"
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "7-10",
+                            "instruction": "Complete the table below. Write ONE WORD ONLY for each answer.",
+                            "context": "A typical 45-minute guitar lesson",
+                            "table": {
+                                "headers": [
+                                    "Time",
+                                    "Activity",
+                                    "Notes"
+                                ],
+                                "rows": [
+                                    {
+                                        "time": "5 minutes",
+                                        "activity": "tuning guitars",
+                                        "notes": "using an app or by 7 _________"
+                                    },
+                                    {
+                                        "time": "10 minutes",
+                                        "activity": "strumming chords using our thumbs",
+                                        "notes": "keeping time while the teacher is 8 _________"
+                                    },
+                                    {
+                                        "time": "15 minutes",
+                                        "activity": "playing songs",
+                                        "notes": "often listening to a 9 _________ of a song"
+                                    },
+                                    {
+                                        "time": "10 minutes",
+                                        "activity": "playing single notes and simple tunes",
+                                        "notes": "playing together, then 10 _________"
+                                    },
+                                    {
+                                        "time": "5 minutes",
+                                        "activity": "noting things to practise at home",
+                                        "notes": ""
+                                    }
+                                ]
+                            },
+                            "questions": [
+                                {
+                                    "number": 7,
+                                    "text": "using an app or by 7 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 8,
+                                    "text": "keeping time while the teacher is 8 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 9,
+                                    "text": "often listening to a 9 _________ of a song",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 10,
+                                    "text": "playing together, then 10 _________",
+                                    "type": "fill_in_blank"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 2,
+                    "questionRange": "11-20",
+                    "sections": [
+                        {
+                            "questionRange": "11-16",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "context": "Working as a lifeboat volunteer",
+                            "questions": [
+                                {
+                                    "number": 11,
+                                    "text": "What made David leave London and move to Northsea?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) He was eager to develop a hobby.",
+                                        "B) He wanted to work shorter hours.",
+                                        "C) He found his job in website design unsatisfying."
+                                    ]
+                                },
+                                {
+                                    "number": 12,
+                                    "text": "The Lifeboat Institution in Northsea was built with money provided by",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) a local organisation.",
+                                        "B) a local resident.",
+                                        "C) the local council."
+                                    ]
+                                },
+                                {
+                                    "number": 13,
+                                    "text": "In his health assessment, the doctor was concerned about the fact that David",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) might be colour blind.",
+                                        "B) was rather short-sighted.",
+                                        "C) had undergone eye surgery."
+                                    ]
+                                },
+                                {
+                                    "number": 14,
+                                    "text": "After arriving at the lifeboat station, they aim to launch the boat within",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) five minutes.",
+                                        "B) six to eight minutes.",
+                                        "C) eight and a half minutes."
+                                    ]
+                                },
+                                {
+                                    "number": 15,
+                                    "text": "As a 'helmsman', David has the responsibility of deciding",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) who will be the members of his crew.",
+                                        "B) what equipment it will be necessary to take.",
+                                        "C) if the lifeboat should be launched."
+                                    ]
+                                },
+                                {
+                                    "number": 16,
+                                    "text": "As well as going out on the lifeboat, David",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) gives talks on safety at sea.",
+                                        "B) helps with fundraising.",
+                                        "C) recruits new volunteers."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "17-18",
+                            "instruction": "Choose TWO letters, A-E. Which TWO things does David say about the lifeboat volunteer training?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) The residential course developed his leadership skills.",
+                                "B) The training in use of ropes and knots was quite brief.",
+                                "C) The timed exercises have built up his mental strength.",
+                                "D) The casualty care activities were particularly challenging for him.",
+                                "E) The wave tank activities provided practice in survival techniques."
+                            ]
+                        },
+                        {
+                            "questionRange": "19-20",
+                            "instruction": "Choose TWO letters, A-E. Which TWO things does David find most motivating about the work he does?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) working as part of a team",
+                                "B) experiences when working in winter",
+                                "C) being thanked by those he has helped",
+                                "D) the fact that it keeps him fit",
+                                "E) the chance to develop new equipment"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 3,
+                    "questionRange": "21-30",
+                    "sections": [
+                        {
+                            "questionRange": "21-24",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "context": "Recycling footwear discussion",
+                            "questions": [
+                                {
+                                    "number": 21,
+                                    "text": "At first, Don thought the topic of recycling footwear might be too",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) limited in scope.",
+                                        "B) hard to research.",
+                                        "C) boring for listeners."
+                                    ]
+                                },
+                                {
+                                    "number": 22,
+                                    "text": "When discussing trainers, Bella and Don disagree about",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) how popular they are among young people.",
+                                        "B) how suitable they are for school.",
+                                        "C) how quickly they wear out."
+                                    ]
+                                },
+                                {
+                                    "number": 23,
+                                    "text": "Bella says that she sometimes recycles shoes because",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) they no longer fit.",
+                                        "B) she no longer likes them.",
+                                        "C) they are no longer in fashion."
+                                    ]
+                                },
+                                {
+                                    "number": 24,
+                                    "text": "What did the article say that confused Don?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) Public consumption of footwear has risen.",
+                                        "B) Less footwear is recycled now than in the past.",
+                                        "C) People dispose of more footwear than they used to."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "25-28",
+                            "instruction": "What reasons did the recycling manager give for rejecting footwear, according to the students? Choose FOUR answers from the box and write the correct letter, A-F, next to Questions 25-28.",
+                            "options_box": [
+                                "A) one shoe was missing",
+                                "B) the colour of one shoe had faded",
+                                "C) one shoe had a hole in it",
+                                "D) the shoes were brand new",
+                                "E) the shoes were too dirty",
+                                "F) the stitching on the shoes was broken"
+                            ],
+                            "questions": [
+                                {
+                                    "number": 25,
+                                    "text": "the high-heeled shoes",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 26,
+                                    "text": "the ankle boots",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 27,
+                                    "text": "the baby shoes",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 28,
+                                    "text": "the trainers",
+                                    "type": "matching"
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "29-30",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "questions": [
+                                {
+                                    "number": 29,
+                                    "text": "Why did the project to make 'new' shoes out of old shoes fail?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) People believed the 'new' pairs of shoes were unhygienic.",
+                                        "B) There were not enough good parts to use in the old shoes.",
+                                        "C) The shoes in the 'new' pairs were not completely alike."
+                                    ]
+                                },
+                                {
+                                    "number": 30,
+                                    "text": "Bella and Don agree that they can present their topic",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) from a new angle.",
+                                        "B) with relevant images.",
+                                        "C) in a straightforward way."
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 4,
+                    "questionRange": "31-40",
+                    "instruction": "Complete the notes below. Write ONE WORD ONLY for each answer.",
+                    "context": "Tardigrades",
+                    "questions": [
+                        {
+                            "number": 31,
+                            "text": "also known as water 'bears' (due to how they 31 _________) and 'moss piglets'",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 32,
+                            "text": "Physical appearance: a 32 _________ round body and four pairs of legs",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 33,
+                            "text": "claws or 33 _________ for gripping",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 34,
+                            "text": "body filled with a liquid that carries both 34 _________ and blood",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 35,
+                            "text": "mouth shaped like a 35 _________ with teeth called stylets",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 36,
+                            "text": "Habitat: very resilient and can exist in very low or high 36 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 37,
+                            "text": "Cryptobiosis: A type of 37 _________ ensures their DNA is not damaged.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 38,
+                            "text": "Research is underway to find out how many days they can stay alive in 38 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 39,
+                            "text": "Feeding: consume liquids, e.g., those found in moss or 39 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 40,
+                            "text": "Conservation status: They are not considered to be 40 _________",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Local Living & Scientific Discovery",
+            "type": "LISTENING",
+            "parts": [
+                {
+                    "part": 1,
+                    "questionRange": "1-10",
+                    "instruction": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
+                    "context": "Local food shops",
+                    "questions": [
+                        {
+                            "number": 1,
+                            "text": "Kite Place – near the 1 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 2,
+                            "text": "Fish market: cross the 2 _________ and turn right",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 3,
+                            "text": "best to go before 3 _________ pm, earlier than closing time",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 4,
+                            "text": "Organic shop: called 4 '_________'",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 5,
+                            "text": "look for the large 5 _________ outside",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 6,
+                            "text": "Supermarket: take a 6 _________ minibus, number 289",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 7,
+                            "text": "Fish market: a handful of 7 _________ (type of seaweed)",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 8,
+                            "text": "Organic shop: beans and a 8 _________ for dessert",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 9,
+                            "text": "spices and 9 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 10,
+                            "text": "Bakery: a 10 _________ tart",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                },
+                {
+                    "part": 2,
+                    "questionRange": "11-20",
+                    "sections": [
+                        {
+                            "questionRange": "11-16",
+                            "instruction": "What information is given about each of the following festival workshops? Choose SIX answers from the box and write the correct letter, A-H, next to Questions 11-16.",
+                            "context": "Festival workshops",
+                            "options": [
+                                "A) involves painting and drawing",
+                                "B) will be led by a prize-winning author",
+                                "C) is aimed at children with a disability",
+                                "D) involves a drama activity",
+                                "E) focuses on new relationships",
+                                "F) is aimed at a specific age group",
+                                "G) explores an unhappy feeling",
+                                "H) raises awareness of a particular culture"
+                            ],
+                            "questions": [
+                                {
+                                    "number": 11,
+                                    "text": "Superheroes",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 12,
+                                    "text": "Just do it",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 13,
+                                    "text": "Count on me",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 14,
+                                    "text": "Speak up",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 15,
+                                    "text": "Jump for joy",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 16,
+                                    "text": "Sticks and stones",
+                                    "type": "matching"
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "17-18",
+                            "instruction": "Choose TWO letters, A-E. Which TWO reasons does the speaker give for recommending Alive and Kicking?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) It will appeal to both boys and girls.",
+                                "B) The author is well known.",
+                                "C) It has colourful illustrations.",
+                                "D) It is funny.",
+                                "E) It deals with an important topic."
+                            ]
+                        },
+                        {
+                            "questionRange": "19-20",
+                            "instruction": "Choose TWO letters, A-E. Which TWO pieces of advice does the speaker give to parents about reading?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) Encourage children to write down new vocabulary.",
+                                "B) Allow children to listen to audio books.",
+                                "C) Get recommendations from librarians.",
+                                "D) Give children a choice about what they read.",
+                                "E) Only read aloud to children until they can read independently."
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 3,
+                    "questionRange": "21-30",
+                    "sections": [
+                        {
+                            "questionRange": "21-25",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "context": "Science experiment for Year 12 students",
+                            "questions": [
+                                {
+                                    "number": 21,
+                                    "text": "How does Clare feel about the students in her Year 12 science class?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) worried that they are not making progress",
+                                        "B) challenged by their poor behaviour in class",
+                                        "C) frustrated at their lack of interest in the subject"
+                                    ]
+                                },
+                                {
+                                    "number": 22,
+                                    "text": "How does Jake react to Clare's suggestion about an experiment based on children's diet?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) He is concerned that the results might not be meaningful.",
+                                        "B) He feels some of the data might be difficult to obtain.",
+                                        "C) He suspects that the conclusions might be upsetting."
+                                    ]
+                                },
+                                {
+                                    "number": 23,
+                                    "text": "What problem do they agree may be involved in an experiment involving animals?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) Any results may not apply to humans.",
+                                        "B) It may be complicated to get permission.",
+                                        "C) Students may not be happy about animal experiments."
+                                    ]
+                                },
+                                {
+                                    "number": 24,
+                                    "text": "What question do they decide the experiment should address?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) Are mice capable of controlling their food intake?",
+                                        "B) Does an increase in sugar lead to health problems?",
+                                        "C) How much do supplements of different kinds affect health?"
+                                    ]
+                                },
+                                {
+                                    "number": 25,
+                                    "text": "Clare might also consider doing another experiment involving",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) other types of food supplement.",
+                                        "B) different genetic strains of mice.",
+                                        "C) varying amounts of exercise."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "26-30",
+                            "instruction": "Complete the flowchart below. Choose FIVE answers from the box and write the correct letter, A-H, next to Questions 26-30. <br/> <strong>Experiment flowchart</strong> <br/> - Choose mice which are all the same 26 _________ <br/> - Divide the mice into two groups, each with a different 27 _________ <br/> - Feed group B the same, but also sugar contained in 28 _________ <br/> - Place them in a weighing chamber to prevent 29 _________ <br/> - Do all necessary 30 _________",
+                            "context": "Experiment flowchart",
+                            "options_box": [
+                                "A) size",
+                                "B) escape",
+                                "C) age",
+                                "D) water",
+                                "E) cereal",
+                                "F) calculations",
+                                "G) changes",
+                                "H) colour"
+                            ],
+                            "questions": [
+                                {
+                                    "number": 26,
+                                    "text": "Choose mice which are all the same 26 _________",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 27,
+                                    "text": "Divide the mice into two groups, each with a different 27 _________",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 28,
+                                    "text": "Feed group B the same, but also sugar contained in 28 _________",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 29,
+                                    "text": "Place them in a weighing chamber to prevent 29 _________",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 30,
+                                    "text": "Do all necessary 30 _________",
+                                    "type": "matching"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 4,
+                    "questionRange": "31-40",
+                    "instruction": "Complete the notes below. Write ONE WORD ONLY for each answer.",
+                    "context": "Microplastics",
+                    "questions": [
+                        {
+                            "number": 31,
+                            "text": "Where microplastics come from: fibres from some 31 _________ during washing",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 32,
+                            "text": "Effects of microplastics: They cause injuries to the 32 _________ of wildlife and affect their digestive systems.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 33,
+                            "text": "They enter the food chain, e.g., in bottled and tap water, 33 _________ and seafood.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 34,
+                            "text": "They may not affect human health, but they are already banned in skin cleaning products and 34 _________ in some countries.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 35,
+                            "text": "Microplastics enter the soil through the air, rain and 35 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 36,
+                            "text": "Microplastics in the soil – a study by Anglia Ruskin University: Earthworms are important because they add 36 _________ to the soil.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 37,
+                            "text": "The study aimed to discover how microplastics in earthworms affect the 37 _________ of plants.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 38,
+                            "text": "The study found that microplastics caused: 38 _________ loss in earthworms",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 39,
+                            "text": "a rise in the level of 39 _________ in the soil.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 40,
+                            "text": "The study concluded: changes to soil damage both ecosystems and 40 _________",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Work Life & Knowledge Preservation",
+            "type": "LISTENING",
+            "parts": [
+                {
+                    "part": 1,
+                    "questionRange": "1-10",
+                    "sections": [
+                        {
+                            "questionRange": "1-6",
+                            "instruction": "Complete the notes below. Write ONE WORD AND/OR A NUMBER for each answer.",
+                            "context": "First day at work",
+                            "questions": [
+                                {
+                                    "number": 1,
+                                    "text": "Name of supervisor: 1 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 2,
+                                    "text": "Where to leave coat and bag: use 2 _________ in staffroom",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 3,
+                                    "text": "See Tiffany in HR: to give 3 _________ number",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 4,
+                                    "text": "to collect 4 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 5,
+                                    "text": "Location of HR office: on 5 _________ floor",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 6,
+                                    "text": "Supervisor's mobile number: 6 _________",
+                                    "type": "fill_in_blank"
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "7-10",
+                            "instruction": "Complete the table below. Write ONE WORD ONLY for each answer.",
+                            "context": "Responsibilities",
+                            "table": {
+                                "headers": [
+                                    "Section",
+                                    "Task 1",
+                                    "Task 2",
+                                    "Notes"
+                                ],
+                                "rows": [
+                                    {
+                                        "section": "Bakery section",
+                                        "task1": "Check sell-by dates",
+                                        "task2": "Change price labels",
+                                        "notes": "Use 7 _________ labels"
+                                    },
+                                    {
+                                        "section": "Sushi takeaway counter",
+                                        "task1": "Re-stock with 8 _________",
+                                        "task2": "Wipe preparation area and clean the sink",
+                                        "notes": "Do not clean any knives"
+                                    },
+                                    {
+                                        "section": "Meat and fish counters",
+                                        "task1": "Clean the serving area, including the weighing scales",
+                                        "task2": "Collect 9 _________ for the fish from the storeroom",
+                                        "notes": "Must wear special 10 _________"
+                                    }
+                                ]
+                            },
+                            "questions": [
+                                {
+                                    "number": 7,
+                                    "text": "Use 7 _________ labels",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 8,
+                                    "text": "Re-stock with 8 _________",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 9,
+                                    "text": "Collect 9 _________ for the fish from the storeroom",
+                                    "type": "fill_in_blank"
+                                },
+                                {
+                                    "number": 10,
+                                    "text": "Must wear special 10 _________",
+                                    "type": "fill_in_blank"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 2,
+                    "questionRange": "11-20",
+                    "sections": [
+                        {
+                            "questionRange": "11-12",
+                            "instruction": "Choose TWO letters, A-E. Which TWO problems with some training programmes for new runners does Liz mention?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) There is a risk of serious injury.",
+                                "B) They are unsuitable for certain age groups.",
+                                "C) They are unsuitable for people with health issues.",
+                                "D) It is difficult to stay motivated.",
+                                "E) There is a lack of individual support."
+                            ]
+                        },
+                        {
+                            "questionRange": "13-14",
+                            "instruction": "Choose TWO letters, A-E. Which TWO tips does Liz recommend for new runners?",
+                            "type": "multiple_choice_two",
+                            "options": [
+                                "A) doing two runs a week",
+                                "B) running in the evening",
+                                "C) going on runs with a friend",
+                                "D) listening to music during runs",
+                                "E) running very slowly"
+                            ]
+                        },
+                        {
+                            "questionRange": "15-18",
+                            "instruction": "What reason prevented each of the following members of the Compton Park Runners Club from joining until recently? Write the correct letter, A, B, or C next to Questions 15-18.",
+                            "context": "Compton Park Runners Club members",
+                            "options_box": [
+                                "A) a lack of confidence",
+                                "B) a dislike of running",
+                                "C) a lack of time"
+                            ],
+                            "questions": [
+                                {
+                                    "number": 15,
+                                    "text": "Ceri",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 16,
+                                    "text": "James",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 17,
+                                    "text": "Leo",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 18,
+                                    "text": "Mark",
+                                    "type": "matching"
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "19-20",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "questions": [
+                                {
+                                    "number": 19,
+                                    "text": "What does Liz say about running her first marathon?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) It had always been her ambition.",
+                                        "B) Her husband persuaded her to do it.",
+                                        "C) She nearly gave up before the end."
+                                    ]
+                                },
+                                {
+                                    "number": 20,
+                                    "text": "Liz says new runners should sign up for a race",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) every six months.",
+                                        "B) within a few weeks of taking up running.",
+                                        "C) after completing several practice runs."
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 3,
+                    "questionRange": "21-30",
+                    "sections": [
+                        {
+                            "questionRange": "21-25",
+                            "instruction": "Choose the correct letter, A, B or C.",
+                            "context": "Discussion about Jane's grandfather's bookshop",
+                            "questions": [
+                                {
+                                    "number": 21,
+                                    "text": "Kieran thinks the packing advice given by Jane's grandfather is",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) common sense.",
+                                        "B) hard to follow.",
+                                        "C) over-protective."
+                                    ]
+                                },
+                                {
+                                    "number": 22,
+                                    "text": "How does Jane feel about the books her grandfather has given her?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) They are not worth keeping.",
+                                        "B) They should go to a collector.",
+                                        "C) They have sentimental value for her."
+                                    ]
+                                },
+                                {
+                                    "number": 23,
+                                    "text": "Jane and Kieran agree that hardback books should be",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) put out on display.",
+                                        "B) given as gifts to visitors.",
+                                        "C) more attractively designed."
+                                    ]
+                                },
+                                {
+                                    "number": 24,
+                                    "text": "While talking about taking a book from a shelf, Jane",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) describes the mistakes other people make doing it.",
+                                        "B) reflects on a significant childhood experience.",
+                                        "C) explains why some books are easier to remove than others."
+                                    ]
+                                },
+                                {
+                                    "number": 25,
+                                    "text": "What do Jane and Kieran suggest about new books?",
+                                    "type": "multiple_choice",
+                                    "options": [
+                                        "A) Their parents liked buying them as presents.",
+                                        "B) They would like to buy more of them.",
+                                        "C) Not everyone can afford them."
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "questionRange": "26-30",
+                            "instruction": "Where does Jane's grandfather keep each of the following types of books in his shop? Choose FIVE answers from the box and write the correct letter, A-G, next to Questions 26-30.",
+                            "context": "Location of books in grandfather's bookshop",
+                            "options_box": [
+                                "A) near the entrance",
+                                "B) in the attic",
+                                "C) at the back of the shop",
+                                "D) on a high shelf",
+                                "E) near the stairs",
+                                "F) in a specially designed space",
+                                "G) within the café"
+                            ],
+                            "questions": [
+                                {
+                                    "number": 26,
+                                    "text": "rare books",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 27,
+                                    "text": "children's books",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 28,
+                                    "text": "unwanted books",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 29,
+                                    "text": "requested books",
+                                    "type": "matching"
+                                },
+                                {
+                                    "number": 30,
+                                    "text": "coursebooks",
+                                    "type": "matching"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "part": 4,
+                    "questionRange": "31-40",
+                    "instruction": "Complete the notes below. Write ONE WORD ONLY for each answer.",
+                    "context": "Tree planting",
+                    "questions": [
+                        {
+                            "number": 31,
+                            "text": "Reforestation projects should: not include invasive species because of possible 31 _________ with native species",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 32,
+                            "text": "aim to capture carbon, protect the environment and provide sustainable sources of 32 _________ for local people",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 33,
+                            "text": "use tree seeds with a high genetic diversity to increase resistance to 33 _________ and climate change",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 34,
+                            "text": "plant trees on previously forested land which is in a bad condition, not select land which is being used for 34 _________",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 35,
+                            "text": "Large-scale reforestation projects: Base planning decisions on information from accurate 35 _________.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 36,
+                            "text": "Drones are useful for identifying areas in Brazil which are endangered by keeping 36 _________ and illegal logging.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 37,
+                            "text": "Lampang Province, Northern Thailand: A variety of native fig trees were planted, which are important for increasing the 37 _________ of recovery by attracting animals and birds,",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 38,
+                            "text": "e.g., 38 _________ were soon attracted to the area.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 39,
+                            "text": "Involving local communities: Destruction of mangrove forests in Madagascar made it difficult for people to make a living from 39 _________.",
+                            "type": "fill_in_blank"
+                        },
+                        {
+                            "number": 40,
+                            "text": "The mangrove reforestation project: protects against the higher risk of 40 _________.",
+                            "type": "fill_in_blank"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

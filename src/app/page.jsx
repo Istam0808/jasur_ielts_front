@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import "./student-login.scss";
 
 export default function StudentLoginPage() {
+  const router = useRouter();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -17,6 +19,7 @@ export default function StudentLoginPage() {
     }
     // Placeholder: in real app would validate and start mock test
     console.log("Student login:", { login: login.trim(), password: "***" });
+    router.push("/mock/listening");
   }
 
   return (

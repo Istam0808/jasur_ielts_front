@@ -1,0 +1,580 @@
+@use 'sass:map';
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+
+
+.practice-page {
+  position: relative;
+  padding: 0;
+}
+
+// =============================================================================
+// SECTION COMPONENTS
+// =============================================================================
+
+// Section Title Component
+.section-title {
+  @include flex(row, center, flex-start, nowrap, 0.5rem);
+
+  // Base properties
+  margin-bottom: 1.5rem;
+  color: $text-primary;
+  font-size: 1.5rem;
+  font-weight: 600;
+  width: 100%;
+
+  // Responsive breakpoints
+  @include respond-to('sm') {
+    font-size: 1.75rem;
+    margin-bottom: 1.75rem;
+  }
+
+  @include respond-to('md') {
+    @include flex(row, space-between, center, nowrap, 1rem);
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  // Badge component within section title
+  .badge {
+    // Base properties
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: -webkit-fill-available;
+    min-width: auto;
+    white-space: nowrap;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+
+    // Visual styling
+    background: rgba($warning-color, 0.1);
+    border: 1px solid rgba($warning-color, 0.3);
+    color: $warning-color;
+    font-weight: 500;
+
+    // Interactive properties
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    position: relative;
+
+    // Responsive adjustments
+    @include respond-to('sm') {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    @include respond-to('md') {
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+// Book Header Component
+.book-header {
+  .back-button {
+    // Reset default button styles
+    background: none;
+    border: none;
+
+    // Layout and spacing
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+
+    // Typography
+    font-size: 1rem;
+    color: #0070f3;
+
+    // Interactive properties
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #0050a0;
+      text-decoration: underline;
+    }
+
+    // Mobile optimization
+    @media (max-width: 784px) {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+}
+
+// =============================================================================
+// TOPICS SECTION vocabulary
+// =============================================================================
+
+// Topics Grid Layout
+.ielts-topics-list {
+  // Grid configuration
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: $spacing-lg;
+  margin-top: $spacing-lg;
+
+  // Mobile responsive
+  @media (max-width: 784px) {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+// No Topics State
+.no-topics-message {
+  // Layout and spacing
+  text-align: center;
+  padding: $spacing-xxl $spacing-xl;
+  margin-top: $spacing-xl;
+
+  // Visual styling
+  background: $background-secondary;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-lg;
+
+  p {
+    // Typography
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $text-muted;
+  }
+}
+
+// =============================================================================
+// TITLE WRAPPER (for consistent headers)
+// =============================================================================
+.title-wrapper {
+  @include flex(row, flex-start, center);
+  gap: 1.5rem;
+  width: 100%;
+
+  @include respond-down('sm') {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .title-icon {
+    @include center-flex;
+    @include size(60px);
+    font-size: 1.75rem;
+    color: $accent-color;
+    background: rgba($text-light, 0.1);
+    border: 1px solid rgba($text-light, 0.2);
+    border-radius: $border-radius-lg;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+    @include respond-to('sm') {
+      @include size(50px);
+      font-size: 1.5rem;
+    }
+  }
+
+  .title-content {
+    @include flex(column, center, flex-start);
+    gap: 0.25rem;
+    text-align: left;
+    flex: 1;
+
+    h1,
+    h2 {
+      font-size: 2rem;
+      font-weight: $font-weight-bold;
+      color: $text-light;
+      margin: 0;
+      line-height: 1.2;
+
+      @include respond-down('md') {
+        font-size: 1.75rem;
+      }
+
+      @include respond-down('sm') {
+        font-size: 1.5rem;
+      }
+    }
+
+    p {
+      font-size: 1rem;
+      color: $text-secondary;
+      margin: 0;
+      max-width: 100%;
+
+      @include respond-down('sm') {
+        font-size: 0.9rem;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// STATE COMPONENTS
+// =============================================================================
+
+// Loading State
+.loading {
+  .spinner {
+    color: $primary-color;
+  }
+}
+
+// Error State
+.error-message {
+  // Layout and spacing
+  padding: $spacing-lg;
+
+  // Visual styling
+  background: $background-secondary;
+  border: 1px solid $danger-color;
+  border-radius: $border-radius-md;
+
+  .level-buttons {
+    // Layout
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+
+    .btn {
+      // Base button styling
+      border-radius: $border-radius-sm;
+      font-weight: $font-weight-medium;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+
+      // Primary button variant
+      &.btn-primary {
+        // Styling
+        background: $primary-color;
+        border: none;
+        color: $text-light;
+
+        &:hover {
+          background: $secondary-color;
+          transform: translateY(-1px);
+        }
+      }
+
+      // Outline button variant
+      &.btn-outline {
+        // Styling
+        background: transparent;
+        border: 1px solid $border-light;
+        color: $text-muted;
+
+        &:hover {
+          background: $neutral-100;
+          border-color: $neutral-300;
+        }
+      }
+    }
+  }
+}
+
+// =============================================================================
+// MOBILE-SPECIFIC OVERRIDES
+// =============================================================================
+
+@media screen and (max-width: 784px) {
+
+  // Section title mobile adjustments
+  .section-title {
+    @include flex(column, center, center, nowrap, 0.5rem);
+    font-size: 1.5rem;
+    text-align: center;
+
+    .badge {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  // Practice info mobile adjustments
+  .practice-info,
+  .ielts-practice {
+
+    h2,
+    p {
+      padding-left: 10px;
+    }
+  }
+}
+
+// =============================================================================
+// iOS COMPATIBILITY
+// =============================================================================
+
+// Touch target optimization for iOS
+@supports (-webkit-touch-callout: none) {
+
+  .section-title .badge,
+  .book-header .back-button,
+  .error-message .level-buttons .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+// Safe area handling for iOS devices
+@supports (padding: max(0px)) {
+  .practice-page {
+    padding-left: max(env(safe-area-inset-left), 0px);
+    padding-right: max(env(safe-area-inset-right), 0px);
+  }
+}
+
+// Section header container
+.section-header-with-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+
+  .section-title {
+    margin: 0;
+    flex: 1;
+  }
+}
+
+// =============================================================================
+// LEVEL SELECTOR BUTTON - Shared Hover Effect (Grammar Header Style)
+// =============================================================================
+.level-change-button,
+.vocabulary-level-selector-pilll {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+
+  // Glass morphism effect
+  background: rgba(255, 255, 255, 0.12);
+
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+
+  position: relative;
+  overflow: hidden;
+
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Shimmer effect background
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .level-code,
+  .vocabulary-level-code {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .level-name,
+  .vocabulary-level-name {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    padding-left: 8px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+  }
+
+  .selectorIcon,
+  .vocabulary-selector-icon {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  // "Change Level" text - HIDDEN by default
+  .change-label,
+  .vocabulary-change-label {
+    font-size: 0.8rem;
+    color: #ff6b00 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-left: 8px;
+    border-left: 1.5px solid rgba(255, 107, 0, 0.4) !important;
+
+    // Hidden by default
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  // Hover State - Expand and reveal "Change Level"
+  &:hover {
+    background: rgba(255, 107, 0, 0.15);
+    border-color: rgba(255, 107, 0, 0.4);
+    padding-right: 24px;
+    transform: translateY(-1px);
+    box-shadow:
+      0 4px 12px rgba(255, 107, 0, 0.2),
+      0 0 0 3px rgba(255, 107, 0, 0.1);
+
+    &::before {
+      transform: translateX(100%);
+    }
+
+    // Reveal "Change Level" text
+    .change-label,
+    .vocabulary-change-label {
+      max-width: 120px;
+      opacity: 1;
+      padding-left: 12px;
+      margin-left: 4px;
+    }
+
+    .selectorIcon,
+    .vocabulary-selector-icon {
+      color: #ff6b00;
+      transform: translateY(2px);
+    }
+
+    .level-code,
+    .vocabulary-level-code {
+      color: #ff6b00;
+    }
+
+    .level-name,
+    .vocabulary-level-name {
+      color: #ff6b00;
+    }
+  }
+
+  // Active/Focus State
+  &:active {
+    transform: translateY(0px) scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 107, 0, 0.6);
+    outline-offset: 3px;
+  }
+}
+
+// =============================================================================
+// WHITE BACKGROUND THEME (for Reading, Listening, Writing)
+// =============================================================================
+// =============================================================================
+// WHITE BACKGROUND THEME (for Reading, Listening, Writing)
+// =============================================================================
+.section-header-with-level {
+  .level-change-button {
+    background: #ff6b00;
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    display: flex; // Added to align items horizontally
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      background: linear-gradient(120deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          transparent 100%);
+    }
+
+    // Targets all spans and the icon directly
+    .level-code,
+    .level-badge-difficulty-three,
+    .change-label,
+    .selectorIcon {
+      color: #ffffff !important;
+      opacity: 1;
+    }
+
+    .level-code {
+      font-weight: bold;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .level-badge-difficulty-three {
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .change-label {
+      border-left: 1px solid rgba(255, 255, 255, 0.4);
+      padding-left: 8px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .selectorIcon {
+      display: flex;
+      align-items: center;
+      font-size: 1.1rem;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: #f07b28;
+      border-color: rgba(255, 255, 255, 0.5);
+      box-shadow:
+
+        0 4px 16px rgba(102, 126, 234, 0.4),
+        0 0 0 3px rgba(102, 126, 234, 0.15);
+
+      .selectorIcon {
+        transform: translateY(2px);
+      }
+    }
+  }
+}
+
+
+@media (max-width: 850px) {
+
+  // Always show "Change Level" on mobile since no hover
+  .level-change-button,
+  .vocabulary-level-selector-pill {
+
+    .change-label,
+    .vocabulary-change-label {
+      max-width: 120px;
+      opacity: 1;
+      padding-left: 12px;
+      margin-left: 4px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+
+  .level-change-button,
+  .vocabulary-level-selector-pill {
+    padding: 6px 14px;
+
+    .level-code,
+    .vocabulary-level-code {
+      font-size: 0.9rem;
+    }
+
+    .level-name,
+    .vocabulary-level-name {
+      font-size: 0.75rem;
+    }
+
+    .change-label,
+    .vocabulary-change-label {
+      font-size: 0.7rem;
+    }
+  }
+}

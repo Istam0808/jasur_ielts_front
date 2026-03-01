@@ -1,0 +1,184 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+.speed-mode {
+    &.paused {
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            border-radius: $border-radius-xl;
+
+            .pause-content {
+                background: linear-gradient(135deg, $background-light 0%, $background-primary 100%);
+                border-radius: $border-radius-lg;
+                padding: $spacing-xl;
+                text-align: center;
+                max-width: 400px;
+                width: 100%;
+                box-shadow: $shadow-xl;
+                border: 2px solid rgba($accent-color, 0.2);
+
+                .close-modal-btn {
+                    position: absolute;
+                    top: $spacing-md;
+                    right: $spacing-md;
+                    width: 44px;
+                    height: 44px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: none;
+                    border-radius: 50%;
+                    background: rgba($text-primary, 0.06);
+                    color: $text-primary;
+                    cursor: pointer;
+                    transition: background 0.2s ease, transform 0.1s ease;
+                    z-index: 1;
+
+                    &:hover {
+                        background: rgba($text-primary, 0.12);
+                        transform: translateY(-1px);
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+
+                    @include respond-down('sm') {
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+
+                // Mobile optimization
+                @include respond-down('sm') {
+                    background: $background-primary;
+                    box-shadow: $shadow-lg;
+                }
+
+                .pause-icon {
+                    font-size: 3rem;
+                    color: $accent-color;
+                    margin-bottom: $spacing-lg;
+                    animation: pulse 2s infinite;
+
+                    @include respond-down('md') {
+                        font-size: 2.5rem;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: 2rem;
+                        animation: none; // Disable animation on mobile for performance
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: 1.5rem;
+                        animation: none;
+                    }
+                }
+
+                h3 {
+                    font-size: $font-size-xl;
+                    font-weight: $font-weight-bold;
+                    margin: 0 0 $spacing-md 0;
+                    color: $text-primary;
+
+                    @include respond-down('md') {
+                        font-size: $font-size-lg;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: $font-size-md;
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: $font-size-sm;
+                    }
+                }
+
+                p {
+                    font-size: $font-size-md;
+                    color: $text-secondary;
+                    margin: 0 0 $spacing-lg 0;
+
+                    @include respond-down('md') {
+                        font-size: $font-size-sm;
+                    }
+
+                    @include respond-down('sm') {
+                        font-size: $font-size-xs;
+                    }
+
+                    @include respond-down('xs') {
+                        font-size: 10px;
+                    }
+                }
+
+                .resume-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: $spacing-sm;
+                    padding: $spacing-md $spacing-lg;
+                    background: linear-gradient(135deg, $accent-color 0%, color.adjust($accent-color, $lightness: -10%) 100%);
+                    color: $background-light;
+                    border: none;
+                    border-radius: $border-radius-md;
+                    font-size: $font-size-md;
+                    font-weight: $font-weight-semibold;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: $shadow-md;
+
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: $shadow-lg;
+
+                        @include respond-down('sm') {
+                            transform: none;
+                            box-shadow: $shadow-md;
+                        }
+                    }
+
+                    @include respond-down('md') {
+                        padding: $spacing-sm $spacing-md;
+                        font-size: $font-size-sm;
+                    }
+
+                    @include respond-down('sm') {
+                        padding: $spacing-md $spacing-lg;
+                        font-size: $font-size-md;
+                        min-height: 48px;
+                    }
+
+                    @include respond-down('xs') {
+                        padding: $spacing-sm $spacing-md;
+                        font-size: $font-size-sm;
+                        min-height: 44px;
+                        width: 100%;
+                    }
+                }
+
+                @include respond-down('md') {
+                    padding: $spacing-lg;
+                }
+
+                @include respond-down('sm') {
+                    padding: $spacing-md;
+                }
+
+                @include respond-down('xs') {
+                    padding: $spacing-sm;
+                }
+            }
+        }
+    }
+}

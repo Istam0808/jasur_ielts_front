@@ -1,0 +1,15 @@
+// Advanced IELTS Question Types Styles - Main File
+// This file imports all modular question type styles
+
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+// Import modular style files
+@use "./_base";
+@use "./_multiple-choice";
+@use "./_true-false";
+@use "./_matching";
+@use "./_completion";
+@use "./_short-answer";
+@use "./_responsive";

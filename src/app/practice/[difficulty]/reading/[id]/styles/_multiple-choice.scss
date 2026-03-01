@@ -1,0 +1,161 @@
+// Multiple Choice Multiple
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.multiple-choice-multiple-container {
+    .question-instruction {
+        @include question-instruction-style;
+    }
+
+    .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid $border-light;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover:not(.review-mode) {
+                border-color: $primary-color;
+                background: color.adjust($primary-color, $lightness: 48%);
+            }
+
+            &.selected {
+                border-color: $primary-color;
+                background: rgba($primary-color, 0.02);
+                box-shadow: 0 2px 8px rgba($primary-color, 0.1);
+            }
+
+            // Override selected styling for incorrect answers in review mode
+            &.selected.feedback-incorrect {
+                border-color: $danger-color;
+                background: rgba($danger-color, 0.02);
+                box-shadow: 0 2px 8px rgba($danger-color, 0.1);
+
+                .checkbox-indicator {
+                    border-color: $danger-color;
+
+                    .checkmark {
+                        color: $danger-color;
+                    }
+                }
+
+                .option-text {
+                    color: $danger-color;
+                    font-weight: $font-weight-medium;
+                }
+            }
+
+            // Override selected styling for correct answers in review mode
+            &.selected.feedback-correct {
+                border-color: $success-color;
+                background: rgba($success-color, 0.02);
+                box-shadow: 0 2px 8px rgba($success-color, 0.1);
+
+                .checkbox-indicator {
+                    border-color: $success-color;
+
+                    .checkmark {
+                        color: $success-color;
+                    }
+                }
+
+                .option-text {
+                    color: $success-color;
+                    font-weight: $font-weight-medium;
+                }
+            }
+
+            &.feedback-correct {
+                border-color: $success-color;
+                background: rgba($success-color, 0.02);
+                box-shadow: 0 2px 8px rgba($success-color, 0.1);
+            }
+
+            &.feedback-incorrect {
+                border-color: $danger-color;
+                background: rgba($danger-color, 0.02);
+                box-shadow: 0 2px 8px rgba($danger-color, 0.1);
+            }
+
+            &.feedback-missed {
+                border-color: $warning-color;
+                background: rgba($warning-color, 0.02);
+                box-shadow: 0 2px 8px rgba($warning-color, 0.1);
+            }
+
+            &.disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+
+                &:hover {
+                    border-color: $border-light;
+                    background: transparent;
+                }
+
+                .option-text {
+                    color: $text-muted;
+                }
+
+                .checkbox-indicator {
+                    border-color: $border-light;
+                    opacity: 0.5;
+                }
+            }
+
+            .checkbox-indicator {
+                width: 20px;
+                height: 20px;
+                border: 2px solid $border-medium;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                .checkmark {
+                    color: $primary-color;
+                    font-weight: bold;
+                    font-size: 14px;
+                }
+            }
+
+            .option-letter {
+                font-weight: bold;
+                color: $text-secondary;
+                min-width: 20px;
+            }
+
+            .option-text {
+                flex: 1;
+                color: $text-primary;
+            }
+
+            .option-feedback {
+                margin-left: auto;
+
+                .feedback-icon {
+                    &.correct {
+                        color: $success-color;
+                    }
+
+                    &.incorrect {
+                        color: $danger-color;
+                    }
+
+                    &.missed {
+                        color: $warning-color;
+                    }
+                }
+            }
+        }
+    }
+}

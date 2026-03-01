@@ -1,0 +1,41 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+    @include common.field-wrapper;
+}
+
+.label {
+    @include common.field-label;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 12px;
+    align-items: center;
+}
+
+.rowLabel {
+    color: common.$text-secondary;
+    font-size: common.$font-size-sm;
+}
+
+.input {
+    @include common.form-control;
+    height: 38px;
+}
+
+.hint {
+    @include common.field-hint;
+}
+
+.error {
+    @include common.field-error;
+}

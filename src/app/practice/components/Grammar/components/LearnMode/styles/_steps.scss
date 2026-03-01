@@ -1,0 +1,272 @@
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+@use "sass:color";
+@use "sass:list";
+@use "sass:math";
+
+.lm-steps {
+    display: flex;
+    gap: 4px 0; // Use consistent gap instead of negative margins
+    flex-wrap: wrap; // Allow wrapping by default
+    $lm-chevron-tip: 18px;
+    padding-right: $lm-chevron-tip + 4px;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    // Remove negative margin approach for better wrapping
+    .lm-step+.lm-step {
+        margin-left: 0; // No negative margins
+    }
+}
+
+// Build a per-step palette that blends from $accent-color (first step)
+// to $success-color (last step). We have exactly 5 slides in LearnMode.
+$lm-step-count: 5;
+$success-dark: color.adjust($success-color, $lightness: -14%, $saturation: 6%);
+$success-light: color.adjust($success-color, $lightness: 85%, $saturation: -20%);
+$success-medium: color.adjust($success-color, $lightness: 70%, $saturation: -10%);
+
+// Generated palette used for hover and progressed/active states
+$lm-step-colors: (
+);
+
+.lm-step {
+    $lm-chevron-tip: 18px;
+    $lm-chevron-tighten: 0px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px 10px 20px;
+    color: $text-secondary;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease, color 0.2s ease, background 0.2s ease;
+    clip-path: polygon(0 0, calc(100% - #{$lm-chevron-tip}) 0, 100% 50%, calc(100% - #{$lm-chevron-tip}) 100%, 0 100%, #{$lm-chevron-tip} 50%);
+    background: linear-gradient(135deg, $background-light, $background-secondary);
+    box-shadow: inset 0 0 0 2px $border-medium, 0 2px 6px rgba($text-primary, 0.06);
+    text-shadow: none;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0; // Prevent steps from shrinking too much
+
+    &:not(:first-child)::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: $lm-chevron-tip;
+        background: $background-light;
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+        z-index: 1;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        right: -$lm-chevron-tip;
+        top: 0;
+        height: 100%;
+        width: $lm-chevron-tip;
+        background: inherit;
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+
+    .lm-step-index {
+        background: $success-light;
+        color: $success-dark;
+        padding: 4px 8px;
+        border-radius: $border-radius-sm;
+        font-weight: 700;
+        font-size: 0.75rem;
+        min-width: 24px;
+        text-align: center;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .lm-step-title {
+        font-weight: 700;
+        font-size: 0.82rem;
+        white-space: nowrap;
+        transition: color 0.2s ease;
+    }
+
+    .lm-step-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: $border-radius-full;
+        padding: 4px 10px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+        box-shadow: inset 0 0 0 1px rgba($text-primary, 0.06);
+
+        &.muted {
+            background: $background-secondary;
+            color: $text-muted;
+        }
+
+        &.info {
+            background: color.adjust($accent-color, $lightness: 42%, $saturation: -20%);
+            color: color.scale($accent-color, $lightness: -60%);
+        }
+
+        &.ok {
+            background: color.adjust($success-color, $lightness: 35%, $saturation: -20%);
+            color: color.scale($success-color, $lightness: -55%);
+        }
+    }
+
+    &:hover:not(.active):not(:has(~ .lm-step.active)) {
+        transform: translateY(-1px);
+        // Default hover (will be overridden per-step below)
+        background: linear-gradient(135deg, $success-light, $success-medium);
+        color: $success-dark;
+        box-shadow: inset 0 0 0 2px $success-color, 0 6px 16px rgba($success-color, 0.15);
+        opacity: 0.98;
+
+        .lm-step-index {
+            background: $success-color;
+            color: $text-light;
+        }
+
+        .lm-step-title {
+            color: $success-dark;
+        }
+    }
+
+    @include focus-visible {
+        outline-color: $success-color;
+        outline-offset: 3px;
+        box-shadow: inset 0 0 0 2px $success-color, 0 0 0 4px rgba($success-color, 0.2);
+    }
+
+    // Active/previous states will be colored per-step in the loops below
+    &.active,
+    &:has(~ .lm-step.active) {
+        background: linear-gradient(135deg, $success-dark, color.adjust($success-dark, $lightness: -8%));
+        color: $text-light;
+        box-shadow: 0 6px 16px rgba($success-dark, 0.35);
+
+        .lm-step-index {
+            background: rgba($text-light, 0.25);
+            color: $text-light;
+        }
+    }
+}
+
+// Per-step hover based on the accent→success blend
+@for $i from 1 through $lm-step-count {
+    .lm-step:nth-child(#{$i}):hover:not(.active):not(:has(~ .lm-step.active)) {
+        $c: list.nth($lm-step-colors, $i);
+        background: linear-gradient(135deg,
+                color.adjust($c, $lightness: 70%, $saturation: -10%),
+                color.adjust($c, $lightness: 50%, $saturation: -6%));
+        color: color.scale($c, $lightness: -70%);
+        box-shadow: inset 0 0 0 2px $c, 0 6px 16px rgba($c, 0.15);
+
+        .lm-step-index {
+            background: $c;
+            color: $text-light;
+        }
+    }
+}
+
+// When a given step is active, color that step and all previous ones
+// using the per-step palette so it gradually shifts from accent→success.
+@for $k from 1 through $lm-step-count {
+    .lm-steps:has(.lm-step:nth-child(#{$k}).active) {
+        @for $i from 1 through $k {
+            .lm-step:nth-child(#{$i}) {
+                $base: list.nth($lm-step-colors, $i);
+                background: linear-gradient(135deg,
+                        color.adjust($base, $lightness: -6%),
+                        color.adjust($base, $lightness: -12%));
+                color: $text-light;
+                box-shadow: 0 6px 16px rgba($base, 0.35);
+
+                .lm-step-index {
+                    background: rgba($text-light, 0.22);
+                    color: $text-light;
+                }
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lm-step {
+        transition: none;
+    }
+}
+
+// Neutral styling for practice sub-steps (override colorful main step palette)
+.lm-practice-steps {
+    .lm-step {
+        background: linear-gradient(135deg, $background-light, $background-secondary) !important;
+        color: $text-secondary !important;
+        box-shadow: inset 0 0 0 1px $border-light, 0 2px 6px rgba($text-primary, 0.04) !important;
+
+        .lm-step-index {
+            background: $neutral-200 !important;
+            color: $text-secondary !important;
+        }
+
+        &:hover:not(.active):not(:has(~ .lm-step.active)) {
+            background: linear-gradient(135deg, $background-secondary, color.adjust($background-secondary, $lightness: -3%)) !important;
+            color: $text-primary !important;
+            box-shadow: inset 0 0 0 1px $border-medium, 0 6px 16px rgba($text-primary, 0.05) !important;
+
+            .lm-step-index {
+                background: $neutral-300 !important;
+                color: $text-primary !important;
+            }
+        }
+
+        &.active {
+            background: linear-gradient(135deg, color.adjust($background-secondary, $lightness: 2%), color.adjust($background-secondary, $lightness: -4%)) !important;
+            color: $success-color !important; // active text in success color
+            box-shadow: inset 0 0 0 2px $border-medium, 0 6px 18px rgba($text-primary, 0.08) !important;
+
+            .lm-step-index {
+                background: $neutral-300 !important;
+                color: $text-primary !important;
+            }
+        }
+
+        &:has(~ .lm-step.active) {
+            background: linear-gradient(135deg, color.adjust($background-secondary, $lightness: 2%), color.adjust($background-secondary, $lightness: -4%)) !important;
+            color: $text-primary !important;
+            box-shadow: inset 0 0 0 2px $border-medium, 0 6px 18px rgba($text-primary, 0.08) !important;
+
+            .lm-step-index {
+                background: $neutral-300 !important;
+                color: $text-primary !important;
+            }
+        }
+    }
+
+    // Force neutral styling even when parent applies colorful progression via :has + :nth-child
+    &:has(.lm-step.active) {
+        .lm-step:nth-child(n) {
+            background: linear-gradient(135deg, color.adjust($background-secondary, $lightness: 2%), color.adjust($background-secondary, $lightness: -4%)) !important;
+            color: $text-primary !important;
+            box-shadow: inset 0 0 0 2px $border-medium, 0 6px 18px rgba($text-primary, 0.08) !important;
+
+            .lm-step-index {
+                background: $neutral-300 !important;
+                color: $text-primary !important;
+            }
+        }
+
+        .lm-step.active {
+            color: $success-color !important; // ensure active keeps success color even with forced neutral block
+        }
+    }
+}

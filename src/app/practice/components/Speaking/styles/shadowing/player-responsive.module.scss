@@ -1,0 +1,186 @@
+@use '@/assets/styles/settings' as *;
+@use '@/assets/styles/mixins' as *;
+
+// ============================================
+// RESPONSIVE DESIGN
+// ============================================
+
+@include respond-down('md') {
+  .top-row-horizontal {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-horizontal-grid {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+
+  .reference-card-new {
+    max-height: 400px;
+  }
+}
+
+@include respond-down('sm') {
+  .shadowing-player-root {
+    padding: $spacing-md;
+  }
+
+  .player-title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: $spacing-md;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .analysis-title {
+    font-size: $font-size-lg;
+  }
+
+  .metric-header {
+    h3 {
+      font-size: $font-size-md;
+    }
+
+    .score-display {
+      font-size: 1.75rem;
+    }
+  }
+
+  .expand-toggle {
+    font-size: $font-size-sm;
+    padding: $spacing-sm $spacing-md;
+    min-height: 44px;
+  }
+
+  .expandable-metric-section {
+    padding: $spacing-sm $spacing-xs $spacing-xs;
+  }
+
+  .metric-detail-row {
+    padding: $spacing-xs 0;
+  }
+
+  .metric-detail-label {
+    font-size: $font-size-xs;
+  }
+
+  .metric-detail-value {
+    font-size: $font-size-sm;
+  }
+}
+
+@media (max-width: 600px) {
+  .metrics-horizontal-grid {
+    gap: $spacing-sm;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-back {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+  }
+
+  .player-title {
+    font-size: 1.25rem;
+  }
+
+  .card {
+    padding: $spacing-sm;
+  }
+
+  .metric-card {
+    padding: $spacing-sm;
+  }
+
+  .recording-status-display {
+    padding: $spacing-md;
+    gap: $spacing-sm;
+  }
+
+  .timer-value {
+    font-size: 1.25rem;
+  }
+
+  .audio-visualizer-live {
+    height: 45px;
+  }
+
+  .analysis-title {
+    font-size: $font-size-md;
+  }
+
+  .metric-header {
+    h3 {
+      font-size: $font-size-sm;
+    }
+
+    .score-display {
+      font-size: 1.75rem;
+    }
+  }
+
+  .metric-detail-value {
+    font-size: $font-size-sm;
+  }
+
+  .player-description {
+    font-size: $font-size-sm;
+    line-height: 1.5;
+  }
+
+  .expand-toggle {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
+  }
+}
+
+@media (max-width: 375px) {
+  .shadowing-player-root {
+    padding: $spacing-sm;
+  }
+
+  .player-title {
+    font-size: 1.1rem;
+  }
+
+  .card {
+    padding: $spacing-xs;
+  }
+
+  .metric-card {
+    padding: $spacing-xs;
+  }
+
+  .analysis-title {
+    font-size: $font-size-sm;
+  }
+
+  .metric-header {
+    h3 {
+      font-size: $font-size-xs;
+    }
+
+    .score-display {
+      font-size: 1.5rem;
+    }
+  }
+
+  .metric-detail-value {
+    font-size: $font-size-xs;
+  }
+
+  .timer-value {
+    font-size: 1.1rem;
+  }
+
+  .player-description {
+    font-size: $font-size-xs;
+    line-height: 1.4;
+  }
+}

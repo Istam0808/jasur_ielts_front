@@ -1,0 +1,61 @@
+@use "base" as base;
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+
+.question-map-labeling {
+    .map-labeling-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: $spacing-lg;
+    }
+
+    .map-labeling-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .question-text {
+        @include question-texts-style;
+    }
+
+    .map-labeling-input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 200px;
+    }
+
+    .map-labeling-input {
+        @include base.input-base;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid $neutral-300;
+        border-radius: $border-radius-sm;
+        background-color: $background-light;
+        color: $text-primary;
+        font-size: 1rem;
+        text-transform: uppercase;
+        text-align: left;
+        font-weight: $font-weight-medium;
+
+        &::placeholder {
+            color: $text-muted;
+            text-transform: none;
+            text-align: left;
+            font-weight: $font-weight-normal;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px color.scale($primary-color, $alpha: -80%);
+        }
+
+        &:hover {
+            border-color: $neutral-400;
+        }
+    }
+}

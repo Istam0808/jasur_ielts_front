@@ -1,0 +1,237 @@
+.route-error-handler {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+    .error-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        border: 1px solid #e1e5e9;
+
+        .error-icon {
+            margin-bottom: 1.5rem;
+
+            svg {
+                width: 64px;
+                height: 64px;
+                color: #ef4444;
+            }
+        }
+
+        .error-content {
+            h1 {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #1f2937;
+                margin-bottom: 1rem;
+                line-height: 1.2;
+            }
+
+            p {
+                font-size: 1.1rem;
+                color: #6b7280;
+                margin-bottom: 2rem;
+                line-height: 1.6;
+            }
+
+            .valid-options {
+                margin-bottom: 2rem;
+                padding: 1.5rem;
+                background: #f8fafc;
+                border-radius: 12px;
+                border: 1px solid #e2e8f0;
+
+                h3 {
+                    font-size: 1.2rem;
+                    font-weight: 600;
+                    color: #374151;
+                    margin-bottom: 1rem;
+                }
+
+                .option-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.75rem;
+                    justify-content: center;
+
+                    .btn {
+                        padding: 0.75rem 1.5rem;
+                        border-radius: 8px;
+                        font-weight: 500;
+                        font-size: 0.95rem;
+                        transition: all 0.2s ease;
+                        border: 2px solid transparent;
+                        cursor: pointer;
+                        min-width: 120px;
+
+                        &.btn-primary {
+                            background: #3b82f6;
+                            color: white;
+                            border-color: #3b82f6;
+
+                            &:hover {
+                                background: #2563eb;
+                                border-color: #2563eb;
+                                transform: translateY(-1px);
+                                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+                            }
+                        }
+
+                        &.btn-outline {
+                            background: transparent;
+                            color: #374151;
+                            border-color: #d1d5db;
+
+                            &:hover {
+                                background: #f3f4f6;
+                                border-color: #9ca3af;
+                                transform: translateY(-1px);
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                            }
+                        }
+                    }
+                }
+            }
+
+            .navigation-options {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+
+                .btn {
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    font-size: 0.95rem;
+                    transition: all 0.2s ease;
+                    border: 2px solid transparent;
+                    cursor: pointer;
+                    min-width: 140px;
+
+                    &.btn-secondary {
+                        background: #f3f4f6;
+                        color: #374151;
+                        border-color: #d1d5db;
+
+                        &:hover {
+                            background: #e5e7eb;
+                            border-color: #9ca3af;
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+    .route-error-handler {
+        padding: 1rem;
+
+        .error-container {
+            padding: 2rem 1.5rem;
+
+            .error-content {
+                h1 {
+                    font-size: 1.5rem;
+                }
+
+                p {
+                    font-size: 1rem;
+                }
+
+                .valid-options {
+                    padding: 1rem;
+
+                    .option-buttons {
+                        flex-direction: column;
+                        align-items: center;
+
+                        .btn {
+                            width: 100%;
+                            max-width: 200px;
+                        }
+                    }
+                }
+
+                .navigation-options {
+                    flex-direction: column;
+                    align-items: center;
+
+                    .btn {
+                        width: 100%;
+                        max-width: 200px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+    .route-error-handler {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+
+        .error-container {
+            background: #374151;
+            border-color: #4b5563;
+
+            .error-content {
+                h1 {
+                    color: #f9fafb;
+                }
+
+                p {
+                    color: #d1d5db;
+                }
+
+                .valid-options {
+                    background: #4b5563;
+                    border-color: #6b7280;
+
+                    h3 {
+                        color: #f3f4f6;
+                    }
+
+                    .option-buttons {
+                        .btn-outline {
+                            color: #f3f4f6;
+                            border-color: #6b7280;
+
+                            &:hover {
+                                background: #6b7280;
+                                border-color: #9ca3af;
+                            }
+                        }
+                    }
+                }
+
+                .navigation-options {
+                    .btn-secondary {
+                        background: #4b5563;
+                        color: #f3f4f6;
+                        border-color: #6b7280;
+
+                        &:hover {
+                            background: #6b7280;
+                            border-color: #9ca3af;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,178 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.aiButton {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.7rem 1.4rem;
+    background: $info-color;
+    border: 1px solid color.adjust($info-color, $lightness: -10%);
+    border-radius: $border-radius-md;
+    color: $text-light;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+
+    &:hover {
+        transform: translateY(-1px);
+        background: color.adjust($info-color, $lightness: 5%);
+        border-color: color.adjust($info-color, $lightness: -5%);
+        box-shadow: 0 0 20px color.adjust($info-color, $alpha: -0.6);
+
+        .sparkle {
+            filter: drop-shadow(0 0 4px $text-light);
+        }
+    }
+
+    &:active {
+        transform: translateY(1px);
+        background: color.adjust($info-color, $lightness: -5%);
+    }
+
+    &:disabled {
+        background: color.adjust($info-color, $saturation: -50%, $lightness: 20%);
+        border-color: color.adjust($info-color, $saturation: -50%, $lightness: 15%);
+        cursor: not-allowed;
+        opacity: 0.7;
+        transform: none;
+
+        &:hover {
+            background: color.adjust($info-color, $saturation: -50%, $lightness: 20%);
+            border-color: color.adjust($info-color, $saturation: -50%, $lightness: 15%);
+            transform: none;
+            box-shadow: none;
+        }
+
+        &:active {
+            background: color.adjust($info-color, $saturation: -50%, $lightness: 20%);
+            transform: none;
+        }
+    }
+}
+
+.contentWrapper {
+    @include flex(row, flex-start, center, nowrap, 0.625rem);
+    @include z-index('default');
+}
+
+.sparklesContainer {
+    position: relative;
+    width: 33px;
+    height: 33px;
+    flex-shrink: 0;
+
+    .sparkle {
+        position: absolute;
+        color: $text-light;
+        transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, opacity;
+    }
+
+    // Large Lead, Small Followers
+    &[data-cycle="0"] {
+        .sparkle1 {
+            transform: translate(0, 0) scale(1.1);
+            opacity: 1;
+            font-size: 1.8rem;
+        }
+
+        .sparkle2 {
+            transform: translate(18px, -6px) scale(0.7);
+            opacity: 0.6;
+            font-size: 1.2rem;
+        }
+
+        .sparkle3 {
+            transform: translate(15px, 15px) scale(0.5);
+            opacity: 0.4;
+            font-size: 0.9rem;
+        }
+    }
+
+    &[data-cycle="1"] {
+        .sparkle1 {
+            transform: translate(18px, -6px) scale(0.7);
+            opacity: 0.6;
+            font-size: 1.2rem;
+        }
+
+        .sparkle2 {
+            transform: translate(15px, 15px) scale(0.5);
+            opacity: 0.4;
+            font-size: 0.9rem;
+        }
+
+        .sparkle3 {
+            transform: translate(0, 0) scale(1.1);
+            opacity: 1;
+            font-size: 1.8rem;
+        }
+    }
+
+    &[data-cycle="2"] {
+        .sparkle1 {
+            transform: translate(15px, 15px) scale(0.5);
+            opacity: 0.4;
+            font-size: 0.9rem;
+        }
+
+        .sparkle2 {
+            transform: translate(0, 0) scale(1.1);
+            opacity: 1;
+            font-size: 1.8rem;
+        }
+
+        .sparkle3 {
+            transform: translate(18px, -6px) scale(0.7);
+            opacity: 0.6;
+            font-size: 1.2rem;
+        }
+    }
+}
+
+.shimmer {
+    @include position(absolute, 0, null, null, -100%);
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            color.adjust($text-light, $alpha: -0.92),
+            transparent);
+    transform: skewX(-25deg);
+
+    @include keyframes(shimmerMove) {
+        0% {
+            left: -100%;
+        }
+
+        30%,
+        100% {
+            left: 200%;
+        }
+    }
+
+    animation: shimmerMove 5s infinite ease-in-out;
+    @include z-index('default');
+}
+
+.buttonText {
+    @include font-size(0.95rem);
+    letter-spacing: 0.2px;
+    background: linear-gradient(180deg, $text-light 0%, $neutral-300 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.glow {
+    background: color.adjust($text-light, $alpha: -0.7);
+    filter: blur(15px);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    @include z-index('base');
+    @include position(absolute, 50%, null, null, 15%);
+    @include size(30px);
+}

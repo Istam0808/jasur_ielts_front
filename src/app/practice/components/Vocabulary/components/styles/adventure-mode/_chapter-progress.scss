@@ -1,0 +1,75 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+
+// Chapter Progress Section
+.chapter-progress-section {
+    .chapter-progress {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+        padding: $spacing-md;
+        background: $background-light;
+        border-radius: $border-radius-md;
+        box-shadow: $shadow-sm;
+
+        @include respond-down('sm') {
+            padding: $spacing-xs;
+            border-radius: 0;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-around;
+            gap: $spacing-md;
+
+            .stat {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: $spacing-xs;
+                text-align: center;
+
+                svg {
+                    font-size: 1.5rem;
+                    color: $accent-color;
+                }
+
+                span {
+                    font-size: $font-size-sm;
+                    font-weight: $font-weight-medium;
+                    color: $text-secondary;
+                }
+
+                @include respond-down('sm') {
+                    svg {
+                        font-size: 1.2rem;
+                    }
+
+                    span {
+                        font-size: $font-size-xs;
+                    }
+                }
+            }
+
+            @include respond-down('sm') {
+                flex-wrap: wrap;
+                gap: $spacing-sm;
+            }
+        }
+
+        .chapter-progress-bar {
+            height: 8px;
+            background: rgba($accent-color, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+
+            .chapter-progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, $accent-color 0%, color.adjust($accent-color, $lightness: 10%) 100%);
+                border-radius: 4px;
+                transition: width 0.8s ease;
+            }
+        }
+    }
+}

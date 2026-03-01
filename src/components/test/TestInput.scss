@@ -1,0 +1,106 @@
+@use 'sass:color';
+@use '../../assets/styles/settings' as *;
+
+.test-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  width: 100%;
+}
+
+.test-input {
+  width: 100%;
+  padding: $spacing-md;
+  font-size: $font-size-base;
+  font-family: $font-family-base;
+  border: 2px solid $border-light;
+  border-radius: $border-radius-sm;
+  background: $background-light;
+  color: $text-primary;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px color.adjust($primary-color, $alpha: -0.8);
+  }
+
+  &::placeholder {
+    color: $text-muted;
+    opacity: 0.6;
+  }
+
+  // Disable browser extension UI
+  &::-webkit-contacts-auto-fill-button,
+  &::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+    margin: 0;
+  }
+
+  // Style for disabled state
+  &:disabled {
+    background: $neutral-100;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Mobile optimizations
+  @media (max-width: 768px) {
+    font-size: 16px; // Prevents zoom on iOS
+    padding: $spacing-md $spacing-lg;
+  }
+}
+
+.test-integrity-notice {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-xs;
+  color: $text-muted;
+  opacity: 0.7;
+  margin-top: $spacing-xs;
+
+  .notice-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  // Hide on mobile and tablet viewports
+  @media (max-width: 992px) {
+    display: none;
+  }
+
+  // Show on larger desktops during tests for clarity
+  .take-test-page & {
+    @media (min-width: 993px) {
+      display: flex;
+    }
+  }
+}
+
+// Hide browser extension overlays during tests
+.take-test-page {
+  // Grammarly
+  grammarly-extension,
+  grammarly-desktop-integration {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  // LanguageTool
+  [data-lt-extension],
+  [data-lt-tmp-id] {
+    display: none !important;
+  }
+
+  // General extension prevention
+  [data-extension-id] {
+    display: none !important;
+  }
+}
+

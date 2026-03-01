@@ -1,0 +1,396 @@
+.topicSelectionModal {
+    width: 100%;
+    max-width: 900px;
+    background: var(--background-color, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.topicModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.topicModalTitleSection {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.topicModalIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.topicModalTitle {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+}
+
+.topicModalSubtitle {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+.topicModalClose {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+.topicModalContent {
+    padding: 2rem;
+    min-height: 200px;
+    max-height: 60vh;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+
+    // Custom scrollbar styling
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--scrollbar-track, #f1f1f1);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb, #c1c1c1);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--scrollbar-thumb-hover, #a8a8a8);
+    }
+
+    // Firefox scrollbar styling
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb, #c1c1c1) var(--scrollbar-track, #f1f1f1);
+}
+
+.topicLoading,
+.topicError {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 1rem;
+    color: var(--text-color, #333);
+}
+
+.topicSpinner {
+    font-size: 2rem;
+    color: #667eea;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.topicError {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.topicGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.topicCard {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.75rem 2rem;
+    background: var(--card-background, #ffffff);
+    border: 2px solid var(--border-color, #e9ecef);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+    min-height: 110px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: scaleY(0);
+        transition: transform 0.35s ease;
+    }
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 32px rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+        background: var(--card-hover-background, linear-gradient(135deg, #fafbff 0%, #f8f9ff 100%));
+
+        &::before {
+            transform: scaleY(1);
+        }
+
+        .topicCardIcon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .topicCardArrow {
+            transform: translateX(8px);
+            opacity: 1;
+            color: #667eea;
+        }
+
+        .topicCardTitle {
+            color: var(--title-hover-color, #667eea);
+        }
+    }
+
+    &:active {
+        transform: translateY(-2px);
+    }
+}
+
+.topicCardLeft {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.topicCardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    background: var(--icon-background, linear-gradient(135deg, #f0f3ff 0%, #e8ebff 100%));
+    color: var(--icon-color, #667eea);
+    border-radius: 18px;
+    font-size: 2rem;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.topicCardCenter {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.topicCardTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color, #1a202c);
+    line-height: 1.5;
+    word-wrap: break-word;
+    transition: color 0.3s ease;
+    letter-spacing: -0.01em;
+}
+
+.topicCardRight {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.topicCardArrow {
+    font-size: 2rem;
+    color: var(--arrow-color, #cbd5e0);
+    font-weight: 300;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .topicSelectionModal {
+        max-width: 95vw;
+    }
+
+    .topicModalHeader {
+        padding: 1.5rem;
+    }
+
+    .topicModalTitle {
+        font-size: 1.5rem;
+    }
+
+    .topicModalSubtitle {
+        font-size: 0.9rem;
+    }
+
+    .topicModalContent {
+        padding: 1.5rem;
+        max-height: 65vh;
+    }
+
+    .topicGrid {
+        gap: 0.875rem;
+    }
+
+    .topicCard {
+        padding: 1.5rem;
+        gap: 1.25rem;
+        min-height: 100px;
+
+        &:hover {
+            .topicCardIcon {
+                transform: scale(1.08) rotate(3deg);
+            }
+        }
+    }
+
+    .topicCardIcon {
+        width: 64px;
+        height: 64px;
+        font-size: 1.75rem;
+    }
+
+    .topicCardTitle {
+        font-size: 1.125rem;
+    }
+
+    .topicCardArrow {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .topicModalHeader {
+        padding: 1rem;
+    }
+
+    .topicModalTitleSection {
+        gap: 0.75rem;
+    }
+
+    .topicModalIcon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .topicModalTitle {
+        font-size: 1.25rem;
+    }
+
+    .topicModalSubtitle {
+        font-size: 0.85rem;
+    }
+
+    .topicModalContent {
+        padding: 1rem;
+        max-height: 70vh;
+    }
+
+    .topicCard {
+        padding: 1.25rem;
+        gap: 1rem;
+        min-height: 90px;
+    }
+
+    .topicCardIcon {
+        width: 56px;
+        height: 56px;
+        font-size: 1.5rem;
+    }
+
+    .topicCardTitle {
+        font-size: 1rem;
+    }
+
+    .topicCardArrow {
+        font-size: 1.5rem;
+    }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+    .topicSelectionModal {
+        --background-color: #1a202c;
+        --text-color: #e2e8f0;
+        --card-background: #2d3748;
+        --card-hover-background: linear-gradient(135deg, #374151 0%, #3d4758 100%);
+        --border-color: #4a5568;
+        --icon-background: linear-gradient(135deg, #374151 0%, #4a5568 100%);
+        --icon-color: #818cf8;
+        --title-hover-color: #a5b4fc;
+        --arrow-color: #6b7280;
+        --scrollbar-track: #2d3748;
+        --scrollbar-thumb: #4a5568;
+        --scrollbar-thumb-hover: #5a6678;
+    }
+}
+

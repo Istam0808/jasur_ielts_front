@@ -1,0 +1,143 @@
+// True/False/Not Given
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.true-false-not-given-container {
+    .question-instruction {
+        @include question-instruction-style;
+    }
+
+    .statement-container {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: color.adjust($primary-color, $lightness: 48%);
+        border-radius: 8px;
+        border-left: 4px solid $primary-color;
+
+        .statement-label {
+            font-weight: bold;
+            color: $primary-color;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .statement-content {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            color: $text-primary;
+        }
+    }
+
+    .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid $border-light;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover:not(.review-mode) {
+                border-color: $primary-color;
+            }
+
+            &.selected {
+                border-color: $primary-color;
+                background: rgba($primary-color, 0.02);
+                box-shadow: 0 2px 8px rgba($primary-color, 0.1);
+            }
+
+            // Override selected styling for incorrect answers in review mode
+            &.selected.feedback-incorrect {
+                border-color: $danger-color;
+                background: rgba($danger-color, 0.02);
+                box-shadow: 0 2px 8px rgba($danger-color, 0.1);
+
+                .radio-indicator {
+                    border-color: $danger-color;
+
+                    .radio-dot {
+                        background: $danger-color;
+                    }
+                }
+
+                .option-text {
+                    color: $danger-color;
+                    font-weight: $font-weight-medium;
+                }
+            }
+
+            // Override selected styling for correct answers in review mode
+            &.selected.feedback-correct {
+                border-color: $success-color;
+                background: rgba($success-color, 0.02);
+                box-shadow: 0 2px 8px rgba($success-color, 0.1);
+
+                .radio-indicator {
+                    border-color: $success-color;
+
+                    .radio-dot {
+                        background: $success-color;
+                    }
+                }
+
+                .option-text {
+                    color: $success-color;
+                    font-weight: $font-weight-medium;
+                }
+            }
+
+            &.feedback-correct {
+                border-color: $success-color;
+                background: rgba($success-color, 0.02);
+                box-shadow: 0 2px 8px rgba($success-color, 0.1);
+            }
+
+            &.feedback-incorrect {
+                border-color: $danger-color;
+                background: rgba($danger-color, 0.02);
+                box-shadow: 0 2px 8px rgba($danger-color, 0.1);
+            }
+
+            .radio-indicator {
+                width: 20px;
+                height: 20px;
+                border: 2px solid $border-medium;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+
+                .radio-dot {
+                    width: 10px;
+                    height: 10px;
+                    background: $primary-color;
+                    border-radius: 50%;
+                }
+            }
+
+            .option-text {
+                flex: 1;
+                font-weight: 500;
+                color: $text-primary;
+            }
+
+            .option-feedback {
+                margin-left: auto;
+
+                .feedback-icon.correct {
+                    color: $success-color;
+                }
+            }
+        }
+    }
+}

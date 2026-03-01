@@ -261,7 +261,7 @@ export default function AdminUserPage() {
                 Machines
               </button>
             </li>
-            <li className="admin-dashboard__nav-item">
+            <li className="admin-dashboard__nav-item">                          
               <button
                 type="button"
                 className={`admin-dashboard__nav-btn ${activeNav === NAV_ONGOING_SESSIONS ? "admin-dashboard__nav-btn--active" : ""}`}

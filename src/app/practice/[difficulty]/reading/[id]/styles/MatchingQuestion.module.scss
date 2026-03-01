@@ -1,0 +1,397 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.matchingQuestionContainer {
+    margin-bottom: $spacing-lg;
+}
+
+.questionInstruction {
+    @include question-instruction-style;
+}
+
+.matchingInformation,
+.matchingFeatures,
+.sentenceCompletion {
+    align-items: start;
+    @include grid(1fr, auto, $spacing-xl);
+
+
+    @include respond-down('md') {
+        gap: $spacing-lg;
+    }
+}
+
+.availableOptions,
+.availableFeatures,
+.availableEndings {
+    background: $background-primary;
+    border-radius: $border-radius-sm;
+    padding: $spacing-lg;
+    border: 1px solid $border-light;
+
+    h4 {
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+        margin: 0 0 $spacing-md 0;
+        padding-bottom: $spacing-sm;
+        @include font-size($font-size-md, $line-height-normal);
+
+        @include respond-down('md') {
+            margin-bottom: $spacing-sm;
+            @include font-size($font-size-base, $line-height-normal);
+        }
+    }
+
+    @include respond-down('md') {
+        padding: 0;
+    }
+}
+
+.availableFeatures {
+    padding: 0;
+    background: transparent;
+    border: none
+}
+
+.optionsList,
+.featuresList,
+.endingsList {
+    @include flex(column, flex-start, stretch, nowrap, $spacing-sm);
+}
+
+.optionItem,
+.featureItem,
+.endingItem {
+    background: $background-light;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-xs;
+    padding: $spacing-sm $spacing-md;
+    color: $text-primary;
+    transition: $transition-fast;
+    @include font-size($font-size-base, $line-height-normal);
+
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+        @include font-size($font-size-sm, $line-height-normal);
+    }
+}
+
+.endingId {
+    font-weight: $font-weight-semibold;
+    min-width: 20px;
+}
+
+.featureItem,
+.endingItem {
+    background: $background-light;
+    border: 2px solid $border-light;
+    border-radius: $border-radius-sm;
+    padding: $spacing-md;
+    transition: $transition-normal;
+    @include flex(column, flex-start, stretch, nowrap, $spacing-sm);
+
+    &.answered {
+        border-color: $primary-color;
+        background: color.adjust($primary-color, $lightness: 52%);
+    }
+
+    &.unanswered {
+        border-color: $border-light;
+    }
+
+    &.correct {
+        border-color: $success-color;
+        background: color.adjust($success-color, $lightness: 50%);
+    }
+
+    &.incorrect {
+        border-color: $danger-color;
+        background: color.adjust($danger-color, $lightness: 50%);
+    }
+
+    &.reviewMode {
+        opacity: 0.8;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+    }
+
+    .featureContent {
+        @include flex(row, flex-start, flex-start, nowrap, $spacing-sm);
+
+        .featureId {
+            font-weight: $font-weight-semibold;
+            min-width: 20px;
+        }
+
+        .featureText {
+            flex: 1;
+        }
+
+        .feedbackIcon {
+            font-weight: $font-weight-bold;
+            font-size: $font-size-lg;
+            min-width: 20px;
+            text-align: center;
+
+            &.correct {
+                color: $success-color;
+            }
+
+            &.incorrect {
+                color: $danger-color;
+            }
+        }
+    }
+
+    .answerSelector {
+        margin-top: $spacing-sm;
+    }
+
+    .correctAnswer {
+        margin-top: $spacing-xs;
+        padding: $spacing-xs $spacing-sm;
+        background: color.adjust($success-color, $lightness: 95%);
+        border-radius: $border-radius-xs;
+        @include flex(row, flex-start, center, nowrap, $spacing-xs);
+
+        .correctLabel {
+            font-weight: $font-weight-medium;
+            color: $success-color;
+            @include font-size($font-size-xs, $line-height-normal);
+        }
+
+        .correctValue {
+            color: $text-primary;
+            @include font-size($font-size-xs, $line-height-normal);
+        }
+    }
+}
+
+.endingItem {
+    flex-direction: row;
+}
+
+.informationItems,
+.itemsContainer,
+.sentencesContainer {
+    @include flex(column, flex-start, stretch, nowrap, $spacing-md);
+}
+
+.matchingItem,
+.sentenceItem {
+    background: $background-light;
+    border: 2px solid $border-light;
+    border-radius: $border-radius-sm;
+    padding: $spacing-md;
+    transition: $transition-normal;
+
+    &.answered {
+        border-color: $primary-color;
+        background: color.adjust($primary-color, $lightness: 52%);
+    }
+
+    &.unanswered {
+        border-color: $border-light;
+    }
+
+    &.feedback {
+        &.answered {
+            border-color: $primary-color;
+            background: color.adjust($primary-color, $lightness: 90%);
+        }
+    }
+
+    &.correct {
+        border-color: $success-color;
+        background: color.adjust($success-color, $lightness: 50%);
+    }
+
+    &.incorrect {
+        border-color: $danger-color;
+        background: color.adjust($danger-color, $lightness: 50%);
+    }
+
+    &.reviewMode {
+        opacity: 0.8;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+    }
+}
+
+.itemContent,
+.sentenceBeginning {
+    margin-bottom: $spacing-sm;
+    @include flex(row, flex-start, flex-start, nowrap, $spacing-sm);
+
+    .itemNumber,
+    .sentenceNumber {
+        font-weight: $font-weight-semibold;
+        min-width: 24px;
+        @include font-size($font-size-base, $line-height-normal);
+
+        @include respond-down('md') {
+            min-width: 20px;
+            @include font-size($font-size-sm, $line-height-normal);
+        }
+    }
+
+    .itemText,
+    .sentenceText {
+        flex: 1;
+        color: $text-primary;
+        @include font-size($font-size-sm, $line-height-relaxed);
+
+        @include respond-down('md') {
+            @include font-size($font-size-xs, $line-height-relaxed);
+        }
+    }
+
+    .feedbackIcon {
+        color: $primary-color;
+        margin-left: auto;
+        @include font-size($font-size-md, $line-height-normal);
+
+        &.answered {
+            color: $primary-color;
+        }
+
+        &.correct {
+            color: $success-color;
+        }
+
+        &.incorrect {
+            color: $danger-color;
+        }
+    }
+}
+
+.answerSelector {
+    @include flex(column, flex-start, stretch, nowrap, $spacing-sm);
+}
+
+.optionSelect,
+.featureSelect,
+.endingSelect {
+    padding: $spacing-sm;
+    border: 2px solid $border-light;
+    border-radius: $border-radius-xs;
+    color: $text-primary;
+    background: $background-primary;
+    cursor: pointer;
+    transition: $transition-fast;
+    min-height: 44px;
+    width: 100%;
+    @include font-size($font-size-sm, $line-height-normal);
+
+    @include focus-visible {
+        outline: none;
+        border-color: $primary-color;
+        @include box-shadow(0, 0, 0, 3px, rgba($primary-color, 0.1));
+    }
+
+    &:disabled {
+        background: $background-secondary;
+        color: $text-secondary;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    &.correct {
+        border-color: $success-color;
+        background: color.adjust($success-color, $lightness: 95%);
+    }
+
+    &.incorrect {
+        border-color: $danger-color;
+        background: color.adjust($danger-color, $lightness: 95%);
+    }
+
+    option {
+        padding: $spacing-sm;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+        @include font-size($font-size-xs, $line-height-normal);
+    }
+}
+
+.correctAnswer {
+    margin-top: $spacing-sm;
+    padding: $spacing-sm;
+    background: color.adjust($success-color, $lightness: 95%);
+    border: 1px solid $success-color;
+    border-radius: $border-radius-xs;
+    @include flex(row, flex-start, center, nowrap, $spacing-sm);
+
+    .correctLabel {
+        font-weight: $font-weight-medium;
+        color: $success-color;
+        @include font-size($font-size-xs, $line-height-normal);
+    }
+
+    .correctValue {
+        color: $text-primary;
+        font-weight: $font-weight-medium;
+        @include font-size($font-size-xs, $line-height-normal);
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-xs $spacing-sm;
+        gap: $spacing-xs;
+    }
+}
+
+
+
+// Error states
+.errorMessage {
+    background: color.adjust($danger-color, $lightness: 95%);
+    border: 1px solid $danger-color;
+    border-radius: $border-radius-xs;
+    padding: $spacing-sm $spacing-md;
+    color: $danger-color;
+    text-align: center;
+    margin: $spacing-md 0;
+    @include font-size($font-size-sm, $line-height-normal);
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+        @include font-size($font-size-xs, $line-height-normal);
+    }
+}
+
+// Loading states
+.loadingState {
+    padding: $spacing-xl $spacing-lg;
+    color: $text-secondary;
+    @include center-flex;
+    @include font-size($font-size-sm, $line-height-normal);
+
+    @include respond-down('md') {
+        padding: $spacing-lg $spacing-md;
+        @include font-size($font-size-xs, $line-height-normal);
+    }
+}
+
+
+
+// Focus management for keyboard navigation
+.optionSelect,
+.featureSelect,
+.endingSelect {
+    @include focus-visible {
+        outline: 2px solid $primary-color;
+        outline-offset: 2px;
+    }
+}

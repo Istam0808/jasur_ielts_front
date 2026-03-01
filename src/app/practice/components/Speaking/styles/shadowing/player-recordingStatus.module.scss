@@ -1,0 +1,189 @@
+@use '@/assets/styles/settings' as *;
+
+// ============================================
+// RECORDING STATUS DISPLAY
+// ============================================
+
+.recording-status-display {
+  background: linear-gradient(135deg, rgba($primary-color, 0.05) 0%, rgba($accent-color, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba($primary-color, 0.2);
+  border-radius: $border-radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: 0 4px 20px rgba($primary-color, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  position: relative;
+  overflow: hidden;
+  contain: layout style paint;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba($primary-color, 0.03) 0%, transparent 50%, rgba($accent-color, 0.03) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  >* {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.recording-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.timer-value {
+  font-size: 1.75rem;
+  font-weight: $font-weight-bold;
+  font-family: 'Courier New', Courier, monospace;
+  color: $primary-color;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 8px rgba($primary-color, 0.2);
+  contain: layout style;
+  transition: opacity 0.1s ease-out;
+  display: inline-block;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.25rem;
+  }
+}
+
+.timer-label {
+  font-size: 0.75rem;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.audio-visualizer-live {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  height: 60px;
+  padding: $spacing-sm 0;
+  contain: layout style;
+  position: relative;
+  transition: all $transition-normal;
+
+  @media (max-width: 768px) {
+    height: 50px;
+    gap: 3px;
+  }
+
+  @media (max-width: 480px) {
+    height: 45px;
+    gap: 3px;
+  }
+
+  // Active state - subtle background glow when audio is detected
+  &.audio-active {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + 20px);
+      height: calc(100% + 10px);
+      background: radial-gradient(ellipse at center, rgba($accent-color, 0.15) 0%, transparent 70%);
+      border-radius: $border-radius-md;
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+.audio-bar-live {
+  width: 7px;
+  min-height: 8px;
+  background: linear-gradient(to top, $accent-color 0%, $accent-color-dark 100%);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba($accent-color, 0.4), 0 0 8px rgba($accent-color, 0.2);
+  transition: box-shadow $transition-fast;
+  will-change: transform;
+  contain: layout style;
+  transform-origin: bottom center;
+  position: relative;
+  z-index: 1;
+
+  @media (max-width: 768px) {
+    width: 6px;
+    min-height: 7px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 480px) {
+    width: 5px;
+    min-height: 6px;
+    border-radius: 2.5px;
+  }
+
+  // Enhanced glow when bar is active (above minimum threshold)
+  &:not([style*="scaleY(0.15)"]) {
+    box-shadow: 0 2px 14px rgba($accent-color, 0.6), 0 0 12px rgba($accent-color, 0.3);
+  }
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ff4757;
+  color: $background-light;
+  padding: 0.35rem 0.75rem;
+  border-radius: $border-radius-full;
+  font-size: 0.75rem;
+  font-weight: $font-weight-bold;
+  box-shadow: 0 2px 12px rgba(255, 71, 87, 0.4);
+  align-self: center;
+  min-width: 70px;
+
+  span {
+    letter-spacing: 0.05em;
+  }
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: $background-light;
+  border-radius: $border-radius-full;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  will-change: transform, opacity;
+  contain: layout style;
+}

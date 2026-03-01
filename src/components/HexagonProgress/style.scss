@@ -1,0 +1,206 @@
+@use "../../assets/styles/settings" as *;
+@use "../../assets/styles/mixins" as *;
+
+.hexagon-progress-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+
+    &.rotate {
+        .hexagon-svg {
+            animation: rotate3d 20s linear infinite;
+        }
+    }
+
+    /* SVG wrapper */
+    .hexagon-svg {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+        filter: drop-shadow(0 6px 18px rgba(86, 79, 253, 0.25));
+
+        .shadow-group {
+            opacity: 0.25;
+        }
+
+        .hexagon-bg {
+            /* Keep background crisp */
+            filter: none;
+        }
+
+        .hexagon-progress {
+            transform-origin: center;
+            /* keep stroke sharp */
+            shape-rendering: geometricPrecision;
+        }
+    }
+
+    /* Center content */
+    .hexagon-content {
+        position: relative;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-align: center;
+
+        .hexagon-title {
+            font-size: 2em;
+            font-weight: 600;
+            color: $accent-color;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .hexagon-subtitle {
+            font-size: 12px;
+            font-weight: 500;
+            color: #ff6636;
+            opacity: 0.85;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    /* Floating particles */
+    .particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--color);
+            animation: float 4s ease-in-out infinite;
+            animation-delay: var(--delay);
+            opacity: 0;
+
+            &:nth-child(1) {
+                top: 10%;
+                left: 20%;
+            }
+
+            &:nth-child(2) {
+                top: 20%;
+                right: 15%;
+            }
+
+            &:nth-child(3) {
+                bottom: 15%;
+                left: 25%;
+            }
+
+            &:nth-child(4) {
+                bottom: 20%;
+                right: 20%;
+            }
+
+            &:nth-child(5) {
+                top: 30%;
+                left: 45%;
+            }
+
+            &:nth-child(6) {
+                bottom: 35%;
+                right: 30%;
+            }
+
+            &:nth-child(7) {
+                top: 40%;
+                right: 40%;
+            }
+
+            &:nth-child(8) {
+                bottom: 25%;
+                left: 40%;
+            }
+        }
+    }
+}
+
+/* ---------------- Animations ---------------- */
+@keyframes rotate3d {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        filter: brightness(1) drop-shadow(0 0 8px rgba(86, 79, 253, 0.4));
+    }
+
+    50% {
+        filter: brightness(1.2) drop-shadow(0 0 14px rgba(255, 102, 54, 0.7));
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) translateX(0) scale(0);
+        opacity: 0;
+    }
+
+    15% {
+        transform: translateY(-5px) translateX(4px) scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(-20px) translateX(-6px) scale(1.1);
+        opacity: 0.85;
+    }
+
+    85% {
+        transform: translateY(-35px) translateX(8px) scale(0.9);
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-40px) translateX(12px) scale(0);
+        opacity: 0;
+    }
+}
+
+/* ---------------- Responsiveness ---------------- */
+@media (max-width: 768px) {
+    .hexagon-progress-container {
+        .hexagon-content {
+            .hexagon-title {
+                font-size: 1.5em;
+            }
+
+            .hexagon-subtitle {
+                font-size: 1em;
+            }
+        }
+    }
+}

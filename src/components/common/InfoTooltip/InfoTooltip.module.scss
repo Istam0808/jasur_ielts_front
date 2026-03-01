@@ -1,0 +1,128 @@
+@use "sass:color";
+@use '@/assets/styles/settings' as *;
+
+.tooltipContainer {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: help;
+    margin-left: 8px;
+}
+
+.customTrigger {
+    margin-left: 0;
+    display: block;
+    width: 100%;
+}
+
+.infoIcon {
+    background: none;
+    border: none;
+    color: color.adjust($text-secondary, $lightness: 30%);
+    transition: color 0.2s ease;
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: inherit;
+
+    &:hover,
+    &:focus {
+        color: $primary-color;
+        outline: none;
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 2px color.adjust($primary-color, $alpha: -0.5);
+    }
+}
+
+.tooltipContent {
+    position: fixed;
+    z-index: 100001;
+    background: $background-dark;
+    color: $text-light;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid color.adjust($primary-color, $alpha: -0.8);
+    max-width: min(320px, calc(100vw - 2rem));
+    min-width: 120px;
+    width: max-content;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    pointer-events: none; // Prevent tooltip from interfering with mouse events
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+
+    &.top {
+        .tooltipArrow {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top: 6px solid $background-dark;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+        }
+    }
+
+    &.bottom {
+        .tooltipArrow {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom: 6px solid $background-dark;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+        }
+    }
+
+    &.left {
+        .tooltipArrow {
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 6px solid $background-dark;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+    }
+
+    &.right {
+        .tooltipArrow {
+            position: absolute;
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right: 6px solid $background-dark;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+    }
+}
+
+.tooltipText {
+    margin: 0;
+    font-weight: 400;
+}
+
+.tooltipArrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+// Responsive adjustments
+@media (max-width: 784px) {
+    .tooltipContent {
+        max-width: min(280px, calc(100vw - 2rem));
+        font-size: 0.8125rem;
+        padding: 10px 14px;
+    }
+}

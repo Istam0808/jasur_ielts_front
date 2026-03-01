@@ -1,0 +1,29 @@
+@use "sass:color";
+@use "../common" as common;
+
+.wrapper {
+  @include common.field-wrapper;
+}
+
+.label {
+  @include common.field-label;
+}
+
+.required {
+  color: common.$error-color;
+  margin-left: 4px;
+}
+
+.input {
+  @include common.form-control;
+}
+
+.hint {
+  @include common.field-hint;
+}
+
+.error {
+  @include common.field-error;
+}
+
+

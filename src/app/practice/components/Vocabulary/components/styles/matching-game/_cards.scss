@@ -1,0 +1,413 @@
+@use 'sass:color';
+@use '@/assets/styles/mixins' as *;
+@use '@/assets/styles/settings' as *;
+@use './variables' as *;
+@use './mixins' as *;
+
+// =============================================================================
+// MATCHING CARDS STYLES (OPTIMIZED FOR ALL SCREENS)
+// =============================================================================
+
+.matching-game {
+    .matching-card {
+        background-color: $background-light;
+        border-radius: $border-radius-md;
+        box-shadow: $shadow-md;
+        border: 1px solid rgba($border-light, 0.8);
+        cursor: grab;
+        width: 100%;
+        min-width: 0; // Prevent content from expanding the card
+        min-height: $card-min-height;
+        max-height: $card-max-height;
+        position: relative;
+        font-family: $body-font-family;
+        font-weight: $font-weight-semibold;
+        overflow: hidden;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        // GPU acceleration for better performance
+        @include mobile-touch-target($card-min-height);
+        @include card-hover-effect;
+        @include flex($direction: column, $justify: center);
+        @include gpu-accelerated;
+
+        // Ultra-wide screens (1600px+)
+        @media (min-width: 1600px) {
+            min-height: 180px;
+            max-height: 240px;
+            padding: $spacing-xxl;
+            border-radius: $border-radius-lg;
+        }
+
+        // Large ultra-wide screens (1400px - 1599px)
+        @media (min-width: 1400px) and (max-width: 1599px) {
+            min-height: 170px;
+            max-height: 220px;
+            padding: $spacing-xl;
+            border-radius: $border-radius-lg;
+        }
+
+        // Large screens (1200px - 1399px)
+        @media (min-width: 1200px) and (max-width: 1399px) {
+            min-height: 160px;
+            max-height: 200px;
+            padding: $spacing-lg;
+            border-radius: $border-radius-md;
+        }
+
+        // Desktop (992px - 1199px)
+        @media (min-width: 992px) and (max-width: 1199px) {
+            min-height: 150px;
+            max-height: 180px;
+            padding: $spacing-lg;
+            border-radius: $border-radius-md;
+        }
+
+        // Tablet landscape (768px - 991px) - KEEP EXISTING STYLES
+        @media (min-width: 768px) and (max-width: 991px) {
+            min-height: 120px;
+            max-height: 160px;
+            padding: $spacing-md;
+        }
+
+        // Tablet portrait (600px - 767px) - KEEP EXISTING STYLES
+        @media (min-width: 600px) and (max-width: 767px) {
+            min-height: 100px;
+            max-height: 140px;
+            padding: $spacing-sm;
+        }
+
+        @include respond-to('sm') {
+            padding: $spacing-sm;
+            min-height: $card-mobile-min-height;
+            @include mobile-touch-target($card-mobile-min-height);
+        }
+
+        @include respond-down('sm') {
+            padding: $spacing-sm;
+            min-height: $card-mobile-min-height;
+            width: 100% !important;
+            max-width: 100% !important;
+            @include mobile-touch-target($card-mobile-min-height);
+        }
+
+        @include respond-down('xs') {
+            padding: $spacing-xs;
+            min-height: $card-mobile-min-height;
+            width: 100%;
+            @include mobile-touch-target($card-mobile-min-height);
+        }
+
+        &:hover {
+            background-color: rgba($accent-color, 0.1);
+        }
+
+        &:active {
+            cursor: grabbing;
+        }
+
+        &.matched {
+            background: linear-gradient(135deg, $success-color, color.adjust($success-color, $lightness: -10%));
+            color: $text-light;
+            cursor: default;
+            transform: scale(1.02) translateZ(0);
+            border-color: $success-color;
+
+            &::before {
+                background: linear-gradient(135deg, rgba($success-color, 0.2), rgba($success-color, 0.1));
+                opacity: 1;
+            }
+
+            .card-content {
+                .card-text {
+                    color: $text-light;
+                }
+
+                .card-topic {
+                    color: rgba($text-light, 0.8);
+                }
+            }
+        }
+
+        &.incorrect {
+            animation: shake 0.5s ease-in-out;
+            border-color: $danger-color;
+            background: linear-gradient(135deg, $danger-color, color.adjust($danger-color, $lightness: -10%));
+            color: $text-light;
+
+            .card-content {
+                .card-text {
+                    color: $text-light;
+                }
+
+                .card-topic {
+                    color: rgba($text-light, 0.8);
+                }
+            }
+        }
+
+        &.hinted {
+            border-color: $warning-color;
+            box-shadow: 0 0 25px rgba($warning-color, 0.6);
+            background: linear-gradient(135deg, rgba($warning-color, 0.1), rgba($warning-color, 0.05));
+            transform: scale(1.02) translateZ(0);
+            z-index: 5;
+
+            &::before {
+                content: '';
+                background: linear-gradient(135deg, rgba($warning-color, 0.1), transparent);
+                border-radius: inherit;
+                pointer-events: none;
+                @include position(absolute, 0, 0, 0, 0);
+            }
+        }
+
+        &.mobile-selected {
+            border-color: $primary-color;
+            box-shadow: 0 0 15px rgba($primary-color, 0.6);
+            background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($primary-color, 0.05));
+            transform: scale(1.05) translateZ(0);
+            z-index: 5;
+        }
+
+        &.dragging {
+            cursor: grabbing;
+            transform: scale(1.05) rotate(2deg) translateZ(0);
+            box-shadow: $shadow-lg;
+            z-index: $z-index-dragging;
+            border-color: $accent-color;
+        }
+
+        &.drop-target {
+            border-color: $success-color;
+            background: linear-gradient(135deg, rgba($success-color, 0.2), rgba($success-color, 0.1));
+            transform: scale(1.02) translateZ(0);
+        }
+
+        .card-content {
+            text-align: center;
+            width: 100%;
+            min-width: 0; // Prevent content from expanding the container
+            height: 100%;
+            padding: $spacing-sm;
+            overflow: hidden;
+            position: relative;
+            @include center-flex;
+
+            .card-text {
+                font-weight: $font-weight-semibold;
+                color: $text-primary;
+                word-break: break-word;
+                max-width: 100%;
+                min-width: 0; // Prevent text from expanding the container
+                text-align: center;
+                text-transform: capitalize;
+                hyphens: auto;
+                overflow-wrap: break-word;
+                display: -webkit-box;
+                -webkit-line-clamp: 6;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin: 0;
+                line-height: 1.4;
+
+                // Ultra-wide screens (1600px+)
+                @media (min-width: 1600px) {
+                    font-size: 1.5rem;
+                    line-height: 1.5;
+                    -webkit-line-clamp: 10;
+                }
+
+                // Large ultra-wide screens (1400px - 1599px)
+                @media (min-width: 1400px) and (max-width: 1599px) {
+                    font-size: 1.4rem;
+                    line-height: 1.4;
+                    -webkit-line-clamp: 9;
+                }
+
+                // Large screens (1200px - 1399px)
+                @media (min-width: 1200px) and (max-width: 1399px) {
+                    font-size: 1.3rem;
+                    line-height: 1.4;
+                    -webkit-line-clamp: 8;
+                }
+
+                // Desktop (992px - 1199px)
+                @media (min-width: 992px) and (max-width: 1199px) {
+                    font-size: 1.2rem;
+                    line-height: 1.4;
+                    -webkit-line-clamp: 7;
+                }
+
+                // Tablet landscape (768px - 991px) - KEEP EXISTING STYLES
+                @media (min-width: 768px) and (max-width: 991px) {
+                    font-size: 1.1rem;
+                    line-height: 1.3;
+                    -webkit-line-clamp: 5;
+                }
+
+                // Tablet portrait (600px - 767px) - KEEP EXISTING STYLES
+                @media (min-width: 600px) and (max-width: 767px) {
+                    font-size: 1rem;
+                    line-height: 1.3;
+                    -webkit-line-clamp: 4;
+                }
+
+                @include respond-to('sm') {
+                    font-size: 0.95rem;
+                    line-height: 1.3;
+                    -webkit-line-clamp: 3;
+                }
+
+                @include respond-down('sm') {
+                    font-size: 0.9rem;
+                    line-height: 1.3;
+                    -webkit-line-clamp: 2;
+                }
+            }
+        }
+
+        .match-indicator {
+            background: rgba($background-light, 0.95);
+            color: $success-color;
+            font-size: 0.6rem;
+            border: 1px solid $border-light;
+            @include position(absolute, 2px, 2px);
+            @include circle(18px);
+            @include center-flex;
+
+            // Larger screens get bigger indicators
+            @media (min-width: 768px) {
+                font-size: 0.7rem;
+                @include circle(22px);
+            }
+
+            @media (min-width: 1200px) {
+                font-size: 0.8rem;
+                @include circle(24px);
+            }
+
+            @media (min-width: 1600px) {
+                font-size: 0.9rem;
+                @include circle(26px);
+            }
+        }
+
+        .hint-indicator {
+            background: rgba($warning-color, 0.9);
+            color: $text-light;
+            font-size: 0.6rem;
+            border: 1px solid $warning-color;
+            animation: hintPulse 1.5s ease-in-out infinite;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba($warning-color, 0.5);
+            @include position(absolute, 2px, 2px);
+            @include circle(18px);
+            @include center-flex;
+
+            // Larger screens get bigger indicators
+            @media (min-width: 768px) {
+                font-size: 0.7rem;
+                @include circle(22px);
+            }
+
+            @media (min-width: 1200px) {
+                font-size: 0.8rem;
+                @include circle(24px);
+            }
+
+            @media (min-width: 1600px) {
+                font-size: 0.9rem;
+                @include circle(26px);
+            }
+        }
+
+        .mobile-selection-indicator {
+            background: rgba($primary-color, 0.9);
+            color: $text-light;
+            font-size: 0.6rem;
+            border: 1px solid $primary-color;
+            animation: mobileSelectionPulse 1s ease-in-out infinite;
+            z-index: 5;
+            box-shadow: 0 0 10px rgba($primary-color, 0.5);
+            @include position(absolute, 2px, 2px);
+            @include circle(18px);
+            @include center-flex;
+
+            // Larger screens get bigger indicators
+            @media (min-width: 768px) {
+                font-size: 0.7rem;
+                @include circle(22px);
+            }
+
+            @media (min-width: 1200px) {
+                font-size: 0.8rem;
+                @include circle(24px);
+            }
+
+            @media (min-width: 1600px) {
+                font-size: 0.9rem;
+                @include circle(26px);
+            }
+        }
+
+        // Subtle indicator for expandable text
+        &:not(.matched):not(.dragging)::after {
+            content: '';
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            opacity: 0;
+            @include position(absolute, null, 2px, 2px);
+            @include size(6px);
+            @include mobile-optimized-transition(opacity);
+
+            // Larger indicator for bigger screens
+            @media (min-width: 768px) {
+                @include size(8px);
+            }
+
+            @media (min-width: 1200px) {
+                @include size(10px);
+            }
+
+            @media (min-width: 1600px) {
+                @include size(12px);
+            }
+        }
+
+        &:not(.matched):not(.dragging):hover::after {
+            opacity: 1;
+        }
+
+        // Add a subtle gradient overlay for better text readability
+        &::before {
+            content: '';
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: inherit;
+            pointer-events: none;
+            opacity: 0;
+            @include position(absolute, 0, 0, 0, 0);
+            @include mobile-optimized-transition(opacity);
+        }
+
+        &:hover::before {
+            opacity: 1;
+        }
+
+        // Improve text readability on ultra-wide screens
+        @media (min-width: 1400px) {
+            .card-content .card-text {
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        // Add subtle border glow on hover for better visual feedback
+        &:hover:not(.matched):not(.incorrect) {
+            border-color: rgba($accent-color, 0.3);
+            box-shadow: 0 4px 12px rgba($accent-color, 0.15);
+        }
+    }
+}

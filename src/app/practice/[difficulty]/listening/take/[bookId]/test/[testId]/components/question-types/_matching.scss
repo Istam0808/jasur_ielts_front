@@ -1,0 +1,136 @@
+@use "base" as base;
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.question-matching {
+    .matching-label {
+        padding: $spacing-sm;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-sm;
+        @include flex($align: center, $justify: flex-start, $gap: $spacing-sm);
+    }
+
+    .matching-select {
+        border: 1px solid $neutral-300;
+        min-width: 200px;
+        cursor: pointer;
+        position: relative;
+        z-index: 10;
+        @include base.input-base;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background-color: $background-light;
+        color: $text-primary;
+        font-size: 1rem;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px color.scale($primary-color, $alpha: -80%);
+        }
+    }
+
+    .matching-items {
+        @include flex($direction: column, $gap: 1.5rem);
+        margin-top: $spacing-md;
+    }
+
+    .matching-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .matching-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .question-text-container {
+        background-color: $background-primary;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-sm;
+        padding: $spacing-md;
+        margin-bottom: $spacing-sm;
+    }
+
+    .question-text {
+        @include question-texts-style;
+    }
+
+    .matching-select-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    // Flowchart-specific styles
+    &.flowchart-style {
+        .matching-items {
+            gap: 0;
+        }
+
+        .matching-item {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .matching-content {
+            background-color: $background-light;
+            border: 2px solid $border-dark;
+            border-radius: $border-radius-md;
+            padding: $spacing-lg;
+            margin-bottom: $spacing-sm;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-text-container {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: $spacing-md;
+        }
+
+        .question-text {
+            @include question-texts-style;
+        }
+
+        .matching-select-wrapper {
+            max-width: 250px;
+        }
+
+        .flowchart-arrow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 30px;
+            margin: $spacing-sm 0;
+
+            svg {
+                opacity: 0.6;
+                transition: opacity $transition-fast;
+            }
+
+            &:hover svg {
+                opacity: 1;
+            }
+        }
+    }
+}

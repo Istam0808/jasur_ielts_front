@@ -1,0 +1,166 @@
+@use "@/assets/styles/settings" as *;
+@use "sass:color";
+@use "@/assets/styles/mixins" as *;
+
+.custom-select {
+    position: relative;
+    z-index: 999;
+    width: 200px !important;
+    max-width: 200px !important;
+    font-size: 1rem;
+    color: $text-primary;
+    flex-shrink: 1; // Allow the component to shrink
+    flex-grow: 0; // Prevent the component from growing
+    overflow: hidden; // Prevent content from spilling out
+    box-sizing: border-box; // Include padding in width calculation
+    table-layout: fixed; // Force fixed layout
+    min-width: 0; // Allow shrinking below content size
+
+    @include respond-down('sm') {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    // Full width variant for vocabulary context
+    &.full-width {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+        display: block !important;
+        table-layout: auto !important;
+
+        .custom-select__trigger {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+    }
+
+    &__trigger {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: $spacing-sm !important;
+        border: 2px solid $border-light;
+        border-radius: $border-radius-xs;
+        background-color: $background-primary;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: auto !important;
+        min-height: 44px;
+        min-width: 0; // Allow flex items to shrink below content size
+        width: 100% !important; // Ensure it takes full width of parent
+        max-width: 100% !important; // Prevent expansion beyond parent
+        box-sizing: border-box; // Include padding in width calculation
+        overflow: hidden; // Prevent content from spilling out
+
+        @include respond-down('sm') {
+            padding: $spacing-sm;
+            font-size: 0.9rem;
+            height: auto;
+            border-color: $border-light;
+        }
+
+        &:hover {
+            border-color: $primary-color;
+        }
+
+        @include focus-visible {
+            outline: none;
+            border-color: $primary-color;
+            @include box-shadow(0, 0, 0, 3px, rgba($primary-color, 0.1));
+        }
+
+        .custom-select__text {
+            flex: 1;
+            min-width: 0;
+            max-width: calc(100% - 32px) !important; // Reserve more space for arrow
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+
+    &__arrow {
+        flex-shrink: 0; // Prevent arrow from shrinking
+        transition: transform 0.3s ease;
+        width: 16px;
+        height: 16px;
+
+        &.open {
+            transform: rotate(180deg);
+        }
+    }
+
+    &__options {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        right: 0;
+        background-color: $background-primary;
+        border: 2px solid $border-light;
+        border-radius: $border-radius-xs;
+        z-index: 999;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+        @include custom-scrollbar;
+    }
+
+    &__option {
+        padding: $spacing-sm;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0; // Allow text to shrink properly
+
+        &:hover {
+            background-color: $neutral-100;
+        }
+
+        &.selected {
+            background-color: $primary-color;
+            color: $background-light;
+            font-weight: 500;
+        }
+    }
+
+    &__tooltip {
+        background-color: $text-primary;
+        color: $background-light;
+        padding: 8px 12px;
+        border-radius: $border-radius-sm;
+        font-size: 0.875rem;
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        pointer-events: none;
+        z-index: 1001;
+        max-width: none;
+        overflow: visible;
+        text-overflow: clip;
+        margin-bottom: 8px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: $text-primary;
+        }
+
+        // Hide tooltip on mobile devices
+        @include respond-down('md') {
+            display: none !important;
+        }
+    }
+}

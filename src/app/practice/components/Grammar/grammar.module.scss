@@ -1,0 +1,527 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+// Sync Status Indicators
+.learnmodeSyncStatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: $background-light;
+    border-radius: 8px;
+    margin: 8px 0;
+    border: 1px solid $border-light;
+
+    .syncText {
+        font-size: 14px;
+        color: $text-secondary;
+        font-weight: 500;
+    }
+}
+
+.grammarPractice {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: $spacing-lg 1rem 2rem;
+}
+
+.grammarHeaderWrapper {
+    margin-bottom: 2rem;
+}
+
+.grammarContent {
+    .grammarTopicsList {
+        scroll-margin-top: 50px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.25rem;
+
+        @media (max-width: 1024px) {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            gap: 0.875rem;
+        }
+
+        @media (max-width: 480px) {
+            gap: 0.75rem;
+        }
+    }
+
+    // Card
+    .grammarCardTitle {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.25rem;
+        width: 100%;
+        background-color: $background-light;
+        background-image: linear-gradient(180deg, rgba($background-light, 0.7) 0%, rgba($background-light, 0.55) 100%), url('../../../../../../../assets/images/card-bg.webp');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border: 1px solid $border-light;
+        border-radius: $border-radius-lg;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: $accent-color;
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
+
+                &::before {
+                    transform: scaleX(1);
+                }
+            }
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.3), 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .grammarTopicHeader {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .grammarTopicInfo {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .grammarTopicName {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $text-primary;
+            margin: 0;
+            line-height: 1.3;
+            letter-spacing: -0.025em;
+            transition: color 0.2s ease;
+            @include flex(row, flex-start, flex-start, nowrap, $spacing-md);
+
+            .numberBadge {
+                margin: 0;
+                flex-shrink: 0;
+                min-width: 32px;
+            }
+
+            .grammarTopicNameText {
+                flex: 1;
+            }
+        }
+
+        .grammarMeta {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1.5fr;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+
+            > span {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.375rem;
+                padding: 0.375rem 0.625rem;
+                border-radius: $border-radius-sm;
+                font-weight: 500;
+                font-size: 0.75rem;
+                line-height: 1;
+                white-space: nowrap;
+                transition: all 0.2s ease;
+                position: relative;
+                overflow: hidden;
+                min-height: 1.75rem;
+                height: 2rem;
+                width: auto;
+                min-width: 0;
+                justify-self: stretch;
+                max-width: 100%;
+                text-align: center;
+                text-overflow: ellipsis;
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                    transition: left 0.5s ease;
+                }
+
+                &:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+                    &::before {
+                        left: 100%;
+                    }
+                }
+
+                svg {
+                    font-size: 0.75rem;
+                    flex-shrink: 0;
+                }
+            }
+
+            .hoursBadge {
+                background: rgba($accent-color, 0.06);
+                color: $accent-color;
+                border: 1px solid rgba($accent-color, 0.22);
+
+                svg {
+                    color: $accent-color;
+                }
+
+                &:hover {
+                    background: rgba($accent-color, 0.12);
+                    border-color: rgba($accent-color, 0.28);
+                    box-shadow: 0 2px 8px rgba($accent-color, 0.15);
+                }
+            }
+
+            .statusBadge {
+                background: rgba($accent-color, 0.06);
+                color: $accent-color;
+                border: 1px solid rgba($accent-color, 0.22);
+                overflow: visible;
+                padding-right: 0.5rem;
+
+                svg {
+                    color: $accent-color;
+                }
+
+                &:hover {
+                    background: rgba($accent-color, 0.12);
+                    border-color: rgba($accent-color, 0.28);
+                    box-shadow: 0 2px 8px rgba($accent-color, 0.15);
+                }
+
+                > span:not(.progressPill) {
+                    min-width: 0;
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .progressPill {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-left: 0.375rem;
+                    font-size: 0.625rem;
+                    line-height: 1;
+                    font-weight: 600;
+                    color: $success-color;
+                    background: rgba($success-color, 0.15);
+                    border: 1px solid rgba($success-color, 0.3);
+                    border-radius: 999px;
+                    padding: 0.125rem 0.375rem;
+                    min-width: 2ch;
+                    height: 1.25rem;
+                    white-space: nowrap;
+                    flex: 0 0 auto;
+                }
+            }
+
+            .attemptsBadge {
+                background: rgba($accent-color, 0.06);
+                color: $accent-color;
+                border: 1px solid rgba($accent-color, 0.22);
+
+                svg {
+                    color: $accent-color;
+                }
+
+                .attemptsText {
+                    line-height: 1;
+                }
+
+                &:hover {
+                    background: rgba($accent-color, 0.12);
+                    border-color: rgba($accent-color, 0.28);
+                    box-shadow: 0 2px 8px rgba($accent-color, 0.15);
+                }
+            }
+
+            @media (max-width: 768px) {
+                gap: 0.375rem;
+                font-size: 0.7rem;
+                grid-template-columns: 1fr 3fr 2fr;
+
+                > span {
+                    padding: 0.25rem 0.5rem;
+                    font-size: 0.7rem;
+                    min-height: 1.5rem;
+                    height: 1.8rem;
+
+                    svg {
+                        font-size: 0.7rem;
+                    }
+                }
+
+                .statusBadge .progressPill {
+                    font-size: 0.6rem;
+                    padding: 0.125rem 0.25rem;
+                    min-width: 1.75ch;
+                    height: 1.125rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                gap: 0.25rem;
+                grid-template-columns: 1fr 2.5fr 1.5fr;
+
+                > span {
+                    padding: 0.25rem 0.375rem;
+                    font-size: 0.65rem;
+                    min-height: 1.375rem;
+                    height: 1.6rem;
+
+                    svg {
+                        font-size: 0.65rem;
+                    }
+                }
+            }
+        }
+
+        .learnCta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.875rem;
+            border-radius: $border-radius-md;
+            background: transparent;
+            color: $accent-color;
+            border: none;
+            box-shadow: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.02em;
+            min-height: 2.25rem;
+            position: relative;
+            overflow: hidden;
+
+            .learnCtaIcon {
+                font-size: 0.95rem;
+                position: relative;
+                z-index: 1;
+            }
+
+            .learnCtaLabel {
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                font-size: 0.9rem;
+                position: relative;
+                z-index: 1;
+            }
+
+            .learnCtaArrow {
+                font-size: 0.8rem;
+                transition: transform 0.2s ease;
+                position: relative;
+                z-index: 1;
+            }
+
+            &:hover {
+                background: transparent;
+
+                .learnCtaArrow {
+                    transform: translateX(2px);
+                }
+            }
+
+            &:active {
+                transform: translateY(0);
+                box-shadow: none;
+            }
+
+            &.isComplete {
+                background: transparent;
+                color: $success-color;
+                border: none;
+
+                &:hover {
+                    background: transparent;
+                }
+
+                .learnCtaArrow {
+                    display: none;
+                }
+            }
+        }
+
+        &.isComplete {
+            border-color: rgba($success-color, 0.3);
+
+            &::before {
+                background: linear-gradient(90deg, $success-color, color.adjust($success-color, $lightness: 10%));
+            }
+
+            .grammarTopicName {
+                color: $text-primary;
+
+                .numberBadge {
+                    color: $success-color;
+                    box-shadow: 0 4px 12px rgba($success-color, 0.25);
+                }
+            }
+
+            .grammarMeta {
+                .hoursBadge,
+                .attemptsBadge {
+                    background: rgba($success-color, 0.08);
+                    color: $success-color;
+                    border: 1px solid rgba($success-color, 0.22);
+
+                    svg {
+                        color: $success-color;
+                    }
+
+                    &:hover {
+                        background: rgba($success-color, 0.12);
+                        border-color: rgba($success-color, 0.28);
+                        box-shadow: 0 2px 8px rgba($success-color, 0.15);
+                    }
+                }
+
+                .statusBadge {
+                    background: rgba($success-color, 0.08);
+                    color: $success-color;
+                    border: 1px solid rgba($success-color, 0.22);
+
+                    svg {
+                        color: $success-color;
+                    }
+
+                    &:hover {
+                        background: rgba($success-color, 0.12);
+                        border-color: rgba($success-color, 0.28);
+                        box-shadow: 0 2px 8px rgba($success-color, 0.15);
+                    }
+                }
+            }
+        }
+    }
+}
+
+.grammarError {
+    @include flex(center, center);
+    gap: 1rem;
+    padding: 3rem;
+    background: color.adjust($danger-color, $lightness: 40%);
+    border-radius: 12px;
+    margin: 2rem 0;
+
+    .errorIcon {
+        font-size: 2rem;
+        color: $danger-color;
+    }
+
+    .errorText {
+        color: color.adjust($danger-color, $lightness: -20%);
+        font-weight: 500;
+        text-align: center;
+    }
+}
+
+.grammarEmpty {
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+    color: $text-secondary;
+}
+
+// Mobile responsiveness
+@media (max-width: 784px) {
+    .grammarPractice {
+        padding: 1.5rem 1rem;
+    }
+
+    .grammarContent {
+        .grammarCardTitle {
+            gap: 1rem;
+
+            .learnCta {
+                padding: 0.45rem 0.75rem;
+
+                .learnCtaLabel {
+                    font-size: 0.9rem;
+                }
+
+                .learnCtaIcon {
+                    font-size: 0.9rem;
+                }
+
+                .learnCtaArrow {
+                    font-size: 0.8rem;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .grammarPractice {
+        padding: 1rem 0.75rem;
+    }
+
+    .grammarContent {
+        .grammarCardTitle {
+            gap: 0.75rem;
+
+            .grammarTopicName {
+                font-size: 1rem;
+            }
+
+            .learnCta {
+                padding: 0.4rem 0.65rem;
+
+                .learnCtaLabel {
+                    font-size: 0.85rem;
+                }
+
+                .learnCtaIcon {
+                    font-size: 0.85rem;
+                }
+
+                .learnCtaArrow {
+                    font-size: 0.75rem;
+                }
+            }
+        }
+    }
+}
