@@ -1,0 +1,17 @@
+# Dependencies and build outputs (redundant with .gitignore; keeps upload explicit)
+node_modules
+.next
+out
+build
+
+# Local and env
+.env
+.env.local
+.env.*.local
+
+# IDE and tooling
+.cursor
+*.log
+
+# Tests and coverage (not needed for production build)
+coverage
