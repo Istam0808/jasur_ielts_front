@@ -1,0 +1,646 @@
+@use "@/assets/styles/mixins" as *;
+@use "@/assets/styles/settings" as *;
+@use "sass:color";
+@use "../../common/ProgressBar.scss";
+
+// Reading Content Styles - Extracted from readingProcess.scss
+
+// Main content layout - now handled by ResizableColumns component
+.reading-content {
+    // Use flexible height that adapts to content
+    height: auto;
+    min-height: 60vh; // Minimum height for usability
+    max-height: calc(100vh - 200px); // Maximum height to prevent overflow
+    // Remove flex-direction: column as it interferes with ResizableColumns
+
+    // Ensure proper spacing between columns on desktop
+    .resizable-column {
+        padding: 0;
+        height: auto; // Let content determine height
+        min-height: inherit; // Inherit minimum height from parent
+    }
+
+    // Mobile-first approach - start with mobile styles
+    @include respond-down('md') {
+        height: auto;
+        min-height: auto;
+        max-height: none;
+
+        .resizable-column {
+            padding: 0;
+            height: auto;
+        }
+    }
+
+    // Tablet adjustments
+    @include respond-to('md') {
+        min-height: 65vh;
+        max-height: calc(100vh - 180px);
+    }
+
+    // Desktop optimizations
+    @include respond-to('lg') {
+        min-height: 70vh;
+        max-height: calc(100vh - 220px);
+    }
+
+    // Large desktop enhancements
+    @include respond-to('xl') {
+        min-height: 75vh;
+        max-height: calc(100vh - 250px);
+    }
+}
+
+// Section headers
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+
+    h2 {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+        color: $text-primary;
+        margin: 0;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .word-count,
+    .questions-count {
+        background: $neutral-100;
+        color: $text-muted;
+        padding: $spacing-xs $spacing-md;
+        border-radius: $border-radius-md;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        white-space: nowrap;
+    }
+
+    // Mobile adjustments
+    @include respond-down('sm') {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $spacing-sm;
+
+        h2 {
+            font-size: $font-size-md;
+            min-width: auto;
+        }
+
+        .word-count,
+        .questions-count {
+            font-size: $font-size-xs;
+            padding: $spacing-xs $spacing-xs;
+        }
+    }
+
+    // Tablet adjustments
+    @include respond-to('md') {
+        h2 {
+            font-size: $font-size-lg;
+        }
+    }
+
+    // Desktop enhancements
+    @include respond-to('lg') {
+        h2 {
+            font-size: $font-size-xl;
+        }
+    }
+}
+
+// Passage section
+.passage-section {
+    background: $background-light;
+    padding: $spacing-xl;
+    border-radius: $border-radius-xl 0 0 $border-radius-xl;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
+    height: auto;
+    min-height: 40vh;
+    max-height: 70vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    .section-header {
+        .header-left {
+            width: 100%;
+            @include flex(row, space-between, center);
+        }
+    }
+
+    &::-webkit-scrollbar {
+        background: transparent;
+    }
+
+    // Mobile-first approach
+    @include respond-down('sm') {
+        padding: $spacing-sm;
+        border-radius: $border-radius-md;
+        min-height: 30vh;
+        max-height: 60vh;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-md;
+        border-radius: $border-radius-lg;
+        min-height: 35vh;
+        max-height: 65vh;
+    }
+
+    // Tablet optimizations
+    @include respond-to('md') {
+        padding: $spacing-lg;
+        min-height: 40vh;
+        max-height: 70vh;
+    }
+
+    // Desktop enhancements
+    @include respond-to('lg') {
+        padding: $spacing-xl;
+        min-height: 45vh;
+        max-height: 75vh;
+    }
+
+    .passage-content {
+        flex: 1;
+        // Remove overflow-y: auto from child since parent handles scrolling
+
+        .passage-title {
+            font-size: $font-size-xl;
+            font-weight: $font-weight-bold;
+            color: $text-primary;
+            margin-bottom: $spacing-xl;
+            line-height: 1.4;
+            text-align: center;
+            padding-bottom: $spacing-lg;
+            border-bottom: 2px solid $border-light;
+
+            // Mobile adjustments
+            @include respond-down('sm') {
+                font-size: $font-size-lg;
+                margin-bottom: $spacing-lg;
+                padding-bottom: $spacing-md;
+                line-height: 1.3;
+            }
+
+            @include respond-down('md') {
+                font-size: $font-size-lg;
+                margin-bottom: $spacing-lg;
+                padding-bottom: $spacing-md;
+            }
+
+            // Tablet optimizations
+            @include respond-to('md') {
+                font-size: $font-size-lg;
+            }
+
+            // Desktop enhancements
+            @include respond-to('lg') {
+                font-size: $font-size-xl;
+            }
+
+            // Large desktop
+            @include respond-to('xl') {
+                font-size: $font-size-xxl;
+            }
+        }
+
+        .passage-paragraph {
+            margin-bottom: $spacing-lg;
+            font-size: $font-size-base;
+            line-height: 1.8;
+            color: $text-secondary;
+            text-align: justify;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+
+            // Mobile optimizations
+            @include respond-down('sm') {
+                font-size: $font-size-sm;
+                line-height: 1.6;
+                margin-bottom: $spacing-md;
+                text-align: left; // Better readability on mobile
+            }
+
+            @include respond-down('md') {
+                font-size: $font-size-base;
+                line-height: 1.7;
+            }
+
+            // Tablet enhancements
+            @include respond-to('md') {
+                line-height: 1.8;
+            }
+
+            // Desktop improvements
+            @include respond-to('lg') {
+                font-size: $font-size-md;
+                line-height: 1.9;
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}
+
+// Questions section
+.questions-section {
+    padding: 0;
+    border-radius: 0 $border-radius-xl $border-radius-xl 0;
+    box-shadow: $shadow-lg;
+    border: 1px solid $border-light;
+    height: auto; // Let content determine height
+    min-height: 50vh; // Minimum height for usability
+    max-height: 70vh; // Maximum height to prevent overflow
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+
+    &>.section-header {
+        padding: $spacing-xl !important;
+        background: $background-light;
+        margin: 0;
+    }
+
+    &::-webkit-scrollbar {
+        background: transparent;
+    }
+
+    // Small mobile devices (320px - 480px)
+    @include respond-down('sm') {
+        min-height: 45vh;
+        max-height: 65vh;
+    }
+
+    // Medium mobile devices (481px - 784px)
+    @include respond-to('sm') {
+        min-height: 50vh;
+        max-height: 70vh;
+    }
+
+    // Tablet devices (769px - 1024px)
+    @include respond-to('md') {
+        min-height: 55vh;
+        max-height: 75vh;
+    }
+
+    // Desktop devices (1025px - 1440px)
+    @include respond-to('lg') {
+        min-height: 60vh;
+        max-height: 80vh;
+    }
+
+    // Large desktop devices (1441px+)
+    @include respond-to('xl') {
+        min-height: 65vh;
+        max-height: 85vh;
+    }
+
+    .questions-content {
+        flex: 1;
+    }
+}
+
+// Question cards
+.reading-question-card {
+    border-radius: $border-radius-lg;
+    margin-bottom: $spacing-lg;
+    transition: all $transition-normal;
+    position: relative;
+    @include heading-bg();
+
+    // Mobile optimizations
+    @include respond-down('sm') {
+        padding: $spacing-sm;
+        margin-bottom: $spacing-sm;
+        border-radius: $border-radius-sm;
+    }
+
+    @include respond-down('md') {
+        padding: $spacing-sm;
+        margin-bottom: $spacing-md;
+    }
+
+    // Tablet enhancements
+    @include respond-to('md') {
+        padding: $spacing-lg;
+        margin-bottom: $spacing-lg;
+    }
+
+    // Desktop improvements
+    @include respond-to('lg') {
+        padding: $spacing-lg;
+        margin-bottom: $spacing-lg;
+    }
+
+    &.answered {
+        background: linear-gradient(135deg, color.adjust($primary-color, $lightness: 20%) 0%, color.adjust($primary-color, $lightness: 20%) 2px, $background-light 2px);
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+
+    .question-number {
+        min-width: 32px;
+        height: 32px;
+        background: $neutral-100;
+        color: $text-muted;
+        border-radius: 5px;
+        border: 1px solid $neutral-300;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-normal;
+        padding: 0 $spacing-sm;
+        white-space: nowrap;
+        transition: all 0.2s ease-in-out;
+        @include flex(row, center, center);
+
+        // Single digit styling (1-9)
+        &.single-digit {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        // Range styling (e.g., "9-15")
+        &.range-number {
+            min-width: 48px;
+            border-radius: 999px;
+            padding: 0 $spacing-sm;
+        }
+
+        span {
+            display: inline-block;
+            text-align: center;
+            line-height: 1;
+        }
+
+        @include respond-down('sm') {
+            min-width: 28px;
+            height: 28px;
+            font-size: $font-size-xs;
+            border-radius: 5px;
+            padding: 0 $spacing-xs;
+
+            // Single digit on mobile
+            &.single-digit {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                padding: 0;
+            }
+
+            // Range on mobile
+            &.range-number {
+                min-width: 40px;
+                border-radius: 999px;
+                padding: 0 $spacing-xs;
+            }
+        }
+
+        // Tablet and up
+        @include respond-to('md') {
+            min-width: 32px;
+            height: 32px;
+            font-size: $font-size-sm;
+            border-radius: 5px;
+            padding: 0 $spacing-sm;
+
+            // Single digit on tablet
+            &.single-digit {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                padding: 0;
+            }
+
+            // Range on tablet
+            &.range-number {
+                min-width: 48px;
+                border-radius: 999px;
+                padding: 0 $spacing-sm;
+            }
+        }
+
+        // Desktop enhancements
+        @include respond-to('lg') {
+            min-width: 36px;
+            height: 36px;
+            font-size: $font-size-sm;
+            border-radius: 5px;
+            padding: 0 $spacing-sm;
+
+            // Single digit on desktop
+            &.single-digit {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                padding: 0;
+            }
+
+            // Range on desktop
+            &.range-number {
+                min-width: 52px;
+                border-radius: 999px;
+                padding: 0 $spacing-sm;
+            }
+        }
+    }
+    .question-status {
+        flex-shrink: 0;
+
+        .status-icon {
+            font-size: 1.5rem !important;
+            width: 24px !important;
+            height: 24px !important;
+
+            &.answered {
+                color: $success-color;
+            }
+
+            &.unanswered {
+                color: $neutral-400;
+            }
+
+            // Mobile adjustments
+            @include respond-down('sm') {
+                font-size: 1.25rem !important;
+                width: 20px !important;
+                height: 20px !important;
+            }
+
+            // Tablet and up
+            @include respond-to('md') {
+                font-size: 1.5rem !important;
+                width: 24px !important;
+                height: 24px !important;
+            }
+
+            // Desktop enhancements
+            @include respond-to('lg') {
+                font-size: 1.75rem !important;
+                width: 28px !important;
+                height: 28px !important;
+            }
+        }
+    }
+}
+
+.question-content {
+    margin-bottom: $spacing-lg;
+
+    .question-text {
+        @include question-texts-style;
+    }
+
+    // Mobile spacing adjustments
+    @include respond-down('sm') {
+        margin-bottom: $spacing-sm;
+    }
+}
+
+// iOS-specific optimizations
+@supports (-webkit-touch-callout: none) {
+
+    .passage-section,
+    .questions-section {
+        // Improve scrolling performance on iOS
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .reading-question-card {
+        // Prevent zoom on double tap
+        touch-action: manipulation;
+    }
+}
+
+
+// Grouped questions styling
+.grouped-question {
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-lg;
+    border-bottom: 1px solid $border-light;
+
+    &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    // Mobile adjustments
+    @include respond-down('sm') {
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-md;
+    }
+
+    @include respond-down('md') {
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+    }
+}
+
+.grouped-question-content {
+    // Remove any card-specific styling when question is grouped
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+
+    .question-content {
+        margin-bottom: $spacing-md;
+
+        .question-text {
+            @include question-texts-style;
+
+            // Mobile optimizations
+            @include respond-down('sm') {
+                font-size: $font-size-sm;
+                line-height: 1.5;
+                margin-bottom: $spacing-xs;
+            }
+
+            // Tablet and up
+            @include respond-to('md') {
+                font-size: $font-size-base;
+                line-height: 1.6;
+            }
+
+            // Desktop enhancements
+            @include respond-to('lg') {
+                font-size: $font-size-md;
+                line-height: 1.7;
+            }
+        }
+    }
+
+    .question-body {
+        // Ensure proper spacing for grouped question content
+        margin-top: $spacing-sm;
+
+        // Mobile adjustments
+        @include respond-down('sm') {
+            margin-top: $spacing-xs;
+        }
+    }
+}
+
+// Consistent Review Mode styling across all question cards
+.reading-question-card.review-mode {
+
+    // Visually indicate review state without harming readability
+    .question-body {
+
+        // Disable interactions in review
+        input,
+        select,
+        textarea,
+        button,
+        [role="textbox"],
+        .react-select__control,
+        .Select,
+        .feature-select,
+        .ending-select,
+        .heading-select,
+        .paragraph-select {
+            pointer-events: none;
+            cursor: default;
+        }
+    }
+}
+
+// Generic review-mode utility within question content (used by some types)
+.reading-question-card .review-mode {
+    // Apply same dim/disable behavior when components add their own .review-mode wrappers
+    opacity: 0.8;
+
+    input,
+    select,
+    textarea,
+    button,
+    [role="textbox"],
+    .react-select__control,
+    .Select {
+        pointer-events: none;
+        cursor: default;
+    }
+}

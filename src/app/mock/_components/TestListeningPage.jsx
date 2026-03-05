@@ -1,1 +1,1 @@
-export { default } from '../../practice/[difficulty]/listening/take/[bookId]/test/[testId]/components/TestListeningPage';
+export { default } from '../_practice/listening/take/[bookId]/test/[testId]/components/TestListeningPage';

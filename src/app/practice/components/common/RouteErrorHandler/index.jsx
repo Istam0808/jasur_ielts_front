@@ -89,7 +89,7 @@ const RouteErrorHandler = ({
 
     const handleBackToEnglish = () => {
         // Use hard refresh to clear module cache and ensure JSON files load
-        window.location.href = '/subjects/languages/english';
+        window.location.href = '/mock/listening';
     };
 
     return (

@@ -1,1 +1,1 @@
-export { default } from '../../practice/[difficulty]/reading/[id]/components/ReadingPage';
+export { default } from '../_practice/reading/components/ReadingPage';

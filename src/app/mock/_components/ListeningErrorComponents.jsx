@@ -1,4 +1,4 @@
 export {
   BookNotFound,
   TestNotFound
-} from '../../practice/[difficulty]/listening/take/[bookId]/components/ErrorComponents';
+} from '../_practice/listening/take/[bookId]/components/ErrorComponents';

@@ -1,1 +1,1 @@
-export { default } from '../../practice/[difficulty]/common/NotFoundMessage';
+export { default } from '../_practice/common/NotFoundMessage';
