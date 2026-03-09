@@ -1,24 +1,35 @@
 import ReadingPage from '../_components/ReadingPage';
 import NotFoundMessage from '../_components/NotFoundMessage';
+import { getMockById, isBackendUnavailableError } from '@/lib/mockApi';
+import { adaptReading } from '@/lib/mockAdapters';
 
 const DEFAULT_READING_ID = 1;
 
-export default async function MockReadingPage() {
-    let readingData = null;
+async function resolveMockId(searchParams) {
+    const resolvedSearchParams = await searchParams;
+    const value = resolvedSearchParams?.mockId;
+    if (Array.isArray(value)) return Number(value[0]) || DEFAULT_READING_ID;
+    return Number(value) || DEFAULT_READING_ID;
+}
+
+function shouldUseFallbackMessage(error) {
+    return isBackendUnavailableError(error) || error?.status === 404;
+}
+
+export default async function MockReadingPage({ searchParams }) {
+    const mockId = await resolveMockId(searchParams);
+    let readingExercise = null;
     try {
-        const module = await import('@/store/data/practice/language/english/reading/new_reading.json');
-        readingData = module.default || module;
+        const mockDetail = await getMockById(mockId);
+        readingExercise = adaptReading(mockDetail);
     } catch (error) {
-        console.error('Failed to load IELTS reading data:', error);
+        if (shouldUseFallbackMessage(error)) {
+            const reason = error?.status === 404 ? 'mock or API not found (404)' : `temporarily unavailable (${error?.status || error?.code || 'unknown'})`;
+            console.warn(`Reading mock backend ${reason}.`);
+        } else {
+            console.error('Failed to load backend reading mock:', error);
+        }
     }
-
-    if (!readingData) {
-        return <NotFoundMessage title={'reading'} />;
-    }
-
-    const readingExercise = Array.isArray(readingData)
-        ? readingData.find((exercise) => exercise.id === DEFAULT_READING_ID)
-        : readingData?.id === DEFAULT_READING_ID ? readingData : null;
 
     if (!readingExercise) {
         return <NotFoundMessage title={'reading'} />;
@@ -28,7 +39,7 @@ export default async function MockReadingPage() {
         <ReadingPage
             readingExercise={readingExercise}
             difficulty="ielts"
-            id={String(DEFAULT_READING_ID)}
+            id={String(mockId)}
             nextHref="/mock/writing"
             uiVariant="mock-fullscreen-like"
         />

@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { getProfile, postLogout as apiLogout } from '@/lib/accountsApi';
 
 const UserContext = createContext(null);
 
@@ -11,6 +12,8 @@ const defaultUserValue = {
   userData: null,
   getToken: async () => null,
   refreshUserData: async () => {},
+  refreshUser: async () => {},
+  logout: async () => {},
   setLevelIdentificationState: () => {},
   getCacheStatus: () => ({}),
 };
@@ -18,9 +21,33 @@ const defaultUserValue = {
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const isAuthenticated = Boolean(user);
+
+  const refreshUser = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { ok, user: profileUser } = await getProfile();
+      setUser(ok && profileUser ? profileUser : null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
+
+  const logout = useCallback(async () => {
+    try {
+      await apiLogout();
+    } finally {
+      setUser(null);
+    }
+  }, []);
 
   const getToken = useCallback(async () => {
     return null;
@@ -41,6 +68,8 @@ export function UserProvider({ children }) {
     userData,
     getToken,
     refreshUserData,
+    refreshUser,
+    logout,
     setLevelIdentificationState,
     getCacheStatus,
   };

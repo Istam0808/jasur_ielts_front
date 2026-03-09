@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 import LoadingSpinner from './LoadingSpinner';
 
-export default function ProtectedRoute({ children, fallback = null, redirectTo = '/auth/login' }) {
+export default function ProtectedRoute({ children, fallback = null, redirectTo = '/' }) {
   const { isAuthenticated, loading } = useUser();
   const router = useRouter();
 

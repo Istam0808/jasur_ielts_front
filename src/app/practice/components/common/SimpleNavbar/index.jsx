@@ -261,10 +261,10 @@ function SimpleNavbar() {
                 </Link>
               ) : (
                 <>
-                  <Link href="/auth/register" className="auth-button sign-up">
+                  <Link href="/" className="auth-button sign-up">
                     <span>{t('common:nav.createAccount')}</span>
                   </Link>
-                  <Link href="/auth/login" className="auth-button sign-in">
+                  <Link href="/" className="auth-button sign-in">
                     <span>{t('common:nav.signIn')}</span>
                   </Link>
                 </>
@@ -329,10 +329,10 @@ function SimpleNavbar() {
                   </Link>
                 ) : (
                   <div className="mobile-auth-container">
-                    <Link href="/auth/register" className="auth-button sign-up" onClick={() => setIsMenuOpen(false)}>
+                    <Link href="/" className="auth-button sign-up" onClick={() => setIsMenuOpen(false)}>
                       <span>{t('common:nav.createAccount')}</span>
                     </Link>
-                    <Link href="/auth/login" className="auth-button sign-in" onClick={() => setIsMenuOpen(false)}>
+                    <Link href="/" className="auth-button sign-in" onClick={() => setIsMenuOpen(false)}>
                       <span>{t('common:nav.signIn')}</span>
                     </Link>
                   </div>

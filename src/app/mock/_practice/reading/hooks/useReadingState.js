@@ -6,6 +6,7 @@ import { useLoading } from '@/components/common/LoadingContext';
 import { checkAnswer, getCorrectAnswerTextForScoring, checkAnswerVariants, normalizeText } from '@/utils/answerChecker';
 import { getQuestionAnswerCount, getProvidedAnswerCount } from '../helpers/questionUtils';
 import { groupQuestionsByType } from '../helpers/QuestionGrouping';
+import { validateReadingMockAnswers } from '@/lib/mockApi';
 
 // Constants
 const HIGHLIGHT_DURATION = 2000;
@@ -522,19 +523,26 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
         try {
             const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
+            const isBackendMockReading = readingData?.source === 'backend-mock';
             const readingIdStr = String(id);
 
-            if (isAdvancedReading && readingData?.id) {
-                // Server-side validation
-                const res = await fetch(`/api/practice/reading/validate`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    cache: 'no-store',
-                    body: JSON.stringify({ readingId: readingData.id, answers: userAnswers }),
-                });
+            if ((isAdvancedReading || isBackendMockReading) && readingData?.id) {
+                let payload = null;
 
-                if (!res.ok) throw new Error('Failed to validate answers');
-                const payload = await res.json();
+                if (isBackendMockReading) {
+                    payload = await validateReadingMockAnswers(readingData.mockId || readingData.id, userAnswers);
+                } else {
+                    // Legacy validation route for non-mock advanced readings.
+                    const res = await fetch(`/api/practice/reading/validate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        cache: 'no-store',
+                        body: JSON.stringify({ readingId: readingData.id, answers: userAnswers }),
+                    });
+
+                    if (!res.ok) throw new Error('Failed to validate answers');
+                    payload = await res.json();
+                }
 
                 // Compute local stats
                 const questionsToScore = selectedQuestionTypes.length === 0
@@ -556,17 +564,21 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
                 const timeTakenSeconds = Math.floor((timeTakenMs % 60000) / 1000);
 
                 setResults({
-                    totalQuestions: payload.total,
-                    correctAnswers: payload.correctCount,
+                    totalQuestions: payload?.total || payload?.totalQuestions || totalIndividualAnswers,
+                    correctAnswers: payload?.correctCount || payload?.correct || 0,
                     answered: providedIndividualAnswers,
                     skipped: Math.max(0, totalIndividualAnswers - providedIndividualAnswers),
-                    percentageCorrect: payload.score,
+                    percentageCorrect: payload?.score || 0,
                     timeTaken: `${timeTakenMinutes}m ${timeTakenSeconds}s`,
-                    reviewToken: payload.reviewToken || null,
+                    reviewToken: payload?.reviewToken || null,
                 });
                 setShowResults(true);
 
-                await markCompletion(readingIdStr, payload.score, payload.total);
+                await markCompletion(
+                    readingIdStr,
+                    payload?.score || 0,
+                    payload?.total || payload?.totalQuestions || totalIndividualAnswers
+                );
             } else {
                 // Basic levels: local calculation
                 const calculatedResults = calculateResults();
@@ -605,8 +617,9 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
         try {
             const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
+            const isBackendMockReading = readingData?.source === 'backend-mock';
 
-            if (isAdvancedReading) {
+            if (isAdvancedReading && !isBackendMockReading) {
                 setActivePassageId(1);
 
                 if (readingData?.id) {
@@ -626,11 +639,13 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
                         setError(`Review fetch failed (${res.status}). Please resubmit to review answers.`);
                     }
                 }
+            } else if (isBackendMockReading) {
+                setError('Review mode is unavailable for backend mock without review endpoint.');
             }
         } catch (error) {
             setError('Unable to load review data. Please try again.');
         }
-    }, [difficulty, readingData?.id, results?.reviewToken]);
+    }, [difficulty, readingData?.id, readingData?.source, results?.reviewToken]);
 
     // Retry handler
     const handleRetry = useCallback(() => {

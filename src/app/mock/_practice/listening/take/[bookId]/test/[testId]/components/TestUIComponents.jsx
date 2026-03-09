@@ -110,7 +110,8 @@ export const MockExamTopBar = ({
     candidateId,
     timeText,
     onSubmit,
-    isSubmitDisabled
+    isSubmitDisabled,
+    onLogout,
 }) => {
     return (
         <div className="mock-exam-top-bar">
@@ -121,6 +122,15 @@ export const MockExamTopBar = ({
                 <button type="button" className="mock-icon-btn" aria-label="Audio settings">
                     <FiVolume2 />
                 </button>
+                {onLogout && (
+                    <button
+                        type="button"
+                        className="mock-logout-btn"
+                        onClick={onLogout}
+                    >
+                        Logout
+                    </button>
+                )}
                 <button
                     type="button"
                     className="mock-submit-btn"

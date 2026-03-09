@@ -28,7 +28,7 @@
 
 .student-login__card {
   width: 100%;
-  max-width: 400px;
+  max-width: 860px;
   margin-inline: auto;
   padding: 0;
 }
@@ -138,6 +138,11 @@
   @include button-base();
 }
 
+.student-login__btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .student-login__btn:hover {
   background: s.t(accent-hover);
   border-color: s.t(accent-hover);
@@ -149,6 +154,67 @@
   transform: translateY(0);
 }
 
+.student-login__mocks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.student-login__mocks-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.student-login__logout-btn {
+  padding: 0.65rem 1rem;
+  border: 1px solid s.t(border-on-light);
+  background: s.t(surface);
+  color: s.t(text-on-light);
+  font-size: 0.95rem;
+  cursor: pointer;
+  @include button-base();
+}
+
+.student-login__logout-btn:hover {
+  border-color: s.t(accent);
+  color: s.t(accent);
+}
+
+.student-login__status {
+  margin: 0;
+  color: s.t(text-muted-on-light);
+}
+
+.student-login__mock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.student-login__mock-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid s.t(border-on-light);
+  border-radius: 12px;
+  background: s.t(surface);
+}
+
+.student-login__mock-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: s.t(text-on-light);
+}
+
+.student-login__mock-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: s.t(text-muted-on-light);
+}
+
 @media (max-width: 480px) {
   .student-login {
     padding: 1.5rem 1rem;
@@ -156,6 +222,11 @@
 
   .student-login__subtitle {
     margin-bottom: 1.5rem;
+  }
+
+  .student-login__mocks-head {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 

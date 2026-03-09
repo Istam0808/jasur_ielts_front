@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useDjangoAuth } from "@/services/djangoAuth";
+import { useUser } from "@/contexts/UserContext";
 import { useLearningTimer } from "@/hooks/useLearningTimer"; // uses the robust hook we built
 import "./style.scss";
 
@@ -17,7 +17,7 @@ const LearningTimer = ({
   showTotalTime = true,
 }) => {
   const { t } = useTranslation("common");
-  const { user } = useDjangoAuth();
+  const { user } = useUser();
 
   // The hook exposes: isActive, sessionDuration (seconds), dailyTotal (minutes),
   // startSession, stopSession, formatMinutes, formatSeconds, formattedSessionTime, formattedDailyTotal

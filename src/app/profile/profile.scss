@@ -1,0 +1,92 @@
+@use "../../style/__settings" as s;
+
+.profile-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: s.t(surface-strong);
+}
+
+.profile-page__card {
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  padding: 2rem;
+  background: s.t(surface);
+  border: 2px solid s.t(border-on-light);
+  border-radius: 12px;
+}
+
+.profile-page__title {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: s.t(text-on-light);
+  text-align: center;
+}
+
+.profile-page__section {
+  margin-bottom: 1.5rem;
+}
+
+.profile-page__dl {
+  margin: 0;
+  display: grid;
+  gap: 0.75rem 1rem;
+}
+
+.profile-page__dt {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: s.t(text-muted-on-light);
+}
+
+.profile-page__dd {
+  margin: 0;
+  font-size: 1rem;
+  color: s.t(text-on-light);
+}
+
+.profile-page__logout {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 650;
+  color: s.t(text-on-light);
+  background: transparent;
+  border: 2px solid s.t(border-on-light);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 220ms ease, background-color 220ms ease, color 220ms ease;
+}
+
+.profile-page__logout:hover {
+  border-color: s.t(accent);
+  color: s.t(accent);
+  background: rgba(s.c(red), 0.06);
+}
+
+.profile-page__logout:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(s.c(red), 0.25);
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 1.5rem 1rem;
+  }
+
+  .profile-page__card {
+    padding: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-page__logout {
+    transition: none;
+  }
+}

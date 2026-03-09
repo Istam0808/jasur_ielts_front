@@ -1,12 +1,23 @@
 import WritingPage from '../_components/WritingPage';
 import NotFoundMessage from '../_components/NotFoundMessage';
+import { getMockById, isBackendUnavailableError } from '@/lib/mockApi';
+import { adaptWriting } from '@/lib/mockAdapters';
 
 const DEFAULT_WRITING_ID = 1;
+const DEFAULT_MOCK_ID = 1;
 
-export default async function MockWritingPage() {
+async function resolveMockId(searchParams) {
+    const resolvedSearchParams = await searchParams;
+    const value = resolvedSearchParams?.mockId;
+    if (Array.isArray(value)) return Number(value[0]) || DEFAULT_MOCK_ID;
+    return Number(value) || DEFAULT_MOCK_ID;
+}
+
+export default async function MockWritingPage({ searchParams }) {
+    const mockId = await resolveMockId(searchParams);
     try {
-        const WritingsJSON = await import('@/store/data/practice/language/english/writing/c2.json');
-        const writingExercise = WritingsJSON.default.find((exercise) => exercise.id === DEFAULT_WRITING_ID);
+        const mockDetail = await getMockById(mockId);
+        const writingExercise = adaptWriting(mockDetail);
 
         if (!writingExercise) {
             return <NotFoundMessage title={'writing'} />;
@@ -21,7 +32,11 @@ export default async function MockWritingPage() {
             />
         );
     } catch (error) {
-        console.error('Failed to load IELTS writing data:', error);
+        if (isBackendUnavailableError(error)) {
+            console.warn(`Writing mock backend is temporarily unavailable (${error?.status || error?.code || 'unknown'})`);
+        } else {
+            console.error('Failed to load backend writing mock:', error);
+        }
         return <NotFoundMessage title={'writing'} />;
     }
 }

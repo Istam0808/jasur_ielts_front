@@ -59,7 +59,8 @@ const ResultsModal = ({ isOpen, onClose, results, bookId, ieltsScoreGuidance, ne
         return null;
     }
 
-    const { score, totalQuestions, userAnswers, correctAnswersData, isTimeUp } = results;
+    const { score, totalQuestions, userAnswers, correctAnswersData, isTimeUp, scoredByBackend } = results;
+    const hasDetailedAnswers = correctAnswersData && Object.keys(correctAnswersData).length > 0;
 
     const getGuidance = (currentScore) => {
         if (!ieltsScoreGuidance || !ieltsScoreGuidance.score_ranges) return '';
@@ -122,7 +123,16 @@ const ResultsModal = ({ isOpen, onClose, results, bookId, ieltsScoreGuidance, ne
 
                 <div className="results-details-pane">
                      <div className="results-grid">
-                        {Object.keys(correctAnswersData).sort((a, b) => parseInt(a) - parseInt(b)).map(questionNumber => {
+                        {!hasDetailedAnswers && (
+                            <div className="result-item">
+                                <div className="question-identifier">
+                                    {scoredByBackend
+                                        ? t('results.checkedByServer', { defaultValue: 'Результат проверен на сервере' })
+                                        : t('results.noDetailedAnswers', { defaultValue: 'Детальная проверка ответов недоступна' })}
+                                </div>
+                            </div>
+                        )}
+                        {hasDetailedAnswers && Object.keys(correctAnswersData).sort((a, b) => parseInt(a) - parseInt(b)).map(questionNumber => {
                             const userAnswer = userAnswers[questionNumber];
                             const correctAnswer = correctAnswersData[questionNumber];
                             const wasCorrect = isCorrect(userAnswer, correctAnswer);

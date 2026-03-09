@@ -12,6 +12,8 @@ import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation, M
 import TestProgress from './TestProgress';
 import ResultsModal from './ResultsModal';
 import NoteModal from '@/components/common/NoteModal';
+import { validateListeningMockAnswers, logoutAgent } from '@/lib/mockApi';
+import { getMockSession, clearMockSession } from '@/lib/mockSession';
 import './testListeningPage.scss';
 
 // Add new component for Notes Viewer Modal
@@ -148,7 +150,7 @@ const NotesViewerModal = ({ isOpen, onClose, partNotes, onDeleteNote, onNavigate
     );
 };
 
-const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, difficultyOverride, nextHref, isMockExam = false }) => {
+const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, difficultyOverride, nextHref, isMockExam = false, mockId = null }) => {
     const { t, i18n } = useTranslation(['listening', 'common', 'test']);
     const router = useRouter();
     const params = useParams();
@@ -409,16 +411,48 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         }
     };
 
-    const handleSubmit = useCallback((isTimeUp = false) => {
+    const handleSubmit = useCallback(async (isTimeUp = false) => {
         // Prevent multiple submissions
         if (isTestSubmitted) return;
 
         setIsTestSubmitted(true);
 
+        if (mockId) {
+            try {
+                const payload = await validateListeningMockAnswers(mockId, userAnswers);
+
+                const backendScore = Number(payload?.correct ?? payload?.score ?? payload?.correctCount ?? 0);
+                const backendTotal = Number(
+                    payload?.total ?? payload?.totalQuestions ?? payload?.count ?? totalQuestions
+                ) || totalQuestions;
+
+                setTestResults({
+                    score: backendScore,
+                    totalQuestions: backendTotal,
+                    userAnswers,
+                    correctAnswersData: payload?.correctAnswers || {},
+                    isTimeUp,
+                    scoredByBackend: true
+                });
+                setIsModalOpen(true);
+                return;
+            } catch (error) {
+                console.error('Backend listening validation failed:', error);
+                // Continue to local fallback if available.
+            }
+        }
+
         if (!answersData) {
-            console.error("Answers data is not loaded.");
-            // Optionally, show an error to the user
-            setIsTestSubmitted(false);
+            const answeredCount = Object.keys(userAnswers).length;
+            setTestResults({
+                score: 0,
+                totalQuestions: totalQuestions || answeredCount,
+                userAnswers,
+                correctAnswersData: {},
+                isTimeUp,
+                scoredByBackend: false
+            });
+            setIsModalOpen(true);
             return;
         }
 
@@ -477,7 +511,7 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         });
 
         setIsModalOpen(true);
-    }, [answersData, testId, userAnswers, isTestSubmitted]);
+    }, [answersData, mockId, testId, totalQuestions, userAnswers, isTestSubmitted]);
 
     // Handle timer expiration
     const handleTimeUp = useCallback(() => {
@@ -973,6 +1007,27 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         setMockTimeLeftSeconds(testDuration * 60);
     }, [testDuration, test?.id]);
 
+    const handleLogout = useCallback(async () => {
+        const storedSession = getMockSession();
+        const token = storedSession?.accessToken;
+
+        // Если токена нет, просто чистим локальную сессию и уходим на главную без запроса
+        if (!token) {
+            clearMockSession();
+            router.replace('/');
+            return;
+        }
+
+        try {
+            await logoutAgent(token);
+        } catch (error) {
+            console.error('Mock agent logout failed:', error);
+        } finally {
+            clearMockSession();
+            router.replace('/');
+        }
+    }, [router]);
+
     useEffect(() => {
         if (!isMockExam || !testStarted || isTestSubmitted) return;
 
@@ -1055,6 +1110,7 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
                     timeText={mockTimeLeftText}
                     onSubmit={() => handleSubmit(false)}
                     isSubmitDisabled={!isSubmittable || isTestSubmitted}
+                    onLogout={handleLogout}
                 />
             ) : (
                 <TestHeader testTitle={testTitle} testName={test.name} backTo="/mock/listening" />
