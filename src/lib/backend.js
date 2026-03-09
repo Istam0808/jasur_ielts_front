@@ -1,4 +1,4 @@
-const DEFAULT_BACKEND_URL = "http://localhost:8000";
+const DEFAULT_BACKEND_URL = "https://jasur-ielts-backend.onrender.com/";
 
 function normalizeBackendUrl(value) {
   const raw = (value || DEFAULT_BACKEND_URL).trim().replace(/\/+$/, "");
@@ -12,7 +12,13 @@ export const BACKEND_URL = normalizeBackendUrl(process.env.NEXT_PUBLIC_BACKEND_U
 
 export function buildBackendUrl(pathname) {
   if (!pathname) return BACKEND_URL;
+
+  // Гарантируем только ведущий слеш у пути.
+  // Хвостовой слеш будет добавлен на стороне backend‑rewrite.
   const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
+  // В браузере ходим через Next.js proxy `/api/backend/...`,
+  // чтобы избежать прямых запросов с localhost:3000 на внешний домен.
   if (typeof window !== "undefined") {
     try {
       const origin = window.location.origin;
@@ -22,6 +28,8 @@ export function buildBackendUrl(pathname) {
       }
     } catch (_) {}
   }
+
+  // На сервере (SSR/Route handlers) или если origin совпал — идём напрямую.
   return `${BACKEND_URL}${path}`;
 }
 

@@ -88,7 +88,7 @@ async function request(pathname, { method = "GET", body, token } = {}) {
 }
 
 export async function loginAgent(username, password) {
-  const payload = await request("/api/v1/auth/login/", {
+  const payload = await request("/api/v1/auth/login", {
     method: "POST",
     body: { username, password },
   });
@@ -100,7 +100,7 @@ export async function loginAgent(username, password) {
 }
 
 export async function logoutAgent(token) {
-  await request("/api/v1/auth/logout/", {
+  await request("/api/v1/auth/logout", {
     method: "POST",
     body: {},
     token,
@@ -109,12 +109,24 @@ export async function logoutAgent(token) {
 
 export async function getMocksList(token) {
   try {
-    const payload = await request("/api/v1/mocks/", { token });
+    const payload = await request("/api/v1/mocks/list/", { token });
+
+    const resultsArray = Array.isArray(payload?.results)
+      ? payload.results
+      : Array.isArray(payload)
+      ? payload
+      : [];
+
     return {
-      count: Number(payload?.count || 0),
+      count:
+        typeof payload?.count === "number"
+          ? payload.count
+          : Array.isArray(resultsArray)
+          ? resultsArray.length
+          : 0,
       next: payload?.next || null,
       previous: payload?.previous || null,
-      results: Array.isArray(payload?.results) ? payload.results : [],
+      results: resultsArray,
     };
   } catch (error) {
     if (error instanceof BackendApiError && Number(error.status) === 404) {

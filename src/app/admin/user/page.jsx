@@ -40,6 +40,14 @@ export default function AdminUserPage() {
     []
   );
 
+  function closeSettingsModal() {
+    setSettingsModalOpen(false);
+  }
+
+  function closeExitConfirmModal() {
+    setExitConfirmModalOpen(false);
+  }
+
   useEffect(() => {
     const ok =
       typeof window !== "undefined" && sessionStorage.getItem("adminAuth") === "true";
@@ -79,14 +87,6 @@ export default function AdminUserPage() {
     if (typeof window !== "undefined") {
       localStorage.setItem(ADMIN_THEME_KEY, newTheme);
     }
-  }
-
-  function closeSettingsModal() {
-    setSettingsModalOpen(false);
-  }
-
-  function closeExitConfirmModal() {
-    setExitConfirmModalOpen(false);
   }
 
   function handleLogout() {
