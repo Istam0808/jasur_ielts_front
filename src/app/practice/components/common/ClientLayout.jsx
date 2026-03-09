@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, Suspense } from 'react'
 import { usePathname } from 'next/navigation'
-import { LoadingBar, Footer, GoToTop, SplashScreen } from '@/components/common'
+import { LoadingBar, Footer } from '@/components/common'
 import EnglishPagesBackground from '@/components/common/EnglishPagesBackground'
 import { LoadingProvider } from './LoadingContext'
 import { NavigationEvents } from './NavigationEvents'
@@ -114,18 +114,10 @@ export function ClientLayout({ children }) {
   };
 
   // Show splash screen until animation completes (don't depend on language)
-  const shouldShowSplash = showSplash && !splashCompleted;
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const shouldShowSplash = false;
 
   return (
     <div className={`fouc-fix ${isReady ? 'ready' : ''}`}>
-      {shouldShowSplash && (
-        <SplashScreen 
-          onComplete={handleSplashComplete}
-          forceShow={isDevelopment}
-        />
-      )}
-      
       {!shouldShowSplash && (
         <UserProvider>
           <LoadingProvider>
@@ -143,7 +135,6 @@ export function ClientLayout({ children }) {
               {children}
             </div>
             {!pathname?.includes('/grammar-learn/') && !pathname?.includes('/languages/english/take/') && !pathname?.includes('/writing/') && <Footer />}
-            {!pathname?.includes('/grammar-learn/') && !pathname?.includes('/languages/english/take/') && !pathname?.includes('/writing/') && <GoToTop />}
           </LoadingProvider>
         </UserProvider>
       )}

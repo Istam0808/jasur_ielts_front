@@ -1,5 +1,4 @@
 export { default as LoadingBar } from './LoadingBar';
-export { default as SplashScreen } from './SplashScreen';
 export { default as Timer } from './Timer';
 export { default as Modal } from './Modal';
 export { default as NoteModal } from './NoteModal';
@@ -12,7 +11,6 @@ export { default as spinner } from './spinner';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as Breadcrumb } from './Breadcrumb';
 export { default as Pagination } from './Pagination';
-export { GoToTop } from './GoToTop';
 export { default as Accordion } from './Accordion';
 export { default as ExplanationDropdown } from './ExplanationDropdown';
 export { default as TestResultsModal } from './TestResultsModal';
