@@ -3,29 +3,17 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import LearningTimer from "./index.jsx";
-import { useLearningTimer } from "@/hooks/useLearningTimer";
 import "./style.scss";
 
 /**
- * Demo component showcasing LearningTimer functionality
- * Demonstrates automatic tracking and manual controls
+ * Упрощённая демо-версия LearningTimer без useLearningTimer.
  */
 const LearningTimerDemo = () => {
   const { t } = useTranslation("common");
 
-  // UI controls for demo toggles
   const [showTimer, setShowTimer] = useState(true);
   const [showSessionTime, setShowSessionTime] = useState(true);
   const [showTotalTime, setShowTotalTime] = useState(true);
-
-  // Hook: learning timer state + controls
-  const {
-    isActive,
-    formattedSessionTime,
-    formattedDailyTotal,
-    manualStart,
-    manualStop,
-  } = useLearningTimer();
 
   return (
     <div className="learning-timer-demo">

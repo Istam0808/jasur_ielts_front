@@ -13,7 +13,6 @@ import PassageNavigation from './PassageNavigation';
 import PassageArrowNavigation from './PassageArrowNavigation';
 import QuestionTypeFilter from './QuestionTypeFilter';
 import ResultsModal from '../../common/ModalResults';
-import { useLearningTimer } from '@/hooks/useLearningTimer';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
 
 export default function NormalReadingMode({
@@ -77,18 +76,6 @@ export default function NormalReadingMode({
                 ? t('submitTest')
                 : t('submitProgress', { answered: submitAnsweredCount, total: submitTotalCount });
 
-    // Learning timer: start when reading mode opens, stop on finish/close/unmount
-    const { manualStart, manualStop } = useLearningTimer({ 
-        activityTag: 'reading_practice', 
-        renderless: true
-    });
-
-    // Start/stop learning timer when component mounts/unmounts
-    useEffect(() => {
-        try { manualStart(); } catch (_) {}
-        return () => { try { manualStop(); } catch (_) {} };
-    }, [manualStart, manualStop]);
-
     // Distraction detection with silent pause/resume for reading sessions
     useDistractionDetector({
         enabled: true,
@@ -97,13 +84,9 @@ export default function NormalReadingMode({
         blurGraceMs: 0, // Stop immediately on blur
         inactivityMs: 5 * 60 * 1000, // 5 minutes inactivity
         onDistraction: () => {
-            // Pause timer silently when user switches tabs/apps
-            try { manualStop(); } catch (_) {}
             setTimerPaused(true);
         },
         onReturn: () => {
-            // Resume timer silently when user returns
-            try { manualStart(); } catch (_) {}
             setTimerPaused(false);
         }
     });
