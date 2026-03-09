@@ -33,7 +33,6 @@ function buildSebHeaders() {
 /** Публичные пути: Authorization не отправляется, чтобы DRF не вызывал JWT и не возвращал 401. */
 const PUBLIC_PATHS = [
   "/api/v1/auth/login",
-  "/api/v1/mocks/list/",
 ];
 
 function isPublicPath(pathname) {
@@ -121,7 +120,7 @@ export async function logoutAgent(token) {
 
 export async function getMocksList(token) {
   try {
-    const payload = await request("/api/v1/mocks/list/");
+    const payload = await request("/api/v1/mocks/list/", { token });
 
     const resultsArray = Array.isArray(payload?.results)
       ? payload.results

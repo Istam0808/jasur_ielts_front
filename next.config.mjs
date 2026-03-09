@@ -12,7 +12,13 @@ const nextConfig = {
         source: "/api/backend/api/v1/mocks/list/",
         destination: `${backendUrl.replace(/\/+$/, "")}/api/v1/mocks/list/`,
       },
-      // Общее правило для всех backend‑запросов (auth, mocks и т.д.) — путь прокидывается как есть.
+      // Правило для backend‑запросов, у которых в исходном URL есть завершающий слеш.
+      // Например: /api/backend/api/v1/mocks/2/ -> .../api/v1/mocks/2/
+      {
+        source: "/api/backend/:path*/",
+        destination: `${backendUrl.replace(/\/+$/, "")}/:path*/`,
+      },
+      // Общее правило для остальных backend‑запросов (auth, mocks и т.д.) без завершающего слеша.
       {
         source: "/api/backend/:path*",
         destination: `${backendUrl.replace(/\/+$/, "")}/:path*`,

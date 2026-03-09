@@ -233,51 +233,16 @@ export default function StudentLoginPage() {
               <div className="student-login__mock-grid">
                 {mocks.map((mockItem) => (
                   <article className="student-login__mock-card" key={mockItem.id}>
-                    <h2 className="student-login__mock-title">Mock #{mockItem.id}</h2>
+                    <h2 className="student-login__mock-title">
+                      Mock #{mockItem.id} — {mockItem.name || "Без названия"}
+                    </h2>
                     <p className="student-login__mock-meta">
                       Создан: {mockItem.created_at || "—"}
                     </p>
                     <p className="student-login__mock-meta">
                       Обновлен: {mockItem.updated_at || "—"}
                     </p>
-                    <div className="student-login__mock-sections">
-                      <div className="student-login__mock-section">
-                        <h3 className="student-login__mock-section-title">Reading</h3>
-                        <p className="student-login__mock-meta">
-                          Part 1: {mockItem.reading_p1 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Part 2: {mockItem.reading_p2 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Part 3: {mockItem.reading_p3 ?? "—"}
-                        </p>
-                      </div>
-                      <div className="student-login__mock-section">
-                        <h3 className="student-login__mock-section-title">Listening</h3>
-                        <p className="student-login__mock-meta">
-                          Part 1: {mockItem.listening_p1 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Part 2: {mockItem.listening_p2 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Part 3: {mockItem.listening_p3 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Part 4: {mockItem.listening_p4 ?? "—"}
-                        </p>
-                      </div>
-                      <div className="student-login__mock-section">
-                        <h3 className="student-login__mock-section-title">Writing</h3>
-                        <p className="student-login__mock-meta">
-                          Task 1: {mockItem.writing_task1 ?? "—"}
-                        </p>
-                        <p className="student-login__mock-meta">
-                          Task 2: {mockItem.writing_task2 ?? "—"}
-                        </p>
-                      </div>
-                    </div>
+                    
                     <button
                       type="button"
                       className="student-login__btn"

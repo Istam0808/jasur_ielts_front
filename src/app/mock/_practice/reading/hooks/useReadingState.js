@@ -209,7 +209,9 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
             metadata: {
                 timeLimit: readingExercise.metadata?.timeLimit,
                 skills: readingExercise.metadata?.skills
-            }
+            },
+            source: readingExercise.source,
+            mockId: readingExercise.mockId
         };
 
         if (isMultiPassage) {

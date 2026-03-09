@@ -245,7 +245,12 @@ export function adaptReadingMockToUi(mockDetail) {
     module: "academic",
     title: `Mock ${mockId}`,
     topic: "Backend mock reading",
-    total_questions: passages.reduce((sum, passage) => sum + asArray(passage.questions).length, 0),
+    source: "backend-mock",
+    mockId,
+    total_questions: passages.reduce(
+      (sum, passage) => sum + asArray(passage.questions).length,
+      0
+    ),
     total_passages: passages.length,
     passages,
     metadata: { timeLimit: 60, skills: ["Reading"] },
