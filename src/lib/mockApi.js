@@ -30,6 +30,18 @@ function buildSebHeaders() {
   return headers;
 }
 
+/** Публичные пути: Authorization не отправляется, чтобы DRF не вызывал JWT и не возвращал 401. */
+const PUBLIC_PATHS = [
+  "/api/v1/auth/login",
+  "/api/v1/mocks/list/",
+];
+
+function isPublicPath(pathname) {
+  if (!pathname || typeof pathname !== "string") return false;
+  const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return PUBLIC_PATHS.includes(normalized);
+}
+
 async function parseResponseBody(response) {
   if (response.status === 204 || response.headers.get("content-length") === "0") {
     return null;
@@ -63,7 +75,7 @@ async function request(pathname, { method = "GET", body, token } = {}) {
     headers["Content-Type"] = "application/json";
   }
 
-  if (token) {
+  if (token && !isPublicPath(pathname)) {
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -109,7 +121,7 @@ export async function logoutAgent(token) {
 
 export async function getMocksList(token) {
   try {
-    const payload = await request("/api/v1/mocks/list/", { token });
+    const payload = await request("/api/v1/mocks/list/");
 
     const resultsArray = Array.isArray(payload?.results)
       ? payload.results

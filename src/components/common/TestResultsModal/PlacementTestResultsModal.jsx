@@ -40,7 +40,6 @@ import {
 } from '@/utils/levelIdentificationToastHelper';
 import useScrollLock from '@/hooks/useScrollLock';
 import { useFocusTrap, useArrowNavigation } from '@/hooks/useKeyboardNavigation';
-import { useMobileDetection } from '@/hooks/useMobileDetection';
 import styles from './IdentifyLevelResultModal.module.scss';
 
 const PlacementTestResultsModal = memo(({
@@ -53,8 +52,8 @@ const PlacementTestResultsModal = memo(({
   i18n
 }) => {
   const { t } = useTranslation(['test', 'subjects', 'practice', 'common', 'profile']);
-  const isTabletOrBelow = useMobileDetection(992);
-  const isMobile = useMobileDetection(768);
+  const isTabletOrBelow = false;
+  const isMobile = false;
   
   // Lock scroll when modal is open
   useScrollLock(isOpen);

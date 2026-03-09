@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './CircularProgressBar.module.scss';
-import { useMobileDetection } from '@/hooks/useMobileDetection';
 
 const getScoreColor = (value, isPercentage, maxScore) => {
     const normalizedScore = isPercentage ? (value / 100) * 9 : ((value / (maxScore || 9)) * 9);
@@ -10,10 +9,8 @@ const getScoreColor = (value, isPercentage, maxScore) => {
 };
 
 const CircularProgressBar = ({ score, maxScore = 9, size: sizeProp = 120, isPercentage = false, showText = true }) => {
-    const isMobile = useMobileDetection(600);
-
-    const size = isMobile ? 80 : sizeProp;
-    const strokeWidth = isMobile ? 8 : 10;
+    const size = sizeProp;
+    const strokeWidth = 10;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
     
