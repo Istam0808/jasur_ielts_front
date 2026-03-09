@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect, Suspense } from 'react'
 import { usePathname } from 'next/navigation'
-import { LoadingBar, Footer } from '@/components/common'
+import { LoadingBar } from '@/components/common'
 import EnglishPagesBackground from '@/components/common/EnglishPagesBackground'
 import { LoadingProvider } from './LoadingContext'
 import { NavigationEvents } from './NavigationEvents'
@@ -134,7 +134,6 @@ export function ClientLayout({ children }) {
             <div className="main-content-wrapper">
               {children}
             </div>
-            {!pathname?.includes('/grammar-learn/') && !pathname?.includes('/languages/english/take/') && !pathname?.includes('/writing/') && <Footer />}
           </LoadingProvider>
         </UserProvider>
       )}

@@ -11,7 +11,6 @@ import { WRITING_TASK_1 } from '@/store';
 import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
 import { TestNavbar, TestFooter } from '@/components/common';
-import InfoTooltip from '@/components/common/InfoTooltip';
 import WritingResultsPanel from './WritingResultsPanel';
 import '../WritingResultsPanel.scss';
 
@@ -489,13 +488,9 @@ function WritingPageContent({
                                 </p>
                                 <div className="ielts-task-instruction__prompt">
                                     <p className="ielts-task-instruction__prompt-text">
-                                        {!isPlacementTest && isTitleTruncated ? (
-                                            <InfoTooltip content={writingTopicTitle} position="bottom">
-                                                <span ref={titleRef} className="writing-title writing-title--truncated">{writingTopicTitle}</span>
-                                            </InfoTooltip>
-                                        ) : (
-                                            <span ref={titleRef} className="writing-title">{writingTopicTitle}</span>
-                                        )}
+                                        <span ref={titleRef} className="writing-title">
+                                            {writingTopicTitle}
+                                        </span>
                                     </p>
                                     {topicDescription && (
                                         <p className="ielts-task-instruction__description">{topicDescription}</p>

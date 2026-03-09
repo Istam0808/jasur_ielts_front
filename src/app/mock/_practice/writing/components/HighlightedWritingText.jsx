@@ -2,7 +2,6 @@
 
 import React, { useMemo } from 'react';
 import { generateHighlightedText } from '@/utils/writing';
-import WritingWordTooltip from '@/components/common/WritingWordTooltip';
 import '../writingProcess.scss';
 
 /**
@@ -40,8 +39,9 @@ export default function HighlightedWritingText({
           }
 
           if (segment.type === 'highlight') {
-            const highlightedWord = (
+            return (
               <span
+                key={segment.key || `highlight-${index}`}
                 className="highlighted-word"
                 style={{
                   '--category-color': segment.category.color,
@@ -49,31 +49,10 @@ export default function HighlightedWritingText({
                   textDecorationColor: segment.category.color,
                   textDecorationThickness: '3px',
                   textUnderlineOffset: '4px',
-                  cursor: enableTooltips ? 'help' : 'default'
+                  cursor: enableTooltips ? 'help' : 'default',
                 }}
               >
                 {segment.content}
-              </span>
-            );
-
-            // Only wrap with tooltip if enabled
-            if (enableTooltips) {
-              return (
-                <WritingWordTooltip
-                  key={segment.key || `highlight-${index}`}
-                  category={segment.category}
-                  word={segment.word}
-                  position="top"
-                >
-                  {highlightedWord}
-                </WritingWordTooltip>
-              );
-            }
-
-            // Return highlighted word without tooltip
-            return (
-              <span key={segment.key || `highlight-${index}`}>
-                {highlightedWord}
               </span>
             );
           }

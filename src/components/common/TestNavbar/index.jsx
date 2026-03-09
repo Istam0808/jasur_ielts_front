@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import Timer from '@/components/common/Timer';
-import InfoTooltip from '@/components/common/InfoTooltip';
 import styles from './style.module.scss';
 
 /**
@@ -70,16 +69,12 @@ export default function TestNavbar({
       );
     }
 
-    // Default: questions progress
+    // Default: questions progress (без всплывающей подсказки)
     return (
       <div className={styles.progress} role="status" aria-live="polite">
         <span className={styles.progressText}>
           {t('test:adaptive.question', 'Question')} {currentQuestion} / ~{estimatedTotal}
         </span>
-        <InfoTooltip 
-          content={t('test:adaptive.tooltips.adaptiveProgress', 'This is an adaptive test. The number of questions may change based on your performance.')}
-          position="bottom"
-        />
       </div>
     );
   };
