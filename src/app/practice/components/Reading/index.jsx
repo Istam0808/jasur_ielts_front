@@ -19,7 +19,6 @@ import {
 } from "react-icons/fi";
 import { BiCategory } from "react-icons/bi";
 import Spinner from "@/components/common/spinner";
-import Pagination from "@/components/common/Pagination";
 import "../shared.scss";
 import "../tabSections.scss";
 import "../topicsList.scss";
@@ -740,257 +739,239 @@ const Reading = ({ onChangeLevelClick }) => {
       </div>
 
       {paginationData.totalItems > 0 ? (
-        <>
-          <div
-            className={`ielts-topics-list ${isAdvancedLevel ? "advanced-layout" : ""}`}
-          >
-            {paginationData.currentTopics.map((topic) => (
-              <div
-                key={topic.id + "-topic-item"}
-                className={`ielts-topic-item`}
+        <div
+          className={`ielts-topics-list ${isAdvancedLevel ? "advanced-layout" : ""}`}
+        >
+          {paginationData.currentTopics.map((topic) => (
+            <div
+              key={topic.id + "-topic-item"}
+              className={`ielts-topic-item`}
+            >
+              <Card
+                className="topic-card"
+                unstyled
+                onClick={() => handleTopicSelect(topic.id)}
+                aria-label={`${t("selectTopic", { ns: "reading", defaultValue: "Select Reading Topic" })}: ${topic.title}`}
+                title={topic.title}
               >
-                <Card
-                  className="topic-card"
-                  unstyled
-                  onClick={() => handleTopicSelect(topic.id)}
-                  aria-label={`${t("selectTopic", { ns: "reading", defaultValue: "Select Reading Topic" })}: ${topic.title}`}
-                  title={topic.title}
-                >
-                  <div className="topic-header">
-                    <div className="practice-explanation-number">
-                      <span className="number-badge">{topic.listNumber}</span>
-                    </div>
-                    <div className="topic-header-right">
-                      <div className="questions-count-badge">
-                        <FiEdit className="stat-icon" />
-                        <span className="stat-text">
-                          {isAdvancedLevel
-                            ? t("fullReading", {
-                              ns: "reading",
-                              defaultValue: "Full reading",
-                            })
-                            : `${topic.questionCount} ${t("questionCount", { ns: "reading", defaultValue: "questions" })}`}
-                        </span>
-                      </div>
-                    </div>
+                <div className="topic-header">
+                  <div className="practice-explanation-number">
+                    <span className="number-badge">{topic.listNumber}</span>
                   </div>
-                  <div className="topic-content">
-                    <h3 className="topic-title">{topic.title}</h3>
-                    {topic.topic && (
-                      <p className="topic-subtitle">{topic.topic}</p>
-                    )}
-                    {topic.passageTitles && topic.passageTitles.length > 0 && (
-                      <div className="passage-titles">
-                        <span className="passage-titles-label">
-                          {t("passages", {
+                  <div className="topic-header-right">
+                    <div className="questions-count-badge">
+                      <FiEdit className="stat-icon" />
+                      <span className="stat-text">
+                        {isAdvancedLevel
+                          ? t("fullReading", {
                             ns: "reading",
-                            defaultValue: "Passages",
-                          })}
-                          :
-                        </span>
-                        <ul className="passage-titles-list">
-                          {topic.passageTitles.map((title, index) => (
-                            <li key={index} className="passage-title-item">
-                              {title}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="topic-description-container">
-                      <p className="topic-description">{topic.description}</p>
-                      {topic.secondaryDescription && (
-                        <p className="topic-secondary-description">
-                          {topic.secondaryDescription}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="topic-meta">
-                    <div className="meta-badges">
-                      <span className="meta-badge badge-info">
-                        <FiBarChart /> {topic.wordCount}{" "}
-                        {t("words", { ns: "reading", defaultValue: "words" })}
+                            defaultValue: "Full reading",
+                          })
+                          : `${topic.questionCount} ${t("questionCount", { ns: "reading", defaultValue: "questions" })}`}
                       </span>
-                      {completedMap[topic.id] && (
-                        <span
-                          className="meta-badge badge-success"
-                          aria-label={t("completed", {
-                            ns: "common",
-                            defaultValue: "Completed",
-                          })}
-                        >
-                          <FiZap />{" "}
-                          {t("completed", {
-                            ns: "common",
-                            defaultValue: "Completed",
-                          })}
-                        </span>
-                      )}
-                      {topic.timeLimit && (
-                        <span className="meta-badge badge-time">
-                          <FiClock /> {topic.timeLimit}{" "}
-                          {t("minutes", { ns: "reading", defaultValue: "min" })}
-                        </span>
-                      )}
-                      {topic.isAcademic && (
-                        <span className="meta-badge badge-academic">
-                          <FiTarget />{" "}
-                          {t("academic", {
-                            ns: "reading",
-                            defaultValue: "Academic",
-                          })}
-                        </span>
-                      )}
                     </div>
                   </div>
-                  {topic.aboutPassage && (
-                    <div
-                      className="topic-footer"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
-                      <div className="about-passage">
-                        <FiBookOpen className="stat-icon" />
-                        <span className="stat-text">{topic.aboutPassage}</span>
-                      </div>
-                      {completedMap[topic.id] && bestResultsMap[topic.id] && (
-                        <div
-                          className="completion-status"
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          {/* Main Score Badge with Gradient - only show if score > 0 */}
-                          {bestResultsMap[topic.id].bestScore > 0 && (
+                </div>
+                <div className="topic-content">
+                  <h3 className="topic-title">{topic.title}</h3>
+                  {topic.topic && (
+                    <p className="topic-subtitle">{topic.topic}</p>
+                  )}
+                  {topic.passageTitles && topic.passageTitles.length > 0 && (
+                    <div className="passage-titles">
+                      <span className="passage-titles-label">
+                        {t("passages", {
+                          ns: "reading",
+                          defaultValue: "Passages",
+                        })}
+                        :
+                      </span>
+                      <ul className="passage-titles-list">
+                        {topic.passageTitles.map((title, index) => (
+                          <li key={index} className="passage-title-item">
+                            {title}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="topic-description-container">
+                    <p className="topic-description">{topic.description}</p>
+                    {topic.secondaryDescription && (
+                      <p className="topic-secondary-description">
+                        {topic.secondaryDescription}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="topic-meta">
+                  <div className="meta-badges">
+                    <span className="meta-badge badge-info">
+                      <FiBarChart /> {topic.wordCount}{" "}
+                      {t("words", { ns: "reading", defaultValue: "words" })}
+                    </span>
+                    {completedMap[topic.id] && (
+                      <span
+                        className="meta-badge badge-success"
+                        aria-label={t("completed", {
+                          ns: "common",
+                          defaultValue: "Completed",
+                        })}
+                      >
+                        <FiZap />{" "}
+                        {t("completed", {
+                          ns: "common",
+                          defaultValue: "Completed",
+                        })}
+                      </span>
+                    )}
+                    {topic.timeLimit && (
+                      <span className="meta-badge badge-time">
+                        <FiClock /> {topic.timeLimit}{" "}
+                        {t("minutes", { ns: "reading", defaultValue: "min" })}
+                      </span>
+                    )}
+                    {topic.isAcademic && (
+                      <span className="meta-badge badge-academic">
+                        <FiTarget />{" "}
+                        {t("academic", {
+                          ns: "reading",
+                          defaultValue: "Academic",
+                        })}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {topic.aboutPassage && (
+                  <div
+                    className="topic-footer"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <div className="about-passage">
+                      <FiBookOpen className="stat-icon" />
+                      <span className="stat-text">{topic.aboutPassage}</span>
+                    </div>
+                    {completedMap[topic.id] && bestResultsMap[topic.id] && (
+                      <div
+                        className="completion-status"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        {bestResultsMap[topic.id].bestScore > 0 && (
+                          <div
+                            className="completion-badge"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "4px 8px",
+                              background:
+                                "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              color: "white",
+                              borderRadius: "16px",
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              boxShadow:
+                                "0 2px 8px rgba(102, 126, 234, 0.25)",
+                              border: "1px solid rgba(255, 255, 255, 0.2)",
+                            }}
+                          >
+                            <FiAward
+                              style={{
+                                fontSize: "15px",
+                                filter:
+                                  "drop-shadow(0 1px 1px rgba(0,0,0,0.2))",
+                              }}
+                            />
                             <div
-                              className="completion-badge"
                               style={{
                                 display: "flex",
+                                flexDirection: "column",
                                 alignItems: "center",
-                                gap: "6px",
-                                padding: "4px 8px",
-                                background:
-                                  "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                                color: "white",
-                                borderRadius: "16px",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                                boxShadow:
-                                  "0 2px 8px rgba(102, 126, 234, 0.25)",
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
                               }}
                             >
-                              <FiAward
-                                style={{
-                                  fontSize: "15px",
-                                  filter:
-                                    "drop-shadow(0 1px 1px rgba(0,0,0,0.2))",
-                                }}
-                              />
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "13px",
-                                    fontWeight: "700",
-                                    lineHeight: "1",
-                                    textShadow: "0 1px 1px rgba(0,0,0,0.2)",
-                                  }}
-                                >
-                                  {bestResultsMap[topic.id].bestScore.toFixed(
-                                    2
-                                  )}
-                                  %
-                                </span>
-                                <span
-                                  style={{
-                                    fontSize: "8px",
-                                    opacity: "0.9",
-                                    lineHeight: "1",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.3px",
-                                  }}
-                                >
-                                  {t("bestScore", {
-                                    ns: "reading",
-                                    defaultValue: "Best",
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Attempts Badge with Creative Design */}
-                          {bestResultsMap[topic.id].totalAttempts > 1 && (
-                            <div
-                              className="attempts-badge"
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                padding: "3px 8px",
-                                background:
-                                  "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                                color: "white",
-                                borderRadius: "14px",
-                                fontSize: "10px",
-                                fontWeight: "600",
-                                boxShadow:
-                                  "0 2px 6px rgba(240, 147, 251, 0.25)",
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
-                              }}
-                            >
-                              <FiRepeat
-                                style={{
-                                  fontSize: "13px",
-                                  filter:
-                                    "drop-shadow(0 1px 1px rgba(0,0,0,0.2))",
-                                }}
-                              />
                               <span
                                 style={{
+                                  fontSize: "13px",
                                   fontWeight: "700",
+                                  lineHeight: "1",
                                   textShadow: "0 1px 1px rgba(0,0,0,0.2)",
                                 }}
                               >
-                                {bestResultsMap[topic.id].totalAttempts}×
+                                {bestResultsMap[topic.id].bestScore.toFixed(
+                                  2
+                                )}
+                                %
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "8px",
+                                  opacity: "0.9",
+                                  lineHeight: "1",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.3px",
+                                }}
+                              >
+                                {t("bestScore", {
+                                  ns: "reading",
+                                  defaultValue: "Best",
+                                })}
                               </span>
                             </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              </div>
-            ))}
+                          </div>
+                        )}
+                        {bestResultsMap[topic.id].totalAttempts > 1 && (
+                          <div
+                            className="attempts-badge"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              padding: "3px 8px",
+                              background:
+                                "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                              color: "white",
+                              borderRadius: "14px",
+                              fontSize: "10px",
+                              fontWeight: "600",
+                              boxShadow:
+                                "0 2px 6px rgba(240, 147, 251, 0.25)",
+                              border: "1px solid rgba(255, 255, 255, 0.2)",
+                            }}
+                          >
+                            <FiRepeat
+                              style={{
+                                fontSize: "13px",
+                                filter:
+                                  "drop-shadow(0 1px 1px rgba(0,0,0,0.2))",
+                              }}
+                            />
+                            <span
+                              style={{
+                                fontWeight: "700",
+                                textShadow: "0 1px 1px rgba(0,0,0,0.2)",
+                              }}
+                            >
+                              {bestResultsMap[topic.id].totalAttempts}×
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+            </div>
+          ))}
         </div>
-        <Pagination
-            currentPage={currentPage}
-            totalPages={paginationData.totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={paginationData.totalItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            startItem={paginationData.startItem}
-            endItem={paginationData.endItem}
-            namespace="common"
-            accentColor={"#FF6636"}
-            scrollTopOnClick=".headerBanner"
-            showInfo={true}
-          />
-        </>
       ) : (
         !isLoading && (
           <div className="no-topics-message">

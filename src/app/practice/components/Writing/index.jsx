@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { FiEdit3, FiClock, FiFileText } from "react-icons/fi";
 import { BiCategory } from "react-icons/bi";
 import Spinner from "@/components/common/spinner";
-import Pagination from "@/components/common/Pagination";
 import { WRITING_TASK_1 } from "@/store";
 import "../tabSections.scss";
 import "../shared.scss";
@@ -347,75 +346,60 @@ const Writing = ({ onChangeLevelClick }) => {
       </div>
 
       {paginationData.totalItems > 0 ? (
-        <>
-          <div className="ielts-topics-list">
-            {paginationData.currentTopics.map((topic) => (
-              <div
-                key={topic.id + "-topic-item"}
-                className="ielts-topic-item"
-                onClick={() => handleTopicSelect(topic.id)}
-              >
-                <div className="topic-card">
-                  <div className="topic-header">
-                    <div className="practice-explanation-number">
-                      <span className="number-badge">{topic.listNumber}</span>
-                    </div>
-                    <div className="topic-header-right">
-                      <div className="topic-type-badge">
-                        <span className="badge badge-primary badge-sm">
-                          {topic.description}
-                        </span>
-                      </div>
-                    </div>
+        <div className="ielts-topics-list">
+          {paginationData.currentTopics.map((topic) => (
+            <div
+              key={topic.id + "-topic-item"}
+              className="ielts-topic-item"
+              onClick={() => handleTopicSelect(topic.id)}
+            >
+              <div className="topic-card">
+                <div className="topic-header">
+                  <div className="practice-explanation-number">
+                    <span className="number-badge">{topic.listNumber}</span>
                   </div>
-                  <div className="topic-content">
-                    <h3 className="topic-title">{topic.title}</h3>
-                  </div>
-                  <div className="topic-meta">
-                    <div className="meta-badges">
-                      <span className="meta-badge badge-info">
-                        <FiEdit3 />{" "}
-                        {t("writingTask", {
-                          ns: "writing",
-                          defaultValue: "Writing Task",
-                        })}
-                      </span>
-                      <span className="meta-badge badge-time">
-                        <FiClock /> {topic.timeLimit}{" "}
-                        {t("minutes", { ns: "writing", defaultValue: "min" })}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="topic-footer">
-                    <div className="stat-item words-count">
-                      <FiFileText className="stat-icon" />
-                      <span className="stat-text">
-                        {topic.requiredWords}{" "}
-                        {t("wordsRequired", {
-                          ns: "writing",
-                          defaultValue: "words required",
-                        })}
+                  <div className="topic-header-right">
+                    <div className="topic-type-badge">
+                      <span className="badge badge-primary badge-sm">
+                        {topic.description}
                       </span>
                     </div>
                   </div>
                 </div>
+                <div className="topic-content">
+                  <h3 className="topic-title">{topic.title}</h3>
+                </div>
+                <div className="topic-meta">
+                  <div className="meta-badges">
+                    <span className="meta-badge badge-info">
+                      <FiEdit3 />{" "}
+                      {t("writingTask", {
+                        ns: "writing",
+                        defaultValue: "Writing Task",
+                      })}
+                    </span>
+                    <span className="meta-badge badge-time">
+                      <FiClock /> {topic.timeLimit}{" "}
+                      {t("minutes", { ns: "writing", defaultValue: "min" })}
+                    </span>
+                  </div>
+                </div>
+                <div className="topic-footer">
+                  <div className="stat-item words-count">
+                    <FiFileText className="stat-icon" />
+                    <span className="stat-text">
+                      {topic.requiredWords}{" "}
+                      {t("wordsRequired", {
+                        ns: "writing",
+                        defaultValue: "words required",
+                      })}
+                    </span>
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
-        <Pagination
-            currentPage={currentPage}
-            totalPages={paginationData.totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={paginationData.totalItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            startItem={paginationData.startItem}
-            endItem={paginationData.endItem}
-            namespace="common"
-            accentColor={"#FF6636"}
-            scrollTopOnClick=".headerBanner"
-            showInfo={true}
-          />
-        </>
       ) : (
         !isLoading && (
           <div className="no-topics-message">

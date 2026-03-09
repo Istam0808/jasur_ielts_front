@@ -12,7 +12,6 @@ import {
   FiList,
 } from "react-icons/fi";
 import Spinner from "@/components/common/spinner";
-import Pagination from "@/components/common/Pagination";
 import { LISTENING_AUDIO_URLS } from "@/store/publicFileUrls";
 import {
   getAvailableBooks,
@@ -276,88 +275,74 @@ const Listening = ({ difficulty = "ielts", onChangeLevelClick }) => {
       </div>
 
       {paginationData.totalItems > 0 ? (
-        <>
-          <div className="ielts-topics-list">
-            {paginationData.currentBooks.map((book) => (
-              <div
-                key={book.id + "-book-item"}
-                className="ielts-topic-item"
-                onClick={() => handleBookSelect(book.id)}
-              >
-                <div className="topic-card">
-                  <div className="topic-header">
-                    <div className="practice-explanation-number">
-                      <span className="number-badge">{book.listNumber}</span>
-                    </div>
-                    <div className="topic-header-right">
-                      {/* Future content can be added here */}
-                    </div>
+        <div className="ielts-topics-list">
+          {paginationData.currentBooks.map((book) => (
+            <div
+              key={book.id + "-book-item"}
+              className="ielts-topic-item"
+              onClick={() => handleBookSelect(book.id)}
+            >
+              <div className="topic-card">
+                <div className="topic-header">
+                  <div className="practice-explanation-number">
+                    <span className="number-badge">{book.listNumber}</span>
                   </div>
-                  <div className="topic-content">
-                    <h3 className="topic-title">{book.title}</h3>
-                    <p className="topic-description">{book.description}</p>
+                  <div className="topic-header-right">
+                    {/* Future content can be added here */}
                   </div>
-                  <div className="topic-meta">
-                    <div className="meta-badges">
-                      <span className="meta-badge badge-info">
-                        <FiBook /> {book.testCount}{" "}
-                        {book.testCount === 1
-                          ? t("completeTest", {
-                            ns: "listening",
-                            defaultValue: "Complete Test",
-                          })
-                          : t("completeTests", {
-                            ns: "listening",
-                            defaultValue: "Complete Tests",
-                          })}
-                      </span>
-                      {book.hasAudio && (
-                        <span className="meta-badge badge-success">
-                          <FiHeadphones />{" "}
-                          {t("audioAvailable", {
-                            ns: "listening",
-                            defaultValue: "Audio Available",
-                          })}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="topic-footer">
-                    <div className="stat-item">
-                      <FiList className="stat-icon" />
-                      <span className="stat-text">
-                        {book.partCount}{" "}
-                        {t("parts", { ns: "listening", defaultValue: "parts" })}
-                      </span>
-                    </div>
-                    <div className="stat-item">
-                      <FiClock className="stat-icon" />
-                      <span className="stat-text">
-                        ~{book.partCount * 10}{" "}
-                        {t("minTotal", {
+                </div>
+                <div className="topic-content">
+                  <h3 className="topic-title">{book.title}</h3>
+                  <p className="topic-description">{book.description}</p>
+                </div>
+                <div className="topic-meta">
+                  <div className="meta-badges">
+                    <span className="meta-badge badge-info">
+                      <FiBook /> {book.testCount}{" "}
+                      {book.testCount === 1
+                        ? t("completeTest", {
                           ns: "listening",
-                          defaultValue: "min total",
+                          defaultValue: "Complete Test",
+                        })
+                        : t("completeTests", {
+                          ns: "listening",
+                          defaultValue: "Complete Tests",
+                        })}
+                    </span>
+                    {book.hasAudio && (
+                      <span className="meta-badge badge-success">
+                        <FiHeadphones />{" "}
+                        {t("audioAvailable", {
+                          ns: "listening",
+                          defaultValue: "Audio Available",
                         })}
                       </span>
-                    </div>
+                    )}
+                  </div>
+                </div>
+                <div className="topic-footer">
+                  <div className="stat-item">
+                    <FiList className="stat-icon" />
+                    <span className="stat-text">
+                      {book.partCount}{" "}
+                      {t("parts", { ns: "listening", defaultValue: "parts" })}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <FiClock className="stat-icon" />
+                    <span className="stat-text">
+                      ~{book.partCount * 10}{" "}
+                      {t("minTotal", {
+                        ns: "listening",
+                        defaultValue: "min total",
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
         </div>
-        <Pagination
-            currentPage={currentPage}
-            totalPages={paginationData.totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={paginationData.totalItems}
-            itemsPerPage={ITEMS_PER_PAGE}
-            startItem={paginationData.startItem}
-            endItem={paginationData.endItem}
-            namespace="common"
-            accentColor={"#FF6636"}
-            scrollTopOnClick=".headerBanner"
-          />
-        </>
       ) : (
         !isLoading && (
           <div className="no-topics-message">
