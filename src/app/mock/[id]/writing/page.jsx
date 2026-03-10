@@ -6,7 +6,7 @@ import Spinner from "@/components/common/spinner";
 import WritingPage from "@/app/mock/_components/WritingPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptWritingMockToUi } from "@/lib/mockAdapters";
-import { getMockAccessToken } from "@/lib/mockSession";
+import { getMockAccessToken, getMockPayload, setMockPayload } from "@/lib/mockSession";
 
 export default function MockWritingByIdPage() {
   const params = useParams();
@@ -27,8 +27,15 @@ export default function MockWritingByIdPage() {
     const load = async () => {
       setLoading(true);
       setError("");
+      const cached = getMockPayload(mockId);
+      if (cached) {
+        setWritingExercise(adaptWritingMockToUi(cached));
+        setLoading(false);
+        return;
+      }
       try {
         const detail = await getMockById(mockId, token);
+        setMockPayload(mockId, detail);
         setWritingExercise(adaptWritingMockToUi(detail));
       } catch (err) {
         setError(err?.message || "Не удалось загрузить writing mock.");

@@ -45,7 +45,7 @@ export const PartNavigation = ({ parts, currentPartIndex, onSelectPart }) => {
         <div className="part-navigation-tabs">
             {parts.map((part, index) => (
                 <button
-                    key={part.part}
+                    key={`part-tab-${index}`}
                     className={`part-tab ${index === currentPartIndex ? 'active' : ''}`}
                     onClick={() => onSelectPart(index)}
                 >
@@ -171,7 +171,7 @@ export const MockExamBottomNav = ({
 
                         return (
                             <div
-                                key={part.part ?? index}
+                                key={`mock-part-${index}`}
                                 className={`mock-exam-part-slot ${isActive ? 'mock-exam-part-slot--active' : ''}`}
                             >
                                 {isActive ? (

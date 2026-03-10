@@ -6,7 +6,7 @@ import Spinner from "@/components/common/spinner";
 import ReadingPage from "@/app/mock/_components/ReadingPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptReadingMockToUi } from "@/lib/mockAdapters";
-import { getMockAccessToken } from "@/lib/mockSession";
+import { getMockAccessToken, getMockPayload, setMockPayload } from "@/lib/mockSession";
 
 export default function MockReadingByIdPage() {
   const params = useParams();
@@ -27,8 +27,15 @@ export default function MockReadingByIdPage() {
     const load = async () => {
       setLoading(true);
       setError("");
+      const cached = getMockPayload(mockId);
+      if (cached) {
+        setReadingExercise(adaptReadingMockToUi(cached));
+        setLoading(false);
+        return;
+      }
       try {
         const detail = await getMockById(mockId, token);
+        setMockPayload(mockId, detail);
         setReadingExercise(adaptReadingMockToUi(detail));
       } catch (err) {
         setError(err?.message || "Не удалось загрузить reading mock.");

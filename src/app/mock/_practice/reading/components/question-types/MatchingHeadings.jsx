@@ -13,6 +13,33 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
         return answer || {};
     }, [answer]);
 
+    // Безопасный список заголовков, устойчивый к разным форматам данных с бэкенда
+    const headings = useMemo(() => {
+        // Корректный массив строк в поле headings
+        if (Array.isArray(question?.headings) && question.headings.length > 0) {
+            return question.headings;
+        }
+
+        // Пытаемся собрать заголовки из options, если бэкенд кладёт их туда
+        if (Array.isArray(question?.options) && question.options.length > 0) {
+            return question.options
+                .map((opt) => {
+                    if (typeof opt === 'string') return opt;
+                    return (
+                        opt.heading || // { heading: "iv. Some text" }
+                        opt.text ||    // { text: "iv. Some text" }
+                        opt.label ||   // { label: "iv. Some text" }
+                        opt.id ||      // { id: "iv. Some text" }
+                        null
+                    );
+                })
+                .filter(Boolean);
+        }
+
+        // Фолбэк — пустой массив, чтобы .map не падал
+        return [];
+    }, [question?.headings, question?.options]);
+
     // Get correct answers for review mode (external map for advanced; embedded for basic)
     const correctAnswers = useMemo(() => {
         if (!isReviewMode) return {};
@@ -79,10 +106,15 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
     };
 
     const getHeadingText = (headingId) => {
-        // Find the heading that starts with the exact headingId
-        const heading = question.headings.find(h => h.startsWith(`${headingId}.`));
+        if (!Array.isArray(headings) || headings.length === 0) {
+            return headingId;
+        }
+
+        // Найти заголовок, начинающийся с идентификатора (A., iii. и т.п.)
+        const heading = headings.find(
+            (h) => typeof h === 'string' && h.startsWith(`${headingId}.`)
+        );
         if (heading) {
-            // Return the full heading with identifier (e.g., "iii. Playing a less essential role")
             return heading;
         }
         return headingId;
@@ -98,12 +130,26 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
             <div className="headings-list">
                 <h4 className="headings-title">{t('listOfHeadings')}:</h4>
                 <div className="headings-grid">
-                    {question.headings.map((heading, idx) => (
-                        <div key={idx} className="heading-item">
-                            <span className="heading-id">{heading.split('.')[0]}.</span>
-                            <span className="heading-text">{heading.split('.').slice(1).join('.').trim()}</span>
-                        </div>
-                    ))}
+                    {headings.length === 0 ? (
+                        <p className="no-headings-warning">
+                            {t('matchingHeadings.noHeadings', 'No headings data available for this question.')}
+                        </p>
+                    ) : (
+                        headings.map((heading, idx) => (
+                            <div key={idx} className="heading-item">
+                                <span className="heading-id">
+                                    {typeof heading === 'string'
+                                        ? `${heading.split('.')[0]}.`
+                                        : ''}
+                                </span>
+                                <span className="heading-text">
+                                    {typeof heading === 'string'
+                                        ? heading.split('.').slice(1).join('.').trim()
+                                        : String(heading)}
+                                </span>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -133,11 +179,15 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
                             
                             <div className="heading-selector">
                                 <SelectOption
-                                  options={question.headings.map((h) => ({ 
-                                    value: h.split('.')[0], 
-                                    label: h,
-                                    disabled: h.startsWith('EXAMPLE')
-                                  }))}
+                                  options={headings.map((h) => {
+                                      const raw = typeof h === 'string' ? h : String(h);
+                                      const id = raw.split('.')[0];
+                                      return {
+                                          value: id,
+                                          label: raw,
+                                          disabled: raw.startsWith('EXAMPLE')
+                                      };
+                                  })}
                                   value={selectedHeading || null}
                                   onChange={(val) => handleHeadingChange(sectionValue, val || '')}
                                   placeholder={t('selectHeading')}

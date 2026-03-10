@@ -1203,7 +1203,21 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
                                 className="audio-player"
                                 preload="metadata"
                                 onError={(e) => {
-                                    console.error('Audio loading error:', e);
+                                    const audioEl = e.currentTarget;
+                                    const error = audioEl?.error;
+
+                                    if (error) {
+                                        console.error('Audio loading error:', {
+                                            code: error.code,
+                                            message: error.message,
+                                            src: audioEl.currentSrc || audioEl.src,
+                                        });
+                                    } else {
+                                        console.error('Audio loading error: unknown', {
+                                            src: audioEl?.currentSrc || audioEl?.src,
+                                            eventType: e.type,
+                                        });
+                                    }
                                 }}
                                 onLoadStart={() => {
                                     console.log('Audio loading started');

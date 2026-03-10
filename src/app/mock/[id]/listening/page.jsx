@@ -6,7 +6,7 @@ import Spinner from "@/components/common/spinner";
 import TestListeningPage from "@/app/mock/_components/TestListeningPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptListeningMockToUi } from "@/lib/mockAdapters";
-import { getMockAccessToken } from "@/lib/mockSession";
+import { getMockAccessToken, getMockPayload, setMockPayload } from "@/lib/mockSession";
 
 export default function MockListeningByIdPage() {
   const params = useParams();
@@ -28,10 +28,16 @@ export default function MockListeningByIdPage() {
     const load = async () => {
       setLoading(true);
       setError("");
+      const cached = getMockPayload(mockId);
+      if (cached) {
+        setPayload(adaptListeningMockToUi(cached));
+        setLoading(false);
+        return;
+      }
       try {
         const detail = await getMockById(mockId, token);
-        const adapted = adaptListeningMockToUi(detail);
-        setPayload(adapted);
+        setMockPayload(mockId, detail);
+        setPayload(adaptListeningMockToUi(detail));
       } catch (err) {
         setError(err?.message || "Не удалось загрузить listening mock.");
       } finally {
