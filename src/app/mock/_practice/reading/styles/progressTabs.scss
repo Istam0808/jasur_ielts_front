@@ -309,9 +309,6 @@
                     font-weight: $font-weight-semibold;
                 }
 
-                .word-count {
-                    opacity: 0.8;
-                }
             }
         }
     }
@@ -468,8 +465,7 @@
             .passage-meta {
                 @include flex(row, space-between, center, nowrap, $spacing-xs);
 
-                .question-range,
-                .word-count {
+                .question-range {
                     @include font-size($font-size-xs, 1.2);
                     color: $text-muted;
                     font-weight: $font-weight-medium;

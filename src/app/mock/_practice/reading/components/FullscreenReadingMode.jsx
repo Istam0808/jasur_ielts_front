@@ -47,7 +47,6 @@ export default function FullscreenReadingMode({
     passageParagraphs,
     passageIsHtml = false,
     passageTitle,
-    wordCount,
     totalQuestions,
     columnWidth,
     onColumnResize,
@@ -536,9 +535,6 @@ export default function FullscreenReadingMode({
                                         : t('readingPassage')
                                     }
                                 </h2>
-                                <span className="word-count">
-                                    {wordCount} {t('words')}
-                                </span>
                             </div>
                             <h3 className="passage-title">{passageTitle}</h3>
                             {PassageParagraphs}

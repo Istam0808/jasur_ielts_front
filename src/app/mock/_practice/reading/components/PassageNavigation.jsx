@@ -4,13 +4,6 @@ import { BsCheckCircleFill, BsCircle, BsCheckLg } from 'react-icons/bs';
 import { FaCheckCircle, FaRegCircle } from 'react-icons/fa';
 import '../styles/PassageNavigation.scss';
 
-// Utility function to calculate word count consistently across components
-const calculateWordCount = (text) => {
-    if (!text || typeof text !== 'string') return 0;
-    // Split by spaces and filter out empty strings to get accurate count
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-};
-
 // Utility function to check if an answer exists (consistent with Question component logic)
 const hasValidAnswer = (answer, question) => {
     // Handle undefined, null, or empty string

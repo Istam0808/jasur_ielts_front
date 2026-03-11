@@ -49,7 +49,6 @@ export default function NormalReadingMode({
     passageParagraphs,
     passageIsHtml = false,
     passageTitle,
-    wordCount,
     totalQuestions,
     columnWidth,
     onColumnResize,
@@ -216,7 +215,6 @@ export default function NormalReadingMode({
                                     : t('readingPassage')
                                 }
                             </h2>
-                            <span className="word-count">{wordCount} {t('words')}</span>
                         </div>
                     </div>
 

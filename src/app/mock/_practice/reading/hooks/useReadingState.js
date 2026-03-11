@@ -400,16 +400,11 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
             ? (currentPassage?.title || readingData.title)
             : readingData?.title;
 
-        const wordCount = text
-            ? text.trim().split(/\s+/).filter(word => word.length > 0).length
-            : 0;
-
         const isHtml = typeof text === 'string' && /<\s*\/?\s*(p|b|i|strong|em|br|span)\s*\/?>/i.test(text);
 
         return {
             text,
             title,
-            wordCount,
             isHtml: !!isHtml,
             paragraphs: isHtml ? (text ? [text] : []) : (text?.split('\n\n') || [])
         };
@@ -938,7 +933,6 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         // Passage content
         passageParagraphs: passageContent.paragraphs,
         passageIsHtml: passageContent.isHtml,
-        wordCount: passageContent.wordCount,
         passageTitle: passageContent.title,
 
         // Actions

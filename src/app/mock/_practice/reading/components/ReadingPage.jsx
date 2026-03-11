@@ -66,7 +66,6 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         questionSequenceMap,
         passageParagraphs,
         passageIsHtml,
-        wordCount,
         passageTitle,
         visiblePassages,
 
@@ -245,15 +244,9 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         }
     }, [isFullScreen]);
 
-    // Keyboard shortcuts for full-screen mode - disabled for mobile devices
+    // Keyboard shortcut: Escape to exit full-screen mode
     useEffect(() => {
         const handleKeyDown = (e) => {
-            // F11 or Ctrl+F for full-screen toggle
-            if (e.key === 'F11' || (e.ctrlKey && e.key === 'f')) {
-                e.preventDefault();
-                toggleFullScreen();
-            }
-            // Escape to exit full-screen
             if (e.key === 'Escape' && isFullScreen) {
                 e.preventDefault();
                 exitFullScreen();
@@ -384,7 +377,6 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         passageParagraphs,
         passageIsHtml,
         passageTitle,
-        wordCount,
         totalQuestions,
         columnWidth,
         onColumnResize: setColumnWidth,

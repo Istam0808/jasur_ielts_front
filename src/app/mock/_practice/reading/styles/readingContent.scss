@@ -69,7 +69,6 @@
         min-width: 200px;
     }
 
-    .word-count,
     .questions-count {
         background: $neutral-100;
         color: $text-muted;
@@ -91,7 +90,6 @@
             min-width: auto;
         }
 
-        .word-count,
         .questions-count {
             font-size: $font-size-xs;
             padding: $spacing-xs $spacing-xs;

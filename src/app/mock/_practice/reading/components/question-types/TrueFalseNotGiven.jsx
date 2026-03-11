@@ -62,7 +62,15 @@ const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, rea
         return null;
     }, [isReviewMode, readingId, reviewMap, question.id, globalNumber, question.type]);
 
-    // Removed overall isCorrect summary calculation since inline feedback is shown on options
+    // For YNNG always show Yes/No/Not Given checkboxes (same UI as TFNG); for TFNG use question.options
+    const displayOptions = useMemo(() => {
+        if (question.type === 'yes_no_not_given') {
+            return ['YES', 'NO', 'NOT GIVEN'];
+        }
+        return question.options && question.options.length
+            ? question.options.map((o) => (typeof o === 'object' ? o.answer : o))
+            : ['TRUE', 'FALSE', 'NOT GIVEN'];
+    }, [question.type, question.options]);
 
     const handleOptionChange = (optionValue) => {
         if (isReviewMode) return;
@@ -126,14 +134,13 @@ const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, rea
                 <Radio
                   name={`q-${question.id}`}
                   inline
-                  options={question.options.map((o) => (typeof o === 'object' ? { value: o.answer, label: o.answer } : { value: o, label: o }))}
+                  options={displayOptions.map((opt) => ({ value: opt, label: opt }))}
                   value={answer || null}
                   onChange={(val) => handleOptionChange(val ?? '')}
                   disabled={isReviewMode}
                   allowDeselect
                   statusByValue={Object.fromEntries(
-                    question.options.map((o) => {
-                      const opt = typeof o === 'object' ? o.answer : o;
+                    displayOptions.map((opt) => {
                       const s = getOptionStatus(opt);
                       return [opt, { status: s.status, show: s.showFeedback }];
                     })
