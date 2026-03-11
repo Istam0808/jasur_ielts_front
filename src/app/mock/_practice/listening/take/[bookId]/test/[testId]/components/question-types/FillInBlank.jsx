@@ -2,12 +2,36 @@
 
 import React from 'react';
 
+const BLANK = '_________';
+
 const FillInBlank = ({ question, userAnswer, onAnswerChange }) => {
     const handleInputChange = (e) => {
         onAnswerChange(question.number, e.target.value);
     };
 
-    const parts = question.text.split(/(\d+.*?_________)/);
+    const text = question.text ?? '';
+    const hasBlank = text.includes(BLANK);
+    const qNumberStr = String(question.number);
+
+    if (!hasBlank) {
+        return (
+            <div className="question-fill-in-blank">
+                <label htmlFor={`q-${question.number}`} className="selectable-content">
+                    <strong className="question-number">{qNumberStr}</strong>
+                    {text && <span> {text}</span>}
+                    <input
+                        type="text"
+                        id={`q-${question.number}`}
+                        value={userAnswer || ''}
+                        onChange={handleInputChange}
+                        className="blank-input"
+                    />
+                </label>
+            </div>
+        );
+    }
+
+    const parts = text.split(/(\d+.*?_________)/);
 
     return (
         <div className="question-fill-in-blank">
@@ -17,16 +41,12 @@ const FillInBlank = ({ question, userAnswer, onAnswerChange }) => {
                         const subParts = part.split(/(_________)/);
                         const textBeforeBlank = subParts[0];
 
-                        // Attempt to find and style the question number
-                        const qNumberStr = String(question.number);
-                        const numberIndex = textBeforeBlank.indexOf(qNumberStr);
-                        
                         let textWithStyledNumber = null;
+                        const numberIndex = textBeforeBlank.indexOf(qNumberStr);
 
                         if (numberIndex !== -1) {
                             const before = textBeforeBlank[numberIndex - 1];
                             const after = textBeforeBlank[numberIndex + qNumberStr.length];
-                            // Ensure it's not part of a larger number
                             const isWholeWord = (!before || !/\d/.test(before)) && (!after || !/\d/.test(after));
 
                             if (isWholeWord) {
@@ -39,7 +59,7 @@ const FillInBlank = ({ question, userAnswer, onAnswerChange }) => {
                                 );
                             }
                         }
-                        
+
                         return (
                             <span key={index}>
                                 {textWithStyledNumber || textBeforeBlank}

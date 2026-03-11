@@ -14,6 +14,7 @@ import ResultsModal from '../../common/ModalResults';
 import AIButton from '@/components/common/AIButton';
 import { isSpecificSlotAnswered, isSpecificSlotCorrect } from '../helpers/questionUtils';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
+import sanitizeHtml from '@/utils/sanitizeHtml';
 
 export default function FullscreenReadingMode({
     readingData,
@@ -44,6 +45,7 @@ export default function FullscreenReadingMode({
     onPassageChange,
     currentPassage,
     passageParagraphs,
+    passageIsHtml = false,
     passageTitle,
     wordCount,
     totalQuestions,
@@ -263,12 +265,20 @@ export default function FullscreenReadingMode({
 
     // Memoize passage paragraphs to prevent unnecessary re-renders
     const PassageParagraphs = useMemo(() => {
+        if (passageIsHtml && passageParagraphs?.length > 0) {
+            return (
+                <div
+                    className="passage-html"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
+                />
+            );
+        }
         return passageParagraphs?.map((paragraph, index) => (
             <p key={`paragraph-${index}`} className="passage-paragraph">
                 {paragraph}
             </p>
         ));
-    }, [passageParagraphs]);
+    }, [passageParagraphs, passageIsHtml]);
 
     // Render helpers for cleaner JSX
     const renderLeftSection = () => {

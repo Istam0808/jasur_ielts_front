@@ -1,31 +1,4 @@
 const LISTENING_AUDIO_URLS = {
-    "a1": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/1-anna-is-a-student.m4a" },
-        { id: 2, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/2-tom-is-a-teacher.m4a" },
-        { id: 3, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/3-last-summer.m4a" },
-        { id: 4, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/4-hi-my-name-is-emma.m4a" },
-        { id: 5, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/5-ben-and-anna.mp3" },
-        { id: 6, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/6-about-sarah.mp3" },
-        { id: 7, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/7-sam-support-agent.mp3" },
-        { id: 8, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/8-ark-convo.mp3" },
-        { id: 9, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/9-mark-natural-conversations.mp3" },
-        { id: 10, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a1-mp3/10-cassidy.mp3" },
-    ],
-    "a2": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/a2-mp3/1-anna-daily-routine.m4a" },
-    ],
-    "b1": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/b1-mp3/1-anna-daily-routine.m4a" },
-    ],
-    "b2": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/b2-mp3/1-anna-daily-routine.m4a" },
-    ],
-    "c1": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/c1-mp3/1-anna-daily-routine.m4a" },
-    ],
-    "c2": [
-        { id: 1, url: "https://hbxcdfuqgxkwvztxkqqd.supabase.co/storage/v1/object/public/listening-files/c2-mp3/1-anna-daily-routine.m4a" },
-    ],
     "cambridge-19": {
         "t1-p1-mp3": "https://eak6nusqnilop27e.public.blob.vercel-storage.com/cambridge-19/t1-p1-DSQkU4vioawXVMp4GnMs3goNg9IMFd.mp3",
         "t1-p2-mp3": "https://eak6nusqnilop27e.public.blob.vercel-storage.com/cambridge-19/t1-p2-8J3IpfDWEqgSR6pKKRO6OIEXQ0zZ71.mp3",

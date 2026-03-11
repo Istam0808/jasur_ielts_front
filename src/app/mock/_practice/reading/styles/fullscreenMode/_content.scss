@@ -166,6 +166,30 @@
             }
         }
 
+        .passage-html {
+            p {
+                margin-bottom: $spacing-lg;
+                font-size: 1.1rem;
+                line-height: 1.75;
+                color: $text-secondary;
+                text-align: left;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+                @include respond-to('lg') {
+                    font-size: $font-size-md;
+                    line-height: 1.8;
+                }
+            }
+
+            b, strong {
+                font-weight: $font-weight-bold;
+            }
+        }
     }
 }
 

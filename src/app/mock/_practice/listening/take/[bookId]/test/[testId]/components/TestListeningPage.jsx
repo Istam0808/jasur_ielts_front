@@ -167,6 +167,7 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
     const [isTestSubmitted, setIsTestSubmitted] = useState(false);
     const testContainerRef = useRef(null);
     const isInitialRender = useRef(true);
+    const audioRef = useRef(null);
 
     // Notes functionality state
     const [partNotes, setPartNotes] = useState({}); // { partIndex: [{ id, text, note, partIndex }] }
@@ -175,6 +176,7 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
     const [pendingNote, setPendingNote] = useState('');
     // Add new state for notes viewer
     const [isNotesViewerOpen, setIsNotesViewerOpen] = useState(false);
+    const [audioError, setAudioError] = useState(null);
 
     // Make sure translations are loaded
     useEffect(() => {
@@ -296,6 +298,16 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
             return numbers.filter((num) => userAnswers[num] != null && userAnswers[num] !== '').length;
         });
     }, [testParts, extractQuestionNumbers, userAnswers]);
+
+    const activePartAudioUrl = useMemo(() => {
+        const part = testParts[currentPartIndex];
+        return part?.audioUrl ?? part?.audio_file ?? '';
+    }, [testParts, currentPartIndex]);
+
+    const hasNoAudioInAnyPart = useMemo(() => {
+        if (!testParts.length) return false;
+        return testParts.every((part) => !(part?.audioUrl ?? part?.audio_file ?? '').trim());
+    }, [testParts]);
 
     useEffect(() => {
         if (currentPartIndex >= testParts.length) {
@@ -1045,6 +1057,26 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         return () => clearInterval(intervalId);
     }, [isMockExam, testStarted, isTestSubmitted, handleSubmit]);
 
+    // Clear audio error when part or URL changes
+    useEffect(() => {
+        setAudioError(null);
+    }, [activePartAudioUrl, currentPartIndex]);
+
+    // Autoplay listening audio when part has audio URL and test is active
+    useEffect(() => {
+        if (!activePartAudioUrl || !testStarted || isTestSubmitted) return;
+        const el = audioRef.current;
+        if (!el) return;
+        const playPromise = el.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch((err) => {
+                const msg = err?.message ?? String(err);
+                console.warn('Audio autoplay prevented or failed:', msg);
+                setAudioError(t('audioLoadError', 'Audio could not be played. Try refreshing or check your connection.'));
+            });
+        }
+    }, [activePartAudioUrl, testStarted, isTestSubmitted, currentPartIndex, t]);
+
     const mockTimeLeftText = useMemo(() => {
         if (mockTimeLeftSeconds <= 0) {
             return '0 minutes left';
@@ -1193,43 +1225,43 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
                 />
 
                 <div className="part-content-card">
-                    <PartHeader partNumber={activePart.part} audioUrl={activePart.audioUrl} />
-
-                    {activePart.audioUrl && (
-                        <div className="audio-player-container">
-                            <audio
-                                controls
-                                src={activePart.audioUrl}
-                                className="audio-player"
-                                preload="metadata"
-                                onError={(e) => {
-                                    const audioEl = e.currentTarget;
-                                    const error = audioEl?.error;
-
-                                    if (error) {
-                                        console.error('Audio loading error:', {
-                                            code: error.code,
-                                            message: error.message,
-                                            src: audioEl.currentSrc || audioEl.src,
-                                        });
-                                    } else {
-                                        console.error('Audio loading error: unknown', {
-                                            src: audioEl?.currentSrc || audioEl?.src,
-                                            eventType: e.type,
-                                        });
-                                    }
-                                }}
-                                onLoadStart={() => {
-                                    console.log('Audio loading started');
-                                }}
-                                onCanPlay={() => {
-                                    console.log('Audio can start playing');
-                                }}
-                            >
-                                {t('audioNotSupported')}
-                            </audio>
+                    <PartHeader partNumber={activePart.part} audioUrl={activePartAudioUrl} />
+                    {hasNoAudioInAnyPart && (
+                        <div className="no-audio-for-mock-message" role="status">
+                            {t('noAudioForMock', 'Для этого мока аудио не загружено.')}
                         </div>
                     )}
+                    {audioError && (
+                        <div className="audio-error-message" role="alert">
+                            {audioError}
+                        </div>
+                    )}
+                    {activePartAudioUrl ? (
+                        <audio
+                            ref={audioRef}
+                            src={activePartAudioUrl}
+                            preload="auto"
+                            className="audio-player audio-player-hidden"
+                            onError={(e) => {
+                                try {
+                                    const audioEl = e.currentTarget;
+                                    const error = audioEl?.error;
+                                    const errorInfo = {
+                                        code: error?.code ?? 'UNKNOWN',
+                                        message: error?.message ?? 'Unknown audio error',
+                                        src: audioEl?.currentSrc || audioEl?.src,
+                                        networkState: audioEl?.networkState,
+                                        readyState: audioEl?.readyState,
+                                        eventType: e.type,
+                                    };
+                                    console.error('Audio loading error:', errorInfo);
+                                    setAudioError(t('audioLoadError', 'Audio could not be loaded. Try refreshing or check your connection.'));
+                                } catch (logError) {
+                                    console.error('Audio onError handler failed', logError);
+                                }
+                            }}
+                        />
+                    ) : null}
 
                     {
                         activePart.instruction && (

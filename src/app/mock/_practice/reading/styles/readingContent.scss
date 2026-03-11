@@ -249,6 +249,47 @@
                 margin-bottom: 0;
             }
         }
+
+        .passage-html {
+            p {
+                margin-bottom: $spacing-lg;
+                font-size: $font-size-base;
+                line-height: 1.8;
+                color: $text-secondary;
+                text-align: justify;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+
+                @include respond-down('sm') {
+                    font-size: $font-size-sm;
+                    line-height: 1.6;
+                    margin-bottom: $spacing-md;
+                    text-align: left;
+                }
+
+                @include respond-down('md') {
+                    font-size: $font-size-base;
+                    line-height: 1.7;
+                }
+
+                @include respond-to('md') {
+                    line-height: 1.8;
+                }
+
+                @include respond-to('lg') {
+                    font-size: $font-size-md;
+                    line-height: 1.9;
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            b, strong {
+                font-weight: $font-weight-bold;
+            }
+        }
     }
 }
 

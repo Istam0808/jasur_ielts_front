@@ -14,6 +14,7 @@ import PassageArrowNavigation from './PassageArrowNavigation';
 import QuestionTypeFilter from './QuestionTypeFilter';
 import ResultsModal from '../../common/ModalResults';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
+import sanitizeHtml from '@/utils/sanitizeHtml';
 
 export default function NormalReadingMode({
     readingData,
@@ -46,6 +47,7 @@ export default function NormalReadingMode({
     currentPassage,
     visiblePassages,
     passageParagraphs,
+    passageIsHtml = false,
     passageTitle,
     wordCount,
     totalQuestions,
@@ -227,11 +229,18 @@ export default function NormalReadingMode({
                         data-passage-id={readingData?.isMultiPassage ? activePassageId : 1}
                     >
                         <h3 className="passage-title">{passageTitle}</h3>
-                        {passageParagraphs.map((paragraph, index) => (
-                            <p key={`paragraph-${index}`} className="passage-paragraph">
-                                {paragraph}
-                            </p>
-                        ))}
+                        {passageIsHtml && passageParagraphs?.length > 0 ? (
+                            <div
+                                className="passage-html"
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
+                            />
+                        ) : (
+                            passageParagraphs.map((paragraph, index) => (
+                                <p key={`paragraph-${index}`} className="passage-paragraph">
+                                    {paragraph}
+                                </p>
+                            ))
+                        )}
                     </div>
                 </div>
 

@@ -19,6 +19,13 @@ function toOptionLabel(option, index) {
   return `${String.fromCharCode(65 + index)}) Option ${index + 1}`;
 }
 
+function isPlaceholderQuestionText(str) {
+  if (str == null) return true;
+  const s = String(str).trim();
+  if (!s) return true;
+  return /^[\s\-–—]+$/.test(s);
+}
+
 function mapListeningType(sectionType, question) {
   if (!sectionType) return "fill_in_blank";
   const normalized = String(sectionType).toLowerCase();
@@ -30,6 +37,8 @@ function mapListeningType(sectionType, question) {
   if (normalized.includes("map")) return "map_labeling";
   if (normalized.includes("matching")) return "matching";
   if (normalized.includes("true_false")) return "true_false";
+  if (normalized.includes("raw_html")) return "fill_in_blank";
+  if (normalized.includes("table_completion")) return "fill_in_blank";
   return "fill_in_blank";
 }
 
@@ -73,10 +82,14 @@ export function adaptListeningMockToUi(mockDetail) {
         questionNumber += 1;
 
         const type = mapListeningType(section?.section_type, question);
+        const rawText = question?.question_text;
+        const text = isPlaceholderQuestionText(rawText)
+          ? `Question ${number} _________`
+          : (rawText || `Question ${number} _________`);
         const base = {
           number,
           type,
-          text: question?.question_text || `Question ${number} _________`,
+          text,
         };
 
         if (type === "multiple_choice" || type === "multiple_choice_two") {
