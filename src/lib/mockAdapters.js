@@ -81,6 +81,28 @@ function extractQuestionPlaceholders(text) {
   return Array.from(new Set(matches));
 }
 
+function normalizeCompletionPlaceholders(text) {
+  if (typeof text !== "string" || !text.trim()) return "";
+  return text.replace(/\{\{question:(\d+)\}\}/g, "___$1___");
+}
+
+function toCompletionAnswers(questions) {
+  return asArray(questions)
+    .map((question) => {
+      const blankId = question?.order != null ? String(question.order).trim() : "";
+      if (!blankId) return null;
+
+      const answerValue = question?.correct_answer ?? question?.answer ?? question?.correct ?? "";
+      if (answerValue == null || String(answerValue).trim() === "") return null;
+
+      return {
+        blank: blankId,
+        answer: String(answerValue).trim(),
+      };
+    })
+    .filter(Boolean);
+}
+
 function extractImageUrl(imageLike) {
   if (!imageLike) return "";
   if (typeof imageLike === "string") return imageLike.trim();
@@ -371,6 +393,22 @@ export function adaptReadingMockToUi(mockDetail) {
           endings: sourceQuestions[0]?.options?.length
             ? sourceQuestions[0].options.map(toOptionLabel)
             : [],
+        }];
+      }
+
+      if (type === "summary_completion") {
+        const summaryText =
+          section?.summary_completion?.text ??
+          section?.summary_completion?.summary ??
+          "";
+
+        return [{
+          id: questionId++,
+          type,
+          instruction: section?.instructions || "Complete the summary.",
+          title: section?.summary_completion?.title || "",
+          summary: normalizeCompletionPlaceholders(summaryText),
+          answers: toCompletionAnswers(sourceQuestions),
         }];
       }
 

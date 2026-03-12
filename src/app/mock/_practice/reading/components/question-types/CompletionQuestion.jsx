@@ -209,6 +209,8 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
         if (!question.summary) {
             return <div>No summary content available</div>;
         }
+
+        const summaryTitle = typeof question.title === 'string' ? question.title.trim() : '';
         
         // Split by blanks first, then handle line breaks within each part
         const summaryParts = question.summary.split(/___\d+___/);
@@ -217,6 +219,11 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
         if (isReviewMode) {
             return (
                 <div className="summary-completion review-mode">
+                    {summaryTitle && (
+                        <div className="summary-title">
+                            <h4 className="title-text">{summaryTitle}</h4>
+                        </div>
+                    )}
                     <div className="summary-text">
                         {summaryParts.map((part, idx) => (
                             <React.Fragment key={idx}>
@@ -278,6 +285,11 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
 
         return (
             <div className={`summary-completion ${isSummaryFullyAnswered ? 'answered' : 'unanswered'}`}>
+                {summaryTitle && (
+                    <div className="summary-title">
+                        <h4 className="title-text">{summaryTitle}</h4>
+                    </div>
+                )}
                 <div className="summary-text">
                     <InlineGapFilling
                       contentParts={contentParts}

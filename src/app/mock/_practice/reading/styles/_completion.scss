@@ -33,6 +33,20 @@
             border-color: $border-medium;
         }
 
+        .summary-title {
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid $border-light;
+            padding-bottom: 0.5rem;
+
+            .title-text {
+                margin: 0;
+                color: $text-primary;
+                font-size: 1rem;
+                font-weight: 700;
+                line-height: 1.4;
+            }
+        }
+
         .summary-text {
             line-height: 1.8;
             font-size: 1.05rem;
