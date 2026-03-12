@@ -172,6 +172,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     const [activePassageId, setActivePassageId] = useState(1);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
+    const [inlinePassagePick, setInlinePassagePick] = useState(null);
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -739,6 +740,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         setIsTimerPaused(false);
         setSelectedQuestionTypes([]);
         setAdjustedTimeLimit(null);
+        setInlinePassagePick(null);
 
         // Reset timer
         const currentTime = Date.now();
@@ -927,11 +929,24 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     // Passage change handler
     const handlePassageChange = useCallback((passageId) => {
         setActivePassageId(passageId);
+        setInlinePassagePick(null);
 
         const passageSection = document.querySelector('.passage-content');
         if (passageSection) {
             passageSection.scrollTo({ top: 0, behavior: 'smooth' });
         }
+    }, []);
+
+    const handleInlinePassagePickChange = useCallback((questionId, value) => {
+        if (!questionId) {
+            setInlinePassagePick(null);
+            return;
+        }
+
+        setInlinePassagePick({
+            questionId,
+            value: value || null
+        });
     }, []);
 
     // Horizontal scroll handler
@@ -967,6 +982,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         showLeftArrow,
         showRightArrow,
         reviewMap,
+        inlinePassagePick,
 
         // Computed values
         isMultiPassage,
@@ -1024,6 +1040,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         handleTimeAdjustment,
         handlePassageChange,
         handleScrollDots,
+        handleInlinePassagePickChange,
         setTimerPaused,
 
         // Setters
@@ -1044,5 +1061,6 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         setActivePassageId,
         setShowLeftArrow,
         setShowRightArrow,
+        setInlinePassagePick,
     };
 };

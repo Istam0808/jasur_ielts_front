@@ -12,6 +12,7 @@ import { checkAnswer, getCorrectAnswer } from '@/utils/answerChecker';
 import MultipleChoiceMultiple from './question-types/MultipleChoiceMultiple';
 import TrueFalseNotGiven from './question-types/TrueFalseNotGiven';
 import MatchingHeadings from './question-types/MatchingHeadings';
+import MatchingHeadingsDragBank from './question-types/MatchingHeadingsDragBank';
 import MatchingQuestion from './question-types/MatchingQuestion';
 import MatchingSentences from './question-types/MatchingSentences';
 import CompletionQuestion from './question-types/CompletionQuestion';
@@ -157,7 +158,7 @@ const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isRevie
 BasicQuestionComponent.displayName = 'BasicQuestionComponent';
 
 // Main Question Router Component
-const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode, questionRange, readingId, difficulty, reviewMap, isGrouped = false, showInstruction = true, globalNumber = null }) => {
+const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode, questionRange, readingId, difficulty, reviewMap, isGrouped = false, showInstruction = true, globalNumber = null, inlinePickedOption = null, onInlinePickOptionChange = () => {} }) => {
     const { t } = useTranslation('practice');
 
     // Determine if answer exists based on question type
@@ -424,6 +425,19 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
                 );
 
             case 'matching_headings':
+                if (question.renderInPassage) {
+                    return (
+                        <MatchingHeadingsDragBank
+                            question={question}
+                            answer={answer}
+                            onAnswerChange={onAnswerChange}
+                            isReviewMode={isReviewMode}
+                            inlinePickedOption={inlinePickedOption}
+                            onInlinePickOptionChange={onInlinePickOptionChange}
+                        />
+                    );
+                }
+
                 return (
                     <MatchingHeadings
                         question={question}

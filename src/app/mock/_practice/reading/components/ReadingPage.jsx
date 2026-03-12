@@ -37,6 +37,7 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         selectedQuestionTypes,
         adjustedTimeLimit,
         isTimerPaused,
+        inlinePassagePick,
         activePassageId,
         showLeftArrow,
         setShowLeftArrow,
@@ -99,7 +100,8 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         handleQuestionTypeFilter,
         handleTimeAdjustment,
         handlePassageChange,
-        handleScrollDots
+        handleScrollDots,
+        handleInlinePassagePickChange
     } = useReadingState(readingExercise, difficulty, id);
 
     // Use text highlighting hook
@@ -370,6 +372,7 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         submitTotalCount,
         groupedQuestions,
         questionRanges,
+        currentPassageQuestions,
         difficulty,
         activePassageId,
         onPassageChange: handlePassageChange,
@@ -390,6 +393,8 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         visiblePassages,
         isTimerPaused,
         setTimerPaused,
+        inlinePassagePick,
+        onInlinePassagePickChange: handleInlinePassagePickChange,
         isMockFullscreenLike
     };
 

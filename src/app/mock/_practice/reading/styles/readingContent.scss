@@ -288,6 +288,178 @@
                 font-weight: $font-weight-bold;
             }
         }
+
+        .inline-drop-passage {
+            display: block;
+
+            .passage-html-chunk {
+                display: block;
+            }
+
+            .inline-drop-placeholder {
+                display: inline-flex;
+                align-items: center;
+                min-width: 180px;
+                min-height: 40px;
+                margin: 0 $spacing-xs $spacing-sm 0;
+                border-radius: $border-radius-sm;
+                border: 1px dashed $neutral-400;
+                background: $neutral-50;
+                color: $text-muted;
+                cursor: pointer;
+                transition: all $transition-fast;
+                vertical-align: middle;
+
+                &.filled {
+                    border-style: solid;
+                    border-color: $primary-color;
+                    background: color.adjust($primary-color, $lightness: 43%);
+                    color: $text-primary;
+                }
+
+                &.empty:hover {
+                    border-color: $primary-color;
+                    background: color.adjust($primary-color, $lightness: 46%);
+                }
+
+                .inline-drop-filled {
+                    width: 100%;
+                    padding: $spacing-xs $spacing-sm;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: $spacing-sm;
+                }
+
+                .inline-drop-filled-text {
+                    font-size: $font-size-sm;
+                    line-height: 1.3;
+                }
+
+                .inline-drop-clear {
+                    width: 24px;
+                    height: 24px;
+                    border: none;
+                    border-radius: 50%;
+                    background: $neutral-200;
+                    color: $text-muted;
+                    cursor: pointer;
+                    transition: all $transition-fast;
+
+                    &:hover {
+                        background: $neutral-300;
+                        color: $text-primary;
+                    }
+                }
+
+                .inline-drop-empty-label {
+                    padding: $spacing-xs $spacing-sm;
+                    font-size: $font-size-xs;
+                    white-space: nowrap;
+                    color: $text-muted;
+                }
+            }
+
+            @include respond-down('md') {
+                .inline-drop-placeholder {
+                    min-width: 140px;
+                    min-height: 36px;
+                }
+            }
+        }
+    }
+}
+
+.inline-matching-bank {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+
+    .inline-matching-bank-header {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .inline-matching-bank-instruction {
+        margin: 0;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+        line-height: 1.5;
+    }
+
+    .inline-matching-bank-actions {
+        display: flex;
+        gap: $spacing-sm;
+        flex-wrap: wrap;
+    }
+
+    .inline-matching-btn {
+        border: 1px solid $border-light;
+        border-radius: $border-radius-sm;
+        background: $background-light;
+        color: $text-primary;
+        padding: $spacing-xs $spacing-sm;
+        font-size: $font-size-xs;
+        cursor: pointer;
+
+        &.secondary {
+            background: $neutral-100;
+        }
+
+        &.danger {
+            background: color.adjust($danger-color, $lightness: 42%);
+            border-color: color.adjust($danger-color, $lightness: 28%);
+            color: color.adjust($danger-color, $lightness: -25%);
+        }
+    }
+
+    .inline-matching-bank-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: $spacing-sm;
+    }
+
+    .inline-matching-option {
+        border: 1px solid $neutral-300;
+        border-radius: $border-radius-md;
+        background: $background-light;
+        text-align: left;
+        padding: $spacing-sm;
+        cursor: grab;
+        transition: all $transition-fast;
+
+        &.picked {
+            border-color: $primary-color;
+            background: color.adjust($primary-color, $lightness: 44%);
+            box-shadow: 0 0 0 2px color.adjust($primary-color, $lightness: 35%);
+        }
+
+        &:hover {
+            border-color: $primary-color;
+            background: $neutral-100;
+        }
+    }
+
+    .inline-matching-option-text {
+        display: block;
+        font-size: $font-size-sm;
+        line-height: 1.4;
+        color: $text-primary;
+    }
+
+    .inline-matching-empty {
+        border: 1px dashed $neutral-300;
+        border-radius: $border-radius-md;
+        color: $text-muted;
+        padding: $spacing-sm;
+        font-size: $font-size-sm;
+    }
+
+    @include respond-down('sm') {
+        .inline-matching-option {
+            padding: $spacing-xs $spacing-sm;
+        }
     }
 }
 

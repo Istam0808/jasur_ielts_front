@@ -15,6 +15,7 @@ import QuestionTypeFilter from './QuestionTypeFilter';
 import ResultsModal from '../../common/ModalResults';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
 import sanitizeHtml from '@/utils/sanitizeHtml';
+import PassageWithDropzones from './PassageWithDropzones';
 
 export default function NormalReadingMode({
     readingData,
@@ -41,6 +42,7 @@ export default function NormalReadingMode({
     filteredQuestionsGlobal,
     groupedQuestions,
     questionRanges,
+    currentPassageQuestions,
     difficulty,
     activePassageId,
     onPassageChange,
@@ -65,6 +67,8 @@ export default function NormalReadingMode({
     handleTimeUp,
     isTimerPaused,
     setTimerPaused,
+    inlinePassagePick,
+    onInlinePassagePickChange,
     isMockFullscreenLike = false,
     nextHref = null
 }) {
@@ -76,6 +80,16 @@ export default function NormalReadingMode({
             : canSubmit
                 ? t('submitTest')
                 : t('submitProgress', { answered: submitAnsweredCount, total: submitTotalCount });
+
+    const inlineMatchingQuestion = useMemo(() => {
+        const sourceQuestions = Array.isArray(currentPassageQuestions) ? currentPassageQuestions : [];
+        return sourceQuestions.find((q) => q?.type === 'matching_headings' && q?.renderInPassage) || null;
+    }, [currentPassageQuestions]);
+
+    const inlineMatchingAnswer = inlineMatchingQuestion ? userAnswers?.[inlineMatchingQuestion.id] : null;
+    const inlinePickedValue = inlineMatchingQuestion && inlinePassagePick?.questionId === inlineMatchingQuestion.id
+        ? inlinePassagePick?.value
+        : null;
 
     // Distraction detection with silent pause/resume for reading sessions
     useDistractionDetector({
@@ -228,10 +242,22 @@ export default function NormalReadingMode({
                     >
                         <h3 className="passage-title">{passageTitle}</h3>
                         {passageIsHtml && passageParagraphs?.length > 0 ? (
-                            <div
-                                className="passage-html"
-                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
-                            />
+                            inlineMatchingQuestion ? (
+                                <PassageWithDropzones
+                                    htmlText={passageParagraphs[0]}
+                                    question={inlineMatchingQuestion}
+                                    answer={inlineMatchingAnswer}
+                                    isReviewMode={isReviewMode}
+                                    onAnswerChange={onAnswerChange}
+                                    inlinePickedOption={inlinePickedValue}
+                                    onInlinePickOptionChange={onInlinePassagePickChange}
+                                />
+                            ) : (
+                                <div
+                                    className="passage-html"
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
+                                />
+                            )
                         ) : (
                             passageParagraphs.map((paragraph, index) => (
                                 <p key={`paragraph-${index}`} className="passage-paragraph">
@@ -274,6 +300,8 @@ export default function NormalReadingMode({
                                         readingId={readingId}
                                         difficulty={difficulty}
                                         reviewMap={isAdvancedReading ? reviewMap : null}
+                                        inlinePickedOption={inlinePickedValue}
+                                        onInlinePickOptionChange={onInlinePassagePickChange}
                                     />
                                 ))
                             );

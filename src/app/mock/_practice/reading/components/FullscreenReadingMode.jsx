@@ -15,6 +15,7 @@ import AIButton from '@/components/common/AIButton';
 import { isSpecificSlotAnswered, isSpecificSlotCorrect } from '../helpers/questionUtils';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
 import sanitizeHtml from '@/utils/sanitizeHtml';
+import PassageWithDropzones from './PassageWithDropzones';
 
 export default function FullscreenReadingMode({
     readingData,
@@ -40,6 +41,7 @@ export default function FullscreenReadingMode({
     filteredQuestionsGlobal,
     groupedQuestions,
     questionRanges,
+    currentPassageQuestions,
     difficulty,
     activePassageId,
     onPassageChange,
@@ -66,6 +68,8 @@ export default function FullscreenReadingMode({
     toggleFullScreen,
     isTimerPaused,
     setTimerPaused,
+    inlinePassagePick,
+    onInlinePassagePickChange,
     isPlacementTest = false, // New prop for placement test mode
     nextHref = null
 }) {
@@ -99,6 +103,14 @@ export default function FullscreenReadingMode({
         ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase()),
         [difficulty]
     );
+    const inlineMatchingQuestion = useMemo(() => {
+        const sourceQuestions = Array.isArray(currentPassageQuestions) ? currentPassageQuestions : [];
+        return sourceQuestions.find((q) => q?.type === 'matching_headings' && q?.renderInPassage) || null;
+    }, [currentPassageQuestions]);
+    const inlineMatchingAnswer = inlineMatchingQuestion ? userAnswers?.[inlineMatchingQuestion.id] : null;
+    const inlinePickedValue = inlineMatchingQuestion && inlinePassagePick?.questionId === inlineMatchingQuestion.id
+        ? inlinePassagePick?.value
+        : null;
 
     // Memoize submit button text
     const submitButtonText = useMemo(() => {
@@ -247,6 +259,8 @@ export default function FullscreenReadingMode({
                 readingId={readingId}
                 difficulty={difficulty}
                 reviewMap={isAdvancedReading ? reviewMap : null}
+                inlinePickedOption={inlinePickedValue}
+                onInlinePickOptionChange={onInlinePassagePickChange}
             />
         ));
     }, [
@@ -259,12 +273,28 @@ export default function FullscreenReadingMode({
         readingId,
         difficulty,
         // Include review map so grouped questions re-render when it becomes available
-        reviewMap
+        reviewMap,
+        inlinePickedValue,
+        onInlinePassagePickChange
     ]);
 
     // Memoize passage paragraphs to prevent unnecessary re-renders
     const PassageParagraphs = useMemo(() => {
         if (passageIsHtml && passageParagraphs?.length > 0) {
+            if (inlineMatchingQuestion) {
+                return (
+                    <PassageWithDropzones
+                        htmlText={passageParagraphs[0]}
+                        question={inlineMatchingQuestion}
+                        answer={inlineMatchingAnswer}
+                        isReviewMode={isReviewMode}
+                        onAnswerChange={onAnswerChange}
+                        inlinePickedOption={inlinePickedValue}
+                        onInlinePickOptionChange={onInlinePassagePickChange}
+                    />
+                );
+            }
+
             return (
                 <div
                     className="passage-html"
@@ -277,7 +307,16 @@ export default function FullscreenReadingMode({
                 {paragraph}
             </p>
         ));
-    }, [passageParagraphs, passageIsHtml]);
+    }, [
+        passageParagraphs,
+        passageIsHtml,
+        inlineMatchingQuestion,
+        inlineMatchingAnswer,
+        isReviewMode,
+        onAnswerChange,
+        inlinePickedValue,
+        onInlinePassagePickChange
+    ]);
 
     // Render helpers for cleaner JSX
     const renderLeftSection = () => {

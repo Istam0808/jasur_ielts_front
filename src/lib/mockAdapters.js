@@ -61,6 +61,25 @@ function mapReadingType(sectionType) {
   return "short_answer";
 }
 
+function toReadingSelection(selection, index) {
+  const label = selection?.label != null
+    ? String(selection.label).trim()
+    : String(index + 1);
+  const text = selection?.text != null ? String(selection.text).trim() : "";
+  return {
+    id: Number(selection?.id) || index + 1,
+    label,
+    text,
+    value: label,
+  };
+}
+
+function extractQuestionPlaceholders(text) {
+  if (typeof text !== "string" || !text.trim()) return [];
+  const matches = Array.from(text.matchAll(/\{\{question:(\d+)\}\}/g)).map((m) => String(m[1]));
+  return Array.from(new Set(matches));
+}
+
 function extractImageUrl(imageLike) {
   if (!imageLike) return "";
   if (typeof imageLike === "string") return imageLike.trim();
@@ -245,14 +264,52 @@ export function adaptReadingMockToUi(mockDetail) {
       }
 
       if (type === "matching_headings") {
+        const selectionOptions = asArray(section?.list_selections).map(toReadingSelection);
+        const headings = selectionOptions.map((opt) => {
+          return opt.text ? `${opt.label}. ${opt.text}` : opt.label;
+        });
+        const sortedQuestions = sourceQuestions
+          .slice()
+          .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+        const placeholdersFromText = extractQuestionPlaceholders(passage?.text);
+        const placeholderIds = placeholdersFromText.length
+          ? placeholdersFromText
+          : sortedQuestions.map((_, idx) => String(idx + 1));
+        const renderInPassage = placeholdersFromText.length > 0 && selectionOptions.length > 0;
+
+        const placeholderMap = {};
+        placeholderIds.forEach((placeholderId, idx) => {
+          const sourceQuestion = sortedQuestions[idx];
+          placeholderMap[placeholderId] = {
+            key: String(placeholderId),
+            sourceQuestionId: sourceQuestion?.id ?? null,
+            sourceOrder: sourceQuestion?.order ?? null,
+          };
+        });
+
+        const answers = sortedQuestions
+          .map((q, idx) => {
+            const placeholderId = placeholderIds[idx];
+            const correct = q?.correct_answer ?? q?.answer ?? q?.correct ?? null;
+            if (!placeholderId || correct == null || String(correct).trim() === "") return null;
+            return {
+              section: String(placeholderId),
+              answer: String(correct).trim(),
+            };
+          })
+          .filter(Boolean);
+
         return [{
           id: questionId++,
           type,
           instruction: section?.instructions || "Match headings.",
-          sections: sourceQuestions.map((q, idx) => `${idx + 1}. ${q?.question_text || `Paragraph ${idx + 1}`}`),
-          options: sourceQuestions[0]?.options?.length
-            ? sourceQuestions[0].options.map(toOptionLabel)
-            : [],
+          sections: placeholderIds,
+          headings,
+          options: headings,
+          dragOptions: selectionOptions,
+          renderInPassage,
+          placeholderMap,
+          answers,
         }];
       }
 

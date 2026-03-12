@@ -38,7 +38,9 @@ const QuestionGroup = memo(({
     questionRanges, 
     readingId, 
     difficulty,
-    reviewMap
+    reviewMap,
+    inlinePickedOption = null,
+    onInlinePickOptionChange = () => {}
 }) => {
     const { t } = useTranslation('reading');
     
@@ -366,6 +368,8 @@ const QuestionGroup = memo(({
                                 isGrouped={true}
                                 showInstruction={!hasRepeatedInstructions || index === 0}
                                 globalNumber={globalNumber}
+                                inlinePickedOption={inlinePickedOption}
+                                onInlinePickOptionChange={onInlinePickOptionChange}
                             />
                         </div>
                     );

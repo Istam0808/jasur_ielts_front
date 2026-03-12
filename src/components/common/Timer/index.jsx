@@ -59,15 +59,6 @@ const Timer = ({
 
   const intervalRef = useRef(null);
 
-  // Memoized timer configuration
-  const timerConfig = useMemo(() => ({
-    radius: 45,
-    strokeWidth: 6,
-    circumference: 2 * Math.PI * 45,
-    svgSize: (45 + 6) * 2,
-    center: 45 + 6
-  }), []);
-
   // Calculate time left based on wall clock
   const calculateTimeLeft = useCallback(() => {
     const state = timerStateRef.current;
@@ -191,32 +182,6 @@ const Timer = ({
   }, [isActive, isReviewMode, calculateTimeLeft]);
 
   // Memoized timer state calculations
-  const timerVisualState = useMemo(() => {
-    if (totalTimeSeconds === 0) {
-      return {
-        progress: 0,
-        percentageLeft: 0,
-        isWarning: false,
-        isCritical: false,
-        isTimeUp: true,
-        strokeDashoffset: timerConfig.circumference
-      };
-    }
-
-    const percentageLeft = (timeLeft / totalTimeSeconds) * 100;
-    const progress = ((totalTimeSeconds - timeLeft) / totalTimeSeconds) * timerConfig.circumference;
-    const strokeDashoffset = timerConfig.circumference - progress;
-
-    return {
-      progress: Number.isFinite(progress) ? progress : 0,
-      percentageLeft: Number.isFinite(percentageLeft) ? percentageLeft : 0,
-      isWarning: percentageLeft <= 50,
-      isCritical: percentageLeft <= 20,
-      isTimeUp: timeLeft === 0,
-      strokeDashoffset: Number.isFinite(strokeDashoffset) ? strokeDashoffset : timerConfig.circumference
-    };
-  }, [timeLeft, totalTimeSeconds, timerConfig.circumference]);
-
   // Memoized time formatter
   const formattedTime = useMemo(() => {
     const minutes = Math.floor(timeLeft / 60);
@@ -224,60 +189,9 @@ const Timer = ({
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, [timeLeft]);
 
-  // Memoized container classes
-  const containerClasses = useMemo(() => {
-    const classes = ['timer-circular'];
-    if (timerVisualState.isWarning) classes.push('warning');
-    if (timerVisualState.isCritical) classes.push('critical');
-    if (timerVisualState.isTimeUp) classes.push('time-up');
-    return classes.join(' ');
-  }, [timerVisualState.isWarning, timerVisualState.isCritical, timerVisualState.isTimeUp]);
-
-  // Memoized circle style for CSS variables
-  const circleStyle = useMemo(() => ({
-    '--progress': timerVisualState.progress,
-    '--percentage': timerVisualState.percentageLeft
-  }), [timerVisualState.progress, timerVisualState.percentageLeft]);
-
   return (
-    <div className={containerClasses}>
-      <div className="timer-circle-container">
-        <div className="timer-circle-bg"></div>
-
-        <svg
-          className="timer-progress-svg"
-          viewBox={`0 0 ${timerConfig.svgSize} ${timerConfig.svgSize}`}
-          aria-hidden="true"
-        >
-          <circle
-            cx={timerConfig.center}
-            cy={timerConfig.center}
-            r={timerConfig.radius}
-            fill="none"
-            className="timer-track"
-            strokeWidth={timerConfig.strokeWidth}
-            style={circleStyle}
-          />
-
-          <circle
-            cx={timerConfig.center}
-            cy={timerConfig.center}
-            r={timerConfig.radius}
-            fill="none"
-            className="timer-progress-ring"
-            strokeWidth={timerConfig.strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={timerConfig.circumference}
-            strokeDashoffset={timerVisualState.strokeDashoffset}
-          />
-        </svg>
-
-        <div className="timer-display-center">
-          <div className="timer-value-large" aria-live="polite">
-            {formattedTime}
-          </div>
-        </div>
-      </div>
+    <div className="timer-text" aria-live="polite">
+      {formattedTime}
     </div>
   );
 };
