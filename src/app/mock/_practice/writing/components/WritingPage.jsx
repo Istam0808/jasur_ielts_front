@@ -25,7 +25,6 @@ import WritingTextarea from './WritingTextarea';
 import WritingFeedbackSection from './WritingFeedbackSection';
 import WritingStartCard from './WritingStartCard';
 import IELTSAcademicInstructionsCard from './IELTSAcademicInstructionsCard';
-import WritingVocabularySection from './WritingVocabularySection';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 // Constants: IELTS Writing Task 1 only (150–250 words, 20 min)
@@ -35,6 +34,34 @@ const DIFFICULTY_ALIASES = {
 };
 const MAX_WORD_LIMIT = WRITING_TASK_1.maxWords;
 const MIN_WORD_REQUIREMENT = WRITING_TASK_1.minWords;
+const WRITING_TASK_2_MIN_WORDS = 250;
+const WRITING_TASK_2_RECOMMENDED_MINUTES = 40;
+
+const extractPromptText = (fullText) => {
+    if (!fullText) return '';
+
+    const markers = [
+        'the chart below',
+        'the table below',
+        'the graph below'
+    ];
+
+    const lowerText = String(fullText).toLowerCase();
+
+    let startIndex = -1;
+    markers.forEach((marker) => {
+        const index = lowerText.indexOf(marker);
+        if (index !== -1 && (startIndex === -1 || index < startIndex)) {
+            startIndex = index;
+        }
+    });
+
+    if (startIndex === -1) {
+        return String(fullText).trim();
+    }
+
+    return String(fullText).slice(startIndex).trim();
+};
 
 function WritingPageContent({
     writingExercise,
@@ -59,6 +86,8 @@ function WritingPageContent({
     // Consolidated state
     const [writingData, setWritingData] = useState(null);
     const [userResponse, setUserResponse] = useState('');
+    const [responsesByPart, setResponsesByPart] = useState({});
+    const [activePartIndex, setActivePartIndex] = useState(0);
     const [minWordRequirement, setMinWordRequirement] = useState(MIN_WORD_REQUIREMENT);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -66,6 +95,57 @@ function WritingPageContent({
     const [isTitleTruncated, setIsTitleTruncated] = useState(false);
 
     const titleRef = useRef(null);
+
+    const writingTasks = useMemo(() => {
+        const sourceTasks = Array.isArray(writingExercise?.tasks) ? writingExercise.tasks : [];
+
+        if (sourceTasks.length) {
+            return sourceTasks
+                .map((task, index) => ({
+                    id: task?.id || index + 1,
+                    part: Number(task?.part) || index + 1,
+                    taskNumber: Number(task?.taskNumber) || Number(task?.task_number) || index + 1,
+                    questionText: String(task?.questionText || task?.question_text || '').trim(),
+                    images: Array.isArray(task?.images) ? task.images : [],
+                    minWords: Number(task?.minWords) || (index === 0 ? MIN_WORD_REQUIREMENT : WRITING_TASK_2_MIN_WORDS),
+                    recommendedMinutes: Number(task?.recommendedMinutes) || (index === 0 ? WRITING_TASK_1.timeMinutes : WRITING_TASK_2_RECOMMENDED_MINUTES)
+                }))
+                .filter((task) => task.questionText);
+        }
+
+        const fallbackTopic = String(writingExercise?.topic || '').trim();
+        if (!fallbackTopic) return [];
+
+        return [{
+            id: parseInt(id),
+            part: 1,
+            taskNumber: 1,
+            questionText: fallbackTopic,
+            images: [],
+            minWords: MIN_WORD_REQUIREMENT,
+            recommendedMinutes: WRITING_TASK_1.timeMinutes
+        }];
+    }, [id, writingExercise]);
+
+    const activeTask = useMemo(() => {
+        if (!writingTasks.length) return null;
+        return writingTasks[activePartIndex] || writingTasks[0];
+    }, [writingTasks, activePartIndex]);
+
+    const combinedUserResponse = useMemo(() => {
+        if (!writingTasks.length) return userResponse;
+
+        const partsPayload = writingTasks
+            .map((task, index) => {
+                const text = responsesByPart[index];
+                if (!text || !String(text).trim()) return '';
+                return `Part ${task.part}\n${String(text).trim()}`;
+            })
+            .filter(Boolean);
+
+        if (!partsPayload.length) return userResponse;
+        return partsPayload.join('\n\n');
+    }, [writingTasks, responsesByPart, userResponse]);
 
     // Custom hooks
     const { wordCount } = useWordCount(userResponse, { maxWords: MAX_WORD_LIMIT, minWords: minWordRequirement });
@@ -102,10 +182,10 @@ function WritingPageContent({
         handleRewrite,
         isSubmittingRef
     } = useWritingSubmission({
-        userResponse,
+        userResponse: combinedUserResponse,
         difficulty: normalizedDifficulty,
         language: i18n.language,
-        topic: writingExercise?.topic,
+        topic: activeTask?.questionText || writingExercise?.topic,
         minWordRequirement,
         isPlacementTest,
         startTimeRef,
@@ -138,12 +218,13 @@ function WritingPageContent({
             id: parseInt(id),
             level: difficultyLower,
             topic: writingExercise.topic,
+            tasks: writingTasks,
             relatedVocabulary: writingExercise.relatedVocabulary
         };
-    }, [id, normalizedDifficulty, writingExercise, t, difficulty]);
+    }, [id, normalizedDifficulty, writingExercise, writingTasks, t, difficulty]);
 
     // Stable key so effect runs only when exercise identity changes (avoids loop when server passes new object ref)
-    const processDataKey = `${id}-${normalizedDifficulty}-${writingExercise?.topic ?? ''}-${writingExercise?.id ?? ''}`;
+    const processDataKey = `${id}-${normalizedDifficulty}-${writingExercise?.topic ?? ''}-${writingExercise?.id ?? ''}-${writingTasks.length}`;
     const processedWritingDataRef = useRef(processedWritingData);
     processedWritingDataRef.current = processedWritingData;
 
@@ -162,7 +243,11 @@ function WritingPageContent({
             }
 
             setWritingData(data);
-            setMinWordRequirement(MIN_WORD_REQUIREMENT);
+            const firstTask = Array.isArray(data?.tasks) ? data.tasks[0] : null;
+            setMinWordRequirement(Number(firstTask?.minWords) || MIN_WORD_REQUIREMENT);
+            setActivePartIndex(0);
+            setResponsesByPart({});
+            setUserResponse('');
 
             if (!hasTimerStarted) {
                 startTimeRef.current = Date.now();
@@ -175,6 +260,23 @@ function WritingPageContent({
             }
         }
     }, [hasTimerStarted, t]);
+
+    useEffect(() => {
+        if (!writingTasks.length) return;
+        if (activePartIndex > writingTasks.length - 1) {
+            setActivePartIndex(0);
+        }
+    }, [writingTasks, activePartIndex]);
+
+    useEffect(() => {
+        const currentAnswer = responsesByPart[activePartIndex] || '';
+        setUserResponse(currentAnswer);
+    }, [activePartIndex, responsesByPart]);
+
+    useEffect(() => {
+        const currentMinWords = Number(activeTask?.minWords) || MIN_WORD_REQUIREMENT;
+        setMinWordRequirement(currentMinWords);
+    }, [activeTask]);
 
     // Load data on mount and when exercise identity changes (not when object reference changes)
     useEffect(() => {
@@ -225,6 +327,8 @@ function WritingPageContent({
     const handleRewriteComplete = useCallback(() => {
         handleRewrite();
         setUserResponse('');
+        setResponsesByPart({});
+        setActivePartIndex(0);
         resetTimer();
     }, [handleRewrite, resetTimer]);
 
@@ -409,52 +513,44 @@ function WritingPageContent({
 
     if (!writingData) return null;
 
-    // Prepare writing topic title
-    const writingTopicTitle = writingData?.topic
-        ? (writingData.topic.split("?")[0] + (writingData.topic.includes("?") ? "?" : ""))
-        : t('defaultTitle', { ns: 'writing', defaultValue: 'Writing Task' });
+    const writingTasksFromData = Array.isArray(writingData?.tasks) ? writingData.tasks : [];
+    const currentTask = writingTasksFromData[activePartIndex] || writingTasksFromData[0] || null;
+    const rawWritingTopicTitle = currentTask?.questionText || writingData?.topic || t('defaultTitle', { ns: 'writing', defaultValue: 'Writing Task' });
+    const writingTopicTitle = extractPromptText(rawWritingTopicTitle);
+    const topicDescription = '';
+    const currentTaskMinWords = Number(currentTask?.minWords) || MIN_WORD_REQUIREMENT;
+    const currentTaskMinutes = Number(currentTask?.recommendedMinutes) || WRITING_TASK_1.timeMinutes;
+    const currentTaskImages = Array.isArray(currentTask?.images) ? currentTask.images : [];
+    const currentTaskLabel = Number(currentTask?.taskNumber) === 2
+        ? t('writingTask2', { ns: 'writing', defaultValue: 'WRITING TASK 2' })
+        : t('writingTask1', { ns: 'writing', defaultValue: 'WRITING TASK 1' });
+    const currentTaskInstruction = `You should spend about ${currentTaskMinutes} minutes on this task. Write at least ${currentTaskMinWords} words.`;
 
-    const topicDescription = writingData?.topic?.split("?")[1] || "";
+    const isHeaderSubmitDisabled =
+        isSubmitting ||
+        hasSubmitted ||
+        (submitError && submitError.isValidationError === true);
 
     return (
         <div className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''}`}>
             {/* Test Navbar */}
             <TestNavbar
-                progressType={hasTimerStarted ? "wordCount" : "none"}
-                wordCount={hasTimerStarted ? wordCount : 0}
-                wordCountMin={hasTimerStarted ? (isPlacementTest ? MIN_WORD_REQUIREMENT : minWordRequirement) : 0}
-                wordCountMax={MAX_WORD_LIMIT}
+                progressType="none"
                 timerDuration={timeLimit / 60}
                 onTimeUp={submitOnTimeUp}
                 isTimerActive={isTimerRunning && hasTimerStarted && !hasSubmitted && !externalTimerPaused}
                 startTime={hasTimerStarted ? (externalTimerStartTime || startTimeRef.current) : undefined}
                 title={isPlacementTest && hasTimerStarted ? writingTopicTitle : null}
+                showHeaderAction={hasTimerStarted && !hasSubmitted && !isPlacementTest}
+                headerActionLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
+                onHeaderAction={handleSubmit}
+                headerActionDisabled={isHeaderSubmitDisabled}
             />
 
             {/* Writing Title Section - Only for Placement Test */}
             {isPlacementTest && hasTimerStarted && !hasSubmitted && (
                 <div className="placement-test-title-section">
                     <h1 className="placement-test-title">{writingTopicTitle}</h1>
-                </div>
-            )}
-
-            {/* Floating Submit Button - Desktop */}
-            {hasTimerStarted && !hasSubmitted && !isTabletOrBelow && !isPlacementTest && (
-                <div className="floating-submit-wrapper">
-                    <WritingSubmitButton
-                        onSubmit={handleSubmit}
-                        isSubmitting={isSubmitting}
-                        hasSubmitted={hasSubmitted}
-                        wordCount={wordCount}
-                        maxWords={MAX_WORD_LIMIT}
-                        minWords={isPlacementTest ? 200 : minWordRequirement}
-                        variant="desktop"
-                        submitError={submitError}
-                        retryCount={retryCount}
-                        onRetry={handleRetry}
-                        onRewrite={handleRewriteComplete}
-                        isPlacementTest={isPlacementTest}
-                    />
                 </div>
             )}
 
@@ -478,39 +574,66 @@ function WritingPageContent({
                     {/* Writing Area */}
                     {hasTimerStarted && (
                         <div className={`writing-area-section ${hasSubmitted ? 'writing-area-section--submitted' : ''}`}>
-                            {/* IELTS-style instruction box: WRITING TASK 1 */}
-                            <div className="ielts-task-instruction" role="region" aria-label="Task instructions">
-                                <h3 className="ielts-task-instruction__heading">
-                                    {t('writingTask1', { ns: 'writing', defaultValue: 'WRITING TASK 1' })}
-                                </h3>
-                                <p className="ielts-task-instruction__time">
-                                    {WRITING_TASK_1.instructionPrefix}
-                                </p>
-                                <div className="ielts-task-instruction__prompt">
-                                    <p className="ielts-task-instruction__prompt-text">
-                                        <span ref={titleRef} className="writing-title">
-                                            {writingTopicTitle}
-                                        </span>
-                                    </p>
-                                    {topicDescription && (
-                                        <p className="ielts-task-instruction__description">{topicDescription}</p>
+                            <div className="ielts-writing-exam-layout">
+                                <div className="ielts-writing-left-pane">
+                                    {/* IELTS-style instruction box: WRITING TASK */}
+                                    <div className="ielts-task-instruction" role="region" aria-label="Task instructions">
+                                        <h3 className="ielts-task-instruction__heading">
+                                            {currentTaskLabel}
+                                        </h3>
+                                        <p className="ielts-task-instruction__time">
+                                            {currentTaskInstruction}
+                                        </p>
+                                        <div className="ielts-task-instruction__prompt">
+                                            <p className="ielts-task-instruction__prompt-text">
+                                                <span ref={titleRef} className="writing-title">
+                                                    {writingTopicTitle}
+                                                </span>
+                                            </p>
+                                            {topicDescription && (
+                                                <p className="ielts-task-instruction__description">{topicDescription}</p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {currentTaskImages.length > 0 && (
+                                        <div className="writing-task-image-panel">
+                                            {currentTaskImages.map((image, idx) => (
+                                                <img
+                                                    key={`writing-image-${image.id || idx}`}
+                                                    src={image.url}
+                                                    alt={`Writing task visual ${idx + 1}`}
+                                                    className="writing-task-image"
+                                                    loading="lazy"
+                                                />
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
-                            </div>
 
-                            <div className="section-header">
-                                <h2>{t('yourResponse', { ns: 'writing', defaultValue: 'Your Response' })}</h2>
-                            </div>
+                                <div className="ielts-writing-right-pane">
+                                    <div className="section-header">
+                                        <h2>{t('yourResponse', { ns: 'writing', defaultValue: 'Your Response' })}</h2>
+                                    </div>
 
-                            <WritingTextarea
-                                value={userResponse}
-                                onChange={(e) => setUserResponse(e.target.value)}
-                                disabled={isSubmitting || hasSubmitted || !hasTimerStarted}
-                                placeholder={t('placeholder', { ns: 'writing', defaultValue: 'Start writing here...' })}
-                                minWords={isPlacementTest ? 200 : minWordRequirement}
-                                maxWords={MAX_WORD_LIMIT}
-                                hasSubmitted={hasSubmitted}
-                            />
+                                    <WritingTextarea
+                                        value={userResponse}
+                                        onChange={(e) => {
+                                            const nextValue = e.target.value;
+                                            setUserResponse(nextValue);
+                                            setResponsesByPart((prev) => ({
+                                                ...prev,
+                                                [activePartIndex]: nextValue
+                                            }));
+                                        }}
+                                        disabled={isSubmitting || hasSubmitted || !hasTimerStarted}
+                                        placeholder={t('placeholder', { ns: 'writing', defaultValue: 'Start writing here...' })}
+                                        minWords={isPlacementTest ? 200 : currentTaskMinWords}
+                                        maxWords={MAX_WORD_LIMIT}
+                                        hasSubmitted={hasSubmitted}
+                                    />
+                                </div>
+                            </div>
 
                             {/* Submit Button Section - Placement Test Only */}
                             {isPlacementTest && !hasSubmitted && (
@@ -537,33 +660,6 @@ function WritingPageContent({
                         <WritingFeedbackSection feedbackText={feedbackText} />
                     )}
 
-                    {/* Vocabulary Section */}
-                    {hasTimerStarted && !isPlacementTest && (
-                        <WritingVocabularySection
-                            vocabulary={writingData?.relatedVocabulary}
-                            language={i18n.language}
-                        />
-                    )}
-
-                    {/* Requirements Section: IELTS Task 1 */}
-                    {hasTimerStarted && !isPlacementTest && (
-                        <div className="requirements-section">
-                            <span className="requirements-label">
-                                {t('requirements', { ns: 'writing', defaultValue: 'Requirements' })}:
-                            </span>{' '}
-                            {t('minimumWords', {
-                                ns: 'writing',
-                                defaultValue: 'At least {{count}} words',
-                                count: minWordRequirement
-                            })}
-                            {' • '}
-                            {t('timeLimitMinutes', {
-                                ns: 'writing',
-                                defaultValue: '{{count}} minutes',
-                                count: WRITING_TASK_1.timeMinutes
-                            })}
-                        </div>
-                    )}
                 </div>
 
                 {/* Right Column - Results Only */}
@@ -720,30 +816,30 @@ function WritingPageContent({
                 </Modal>
             )}
 
-            {/* Test Footer */}
-            {!isPlacementTest && <TestFooter />}
-
-            {/* Mobile Actions */}
-            {hasTimerStarted && isTabletOrBelow && !isPlacementTest && (
-                <div className="mobile-back-link">
-                    <div className="mobile-actions-wrapper">
-                        <WritingSubmitButton
-                            onSubmit={handleSubmit}
-                            isSubmitting={isSubmitting}
-                            hasSubmitted={hasSubmitted}
-                            wordCount={wordCount}
-                            maxWords={MAX_WORD_LIMIT}
-                            minWords={minWordRequirement}
-                            variant="mobile"
-                            submitError={submitError}
-                            retryCount={retryCount}
-                            onRetry={handleRetry}
-                            onRewrite={handleRewriteComplete}
-                            isPlacementTest={isPlacementTest}
-                        />
+            {/* Bottom Part Navigation (similar to listening mock footer) */}
+            {writingTasksFromData.length > 1 && !hasSubmitted && (
+                <div className="writing-part-footer" role="navigation" aria-label="Writing parts navigation">
+                    <div className="writing-part-navigation" role="tablist">
+                        {writingTasksFromData.map((task, index) => (
+                            <button
+                                key={`writing-part-footer-${task.id || index}`}
+                                type="button"
+                                role="tab"
+                                aria-selected={index === activePartIndex}
+                                className={`writing-part-tab ${index === activePartIndex ? 'active' : ''}`}
+                                onClick={() => setActivePartIndex(index)}
+                                disabled={hasSubmitted}
+                            >
+                                Part {task.part || index + 1}
+                            </button>
+                        ))}
                     </div>
                 </div>
             )}
+
+            {/* Test Footer */}
+            {!isPlacementTest && <TestFooter />}
+
         </div>
     );
 }

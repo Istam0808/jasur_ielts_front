@@ -26,16 +26,10 @@ export default function WritingSubmitButton({
 
   const isDisabled = 
     isSubmitting || 
-    hasSubmitted || 
-    wordCount === 0 ||
-    (minWords > 0 && wordCount < minWords) ||
-    wordCount > maxWords ||
+    hasSubmitted ||
     (submitError && submitError.isValidationError === true);
 
   const getButtonText = () => {
-    if (wordCount > maxWords) {
-      return t('exceedsMaxWords', { ns: 'writing', defaultValue: 'Exceeds 400 word limit' });
-    }
     if (isSubmitting) {
       return t('submitting', { ns: 'writing', defaultValue: 'Submitting...' });
     }

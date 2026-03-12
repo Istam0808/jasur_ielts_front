@@ -61,6 +61,63 @@ function mapReadingType(sectionType) {
   return "short_answer";
 }
 
+function extractImageUrl(imageLike) {
+  if (!imageLike) return "";
+  if (typeof imageLike === "string") return imageLike.trim();
+
+  if (typeof imageLike !== "object") return "";
+
+  const candidates = [
+    imageLike.image_url,
+    imageLike.imageUrl,
+    imageLike.url,
+    imageLike.file,
+    imageLike.image,
+    imageLike.src,
+    imageLike.path,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return "";
+}
+
+function normalizeWritingImages(task) {
+  const fromArray = asArray(task?.images)
+    .map((item) => {
+      if (!item) return null;
+      const url = extractImageUrl(item);
+      if (!url) return null;
+      return {
+        id: Number(item.id) || null,
+        order: Number(item.order) || null,
+        url,
+      };
+    })
+    .filter(Boolean);
+
+  if (fromArray.length) return fromArray;
+
+  const fallbackSingle = [
+    task?.image_url,
+    task?.imageUrl,
+    task?.image,
+    task?.file,
+    task?.url,
+  ];
+
+  const singleUrl = fallbackSingle.find(
+    (value) => typeof value === "string" && value.trim()
+  );
+
+  if (!singleUrl) return [];
+  return [{ id: null, order: 1, url: String(singleUrl).trim() }];
+}
+
 export function adaptListening(mockDetail) {
   const adapted = adaptListeningMockToUi(mockDetail);
   return adapted?.bookData?.tests?.[0] ?? null;
@@ -278,13 +335,41 @@ export function adaptWritingMockToUi(mockDetail) {
   const mockId = Number(mockDetail?.id) || 1;
   const task1 = mockDetail?.writing_task1 || {};
   const task2 = mockDetail?.writing_task2 || {};
+  const task1Text = task1?.question_text ? String(task1.question_text).trim() : "";
+  const task2Text = task2?.question_text ? String(task2.question_text).trim() : "";
+
+  const tasks = [];
+
+  if (task1Text) {
+    tasks.push({
+      id: Number(task1?.id) || 1,
+      part: 1,
+      taskNumber: Number(task1?.task_number) || 1,
+      questionText: task1Text,
+      images: normalizeWritingImages(task1),
+      minWords: 150,
+      recommendedMinutes: 20,
+    });
+  }
+
+  if (task2Text) {
+    tasks.push({
+      id: Number(task2?.id) || 2,
+      part: 2,
+      taskNumber: Number(task2?.task_number) || 2,
+      questionText: task2Text,
+      images: normalizeWritingImages(task2),
+      minWords: 250,
+      recommendedMinutes: 40,
+    });
+  }
+
+  const topicFallback = task1Text || task2Text || `Mock ${mockId} Writing Task`;
 
   return {
     id: mockId,
-    topic:
-      task1?.question_text ||
-      task2?.question_text ||
-      `Mock ${mockId} Writing Task`,
+    topic: topicFallback,
+    tasks,
     relatedVocabulary: [],
   };
 }

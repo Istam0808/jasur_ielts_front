@@ -124,6 +124,32 @@
   overflow: visible; // Allow dropdown to overflow
 }
 
+.headerActionButton {
+  border: 1px solid $neutral-800;
+  background-color: $neutral-800;
+  color: $background-light;
+  border-radius: $border-radius-xs;
+  padding: 0.5rem 0.875rem;
+  min-height: 36px;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color $transition-fast, border-color $transition-fast, color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: $neutral-900;
+    border-color: $neutral-900;
+  }
+
+  &:disabled {
+    border-color: $neutral-300;
+    background-color: $neutral-300;
+    color: $neutral-500;
+    cursor: not-allowed;
+  }
+}
+
 // Timer wrapper - compact for navbar
 .timerWrapper {
   flex-shrink: 0;
@@ -264,6 +290,12 @@
     gap: $spacing-sm;
   }
 
+  .headerActionButton {
+    padding: 0.45rem 0.75rem;
+    min-height: 34px;
+    font-size: $font-size-xs;
+  }
+
   .separator {
     min-height: 28px;
   }
@@ -317,6 +349,12 @@
   .rightControls {
     gap: $spacing-xs;
     flex-shrink: 0;
+  }
+
+  .headerActionButton {
+    padding: 0.4rem 0.65rem;
+    min-height: 32px;
+    font-size: $font-size-xs;
   }
 
   .separator {
@@ -422,6 +460,12 @@
     gap: 0.375rem;
     flex-shrink: 0;
     min-width: 0;
+  }
+
+  .headerActionButton {
+    padding: 0.3rem 0.55rem;
+    min-height: 30px;
+    font-size: 0.7rem;
   }
 
   .separator {

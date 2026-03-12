@@ -19,6 +19,10 @@ import styles from './style.module.scss';
  * @param {number} props.wordCountMax - Maximum word limit (for wordCount progress type, default: 400)
  * @param {string} props.title - Optional title to display (for none progress type)
  * @param {number} props.startTime - Start time for timer (timestamp in ms) - used as single source of truth
+ * @param {boolean} props.showHeaderAction - Show action button in header
+ * @param {string} props.headerActionLabel - Header action button label
+ * @param {Function} props.onHeaderAction - Header action handler
+ * @param {boolean} props.headerActionDisabled - Header action disabled state
  */
 export default function TestNavbar({
   currentQuestion = 0,
@@ -32,10 +36,13 @@ export default function TestNavbar({
   wordCountMax = 400,
   title = null,
   startTime = undefined,
+  showHeaderAction = false,
+  headerActionLabel = '',
+  onHeaderAction,
+  headerActionDisabled = false,
 }) {
   const { t } = useTranslation(['test', 'common', 'writing']);
 
-  // Render progress indicator based on type
   const renderProgressIndicator = () => {
     if (progressType === 'none') {
       if (title) {
@@ -51,25 +58,9 @@ export default function TestNavbar({
     }
 
     if (progressType === 'wordCount') {
-      const hasWarning = wordCountMin > 0 && wordCount < wordCountMin;
-      const hasError = wordCount > wordCountMax;
-      
-      return (
-        <div className={styles.progress} role="status" aria-live="polite">
-          <span className={`${styles.progressText} ${styles.wordCount} ${hasWarning ? styles.warning : ''} ${hasError ? styles.error : ''}`}>
-            {wordCount} {t('words', { ns: 'writing', defaultValue: 'words' })}
-            {wordCountMin > 0 && ` / ${wordCountMin} ${t('minimum', { ns: 'writing', defaultValue: 'minimum' })}`}
-            {wordCount > wordCountMax && (
-              <span className={styles.maxLimitExceeded}>
-                {' '}({t('maxLimitExceeded', { ns: 'writing', defaultValue: 'Max 400 words exceeded' })})
-              </span>
-            )}
-          </span>
-        </div>
-      );
+      return null;
     }
 
-    // Default: questions progress (без всплывающей подсказки)
     return (
       <div className={styles.progress} role="status" aria-live="polite">
         <span className={styles.progressText}>
@@ -98,6 +89,17 @@ export default function TestNavbar({
 
         {/* Right Controls: Timer */}
         <div className={styles.rightControls}>
+          {showHeaderAction && (
+            <button
+              type="button"
+              className={styles.headerActionButton}
+              onClick={onHeaderAction}
+              disabled={headerActionDisabled}
+            >
+              {headerActionLabel || t('submit', { ns: 'common', defaultValue: 'Submit' })}
+            </button>
+          )}
+
           {/* Professional Timer */}
           <div className={styles.timerWrapper}>
             <Timer

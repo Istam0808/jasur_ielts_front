@@ -43,10 +43,52 @@ export function getMockPayload(mockId) {
   }
 }
 
+function buildMockCachePayload(detail) {
+  if (!detail || typeof detail !== "object") return null;
+
+  const {
+    id,
+    reading_p1,
+    reading_p2,
+    reading_p3,
+    listening_p1,
+    listening_p2,
+    listening_p3,
+    listening_p4,
+    writing_task1,
+    writing_task2,
+    ...rest
+  } = detail;
+
+  // Храним только нужные для экзамена секции и минимальные метаданные,
+  // чтобы не парсить и не тянуть лишние поля при каждом переходе.
+  return {
+    id,
+    reading_p1,
+    reading_p2,
+    reading_p3,
+    listening_p1,
+    listening_p2,
+    listening_p3,
+    listening_p4,
+    writing_task1,
+    writing_task2,
+    // В случае, если адаптеры вдруг используют что‑то ещё,
+    // оставляем небольшой объект с основными метаданными.
+    meta: {
+      title: rest?.title,
+      module: rest?.module,
+      level: rest?.level,
+    },
+  };
+}
+
 export function setMockPayload(mockId, payload) {
   if (typeof window === "undefined") return;
   const key = MOCK_PAYLOAD_PREFIX + String(mockId);
-  window.sessionStorage.setItem(key, JSON.stringify(payload));
+
+  const cachePayload = buildMockCachePayload(payload) || payload;
+  window.sessionStorage.setItem(key, JSON.stringify(cachePayload));
 }
 
 export function clearMockPayloads() {

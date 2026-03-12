@@ -5,11 +5,13 @@
 .writing-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
     color: $neutral-800;
     font-family: $body-font-family;
     padding: 0; // Remove padding to allow TestNavbar to be full-width
     overflow-x: hidden; // Prevent horizontal overflow
+    overflow-y: hidden; // Lock page height to viewport
     max-width: 100vw; // Ensure container doesn't exceed viewport width
 
     // Placement test mode: Full-width navbar
@@ -55,39 +57,6 @@
         align-items: center;
         gap: $spacing-md;
 
-        .back-btn {
-            // Base styles for the button (desktop)
-            display: flex;
-            align-items: center;
-            gap: $spacing-sm;
-            padding: $spacing-sm $spacing-md;
-            border-radius: $border-radius-md;
-            background: linear-gradient(145deg, $neutral-100, $background-light);
-            border: 1px solid $neutral-200;
-            color: $neutral-700;
-            font-weight: $font-weight-medium;
-            cursor: pointer;
-            transition: all $transition-fast;
-
-            .back-btn-text {
-                display: inline; // Text is visible by default
-            }
-
-            &:hover {
-                background: linear-gradient(145deg, $background-light, $neutral-100);
-                color: $neutral-800;
-            }
-
-            &:active {
-                transform: translateY(1px);
-                color: $primary-color;
-            }
-
-            &:focus {
-                outline: 2px solid $primary-color;
-                outline-offset: 2px;
-            }
-        }
     }
 
     .title-section {
@@ -187,10 +156,16 @@
     transition: grid-template-columns $transition-fast;
     padding: $spacing-xl;
     padding-top: calc(80px + #{$spacing-sm}); // Account for sticky TestNavbar
+    overflow-y: auto;
 
     // Single column when right column is hidden (during writing)
     &.writing-content-grid--single {
         grid-template-columns: 1fr;
+
+        &:has(.writing-area-section) {
+            padding: 0;
+            margin-bottom: 0;
+        }
     }
 
     // Expanded width when submitted
@@ -894,8 +869,19 @@
 }
 
 .writing-area-section {
+    padding: 0;
+    padding-top: $spacing-lg;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: calc(100vh - 80px - #{$spacing-sm});
+
     @media (max-width: 784px) {
-        padding: $spacing-sm;
+        min-height: calc(100vh - 72px);
+    }
+
+    @media (max-width: 576px) {
+        min-height: calc(100vh - 64px);
     }
 
     // After submission: remove height limits and scrollbar
@@ -911,6 +897,113 @@
         overflow: visible;
         height: auto;
     }
+}
+
+.writing-part-navigation {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+}
+
+.writing-part-tab {
+    border: 1px solid $border-light;
+    background-color: $background-secondary;
+    color: $text-secondary;
+    border-radius: $border-radius-sm;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) {
+        border-color: $primary-color;
+        color: $primary-color;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &.active {
+        border-color: $primary-color;
+        background-color: color.adjust($primary-color, $lightness: 44%);
+        color: $primary-color;
+        font-weight: $font-weight-semibold;
+    }
+}
+
+.writing-part-footer {
+    margin-top: $spacing-lg;
+    padding-top: $spacing-md;
+    border-top: 1px solid $border-light;
+    background-color: $background-secondary;
+}
+
+.ielts-writing-exam-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: $spacing-md;
+    min-height: 560px;
+}
+
+.ielts-writing-left-pane,
+.ielts-writing-right-pane {
+    min-width: 0;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    background-color: $background-light;
+}
+
+.ielts-writing-left-pane {
+    padding: $spacing-md;
+    overflow-y: auto;
+}
+
+.ielts-writing-right-pane {
+    display: flex;
+    flex-direction: column;
+    padding: $spacing-md;
+
+    .section-header {
+        flex-shrink: 0;
+        margin-bottom: $spacing-sm;
+    }
+
+    .writing-textarea-wrapper {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .writing-textarea {
+        flex: 1 1 auto;
+        min-height: 420px;
+        border: 1px solid $border-light;
+    }
+
+    .highlighted-writing-text {
+        min-height: 420px;
+        border: 1px solid $border-light;
+    }
+}
+
+.writing-task-image-panel {
+    margin-top: $spacing-md;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    background-color: $background-light;
+    padding: $spacing-sm;
+}
+
+.writing-task-image {
+    width: 100%;
+    height: auto;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    display: block;
 }
 
 .requirements-section {
@@ -982,7 +1075,7 @@
     border: 1px solid $neutral-200;
     border-radius: $border-radius-md;
     padding: $spacing-lg;
-    margin-bottom: $spacing-lg;
+    margin-bottom: 0;
 
     &__heading {
         font-size: $font-size-base;
@@ -1020,6 +1113,23 @@
         line-height: 1.6;
         color: $neutral-700;
         margin: $spacing-sm 0 0;
+    }
+}
+
+@media (max-width: 992px) {
+    .ielts-writing-exam-layout {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .ielts-writing-right-pane {
+        .writing-textarea {
+            min-height: 320px;
+        }
+
+        .highlighted-writing-text {
+            min-height: 320px;
+        }
     }
 }
 
