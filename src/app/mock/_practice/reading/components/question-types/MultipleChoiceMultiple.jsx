@@ -5,6 +5,19 @@ import { useMemo } from 'react';
 import Checkbox from '@/components/common/input-types/Checkbox';
 import { useTranslation } from 'react-i18next';
 
+const parseInstructionSelectionCount = (instruction) => {
+    if (!instruction) return null;
+    const match = instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
+    if (!match) return null;
+    const numberWord = match[1].toLowerCase();
+    const numberMap = {
+        'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+        'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+    };
+    const parsed = numberMap[numberWord] || parseInt(numberWord, 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
 const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, reviewMap, globalNumber = null }) => {
     const { t } = useTranslation('reading');
 
@@ -13,16 +26,10 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
         const isAdvancedReading = ['b2', 'c1', 'c2'].includes(difficulty?.toLowerCase());
         if (!isAdvancedReading || !readingId || !reviewMap || !isReviewMode) return [];
 
-        // Determine how many answers to collect based on the instruction
-        let expectedAnswerCount = 2; // Default fallback for "Choose TWO letters"
-        if (question.instruction) {
-            const match = question.instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
-            if (match) {
-                const numberWord = match[1].toLowerCase();
-                const numberMap = { 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10 };
-                expectedAnswerCount = numberMap[numberWord] || parseInt(numberWord) || 2;
-            }
-        }
+        const expectedAnswerCount =
+            Number.isFinite(question?.maxSelections) && question.maxSelections > 0
+                ? question.maxSelections
+                : (parseInstructionSelectionCount(question?.instruction) || 2);
 
         // For multiple choice multiple questions, we need to find the correct answer
         // based on the question's position in the reading passage
@@ -85,7 +92,7 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
         }
         
         return [];
-    }, [difficulty, readingId, question.id, question.sequentialNumber, question.instruction, reviewMap, isReviewMode, globalNumber]);
+    }, [difficulty, readingId, question.id, question.sequentialNumber, question.instruction, question.maxSelections, reviewMap, isReviewMode, globalNumber]);
 
     const selectedAnswers = useMemo(() => {
         if (!answer) return [];
@@ -104,22 +111,11 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
     }, [answer]);
 
     const maxSelections = useMemo(() => {
-        // For new structure, we need to parse the instruction to get the number of selections
-        // e.g., "Choose THREE letters A-F" or look for number words
-        if (question.instruction) {
-            const match = question.instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
-            if (match) {
-                const numberWord = match[1].toLowerCase();
-                const numberMap = {
-                    'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5, 
-                    'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
-                };
-                return numberMap[numberWord] || parseInt(numberWord) || 2; // default to 2
-            }
+        if (Number.isFinite(question?.maxSelections) && question.maxSelections > 0) {
+            return question.maxSelections;
         }
-        // Fallback - try to determine from question context or default to 2
-        return 2;
-    }, [question.instruction]);
+        return parseInstructionSelectionCount(question?.instruction) || 2;
+    }, [question.instruction, question.maxSelections]);
 
     // Removed overall isCorrect summary calculation since per-option feedback is shown inline
 
@@ -193,9 +189,6 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
     return (
         <div className="multiple-choice-multiple-container">
             <div className="question-instruction">
-                {question.instruction && (
-                    <p className="instruction-text">{question.instruction}</p>
-                )}
                 <div className="selection-info">
                     <p className="selection-hint">
                         {t('multipleChoice.selectMultiple', { count: maxSelections })}

@@ -92,7 +92,6 @@ const AdvancedShortAnswer = ({ question, answer, onAnswerChange, isReviewMode, r
     return (
         <div className="advanced-short-answer-container">
             <div className="question-instruction">
-                <p className="instruction-text">{question.instruction}</p>
                 <div className="word-limit-reminder">
                     <span className="reminder-icon">⚠️</span>
                     <span className="reminder-text">

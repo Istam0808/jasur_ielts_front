@@ -119,6 +119,9 @@ export const getQuestionAnswerCount = (question) => {
             return 1;
 
         case 'multiple_choice_multiple':
+            if (Number.isFinite(question.maxSelections) && question.maxSelections > 0) {
+                return question.maxSelections;
+            }
             // First try to get from correct properties in options
             const correctFromOptions = question.options?.filter(opt => opt.correct)?.length;
             if (correctFromOptions > 0) {

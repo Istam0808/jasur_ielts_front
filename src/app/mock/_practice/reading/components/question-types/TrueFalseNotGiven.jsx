@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Radio from '@/components/common/input-types/Radio';
 
-const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, showInstruction = true, reviewMap, globalNumber = null }) => {
+const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, reviewMap, globalNumber = null }) => {
     const { t } = useTranslation('reading');
 
     // Get correct answer for review mode (global numbers for advanced)
@@ -101,25 +101,8 @@ const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, rea
         };
     };
 
-    const getInstructionText = () => {
-        switch (question.type) {
-            case 'true_false_not_given':
-                return t('trueFalseNotGiven.instruction');
-            case 'yes_no_not_given':
-                return t('yesNoNotGiven.instruction');
-            default:
-                return '';
-        }
-    };
-
     return (
         <div className="true-false-not-given-container">
-            {showInstruction && (
-                <div className="question-instruction">
-                    <p className="instruction-text">{getInstructionText()}</p>
-                </div>
-            )}
-
             <div className="statement-container">
                 <div className="statement-text">
                     <span className="statement-label">{t('statement')}:</span>

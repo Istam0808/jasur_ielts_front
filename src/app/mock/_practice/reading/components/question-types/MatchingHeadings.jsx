@@ -123,7 +123,6 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
     return (
         <div className="matching-headings-container">
             <div className="question-instruction">
-                <p className="instruction-text">{question.instruction}</p>
                 <p className="note-text">{t('matchingHeadings.note')}</p>
             </div>
 

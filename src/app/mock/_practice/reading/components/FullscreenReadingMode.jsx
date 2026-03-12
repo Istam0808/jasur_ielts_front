@@ -320,15 +320,13 @@ export default function FullscreenReadingMode({
 
     // Render helpers for cleaner JSX
     const renderLeftSection = () => {
-        // Advanced multi-passage variant: show Part + Instruction banner on the left
+        // Advanced multi-passage variant: show part label only (without instruction text)
         if (isMultiPassage && isAdvancedReading) {
             const partLabel = `${t('part', 'Part')} ${activePassageId}`;
-            const instructionText = `${t('readingInstruction', 'Read the text and answer questions')} ${currentPassage?.question_range || ''}.`;
 
             return (
-                <div className="fullscreen-advanced-banner" role="region" aria-label={t('instructions', 'Instructions')}>
+                <div className="fullscreen-advanced-banner" role="region" aria-label={t('part', 'Part')}>
                     <div className="advanced-part-title" aria-live="polite">{partLabel}</div>
-                    <div className="advanced-instruction-text">{instructionText}</div>
                 </div>
             );
         }

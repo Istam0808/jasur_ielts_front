@@ -87,12 +87,6 @@ const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) =
     return (
         <div className={styles.root} data-question-type="matching-sentences">
             <div className={styles.left}>
-                {question.instruction ? (
-                    <div className={styles.instruction}>
-                        {question.instruction}
-                    </div>
-                ) : null}
-
                 <div className={styles.items}>
                     {items.map((item) => {
                         const key = String(item.id);

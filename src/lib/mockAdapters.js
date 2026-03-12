@@ -57,6 +57,7 @@ function mapReadingType(sectionType) {
   if (normalized.includes("note_completion")) return "note_completion";
   if (normalized.includes("yes_no_not_given")) return "yes_no_not_given";
   if (normalized.includes("true_false_not_given")) return "true_false_not_given";
+  if (normalized.includes("multiple_choice_multiple_answers")) return "multiple_choice_multiple";
   if (normalized.includes("multiple_choice")) return "multiple_choice";
   return "short_answer";
 }
@@ -248,6 +249,30 @@ export function adaptReadingMockToUi(mockDetail) {
     const questions = asArray(passage.sections).flatMap((section) => {
       const type = mapReadingType(section?.section_type);
       const sourceQuestions = asArray(section?.questions);
+
+      if (type === "multiple_choice_multiple") {
+        const selections = asArray(section?.list_selections).map((selection, index) => {
+          const label = selection?.label != null
+            ? String(selection.label).trim().toUpperCase()
+            : String.fromCharCode(65 + index);
+          const text = selection?.text != null ? String(selection.text).trim() : "";
+          return text ? `${label}. ${text}` : `${label}.`;
+        });
+        const sectionQuestionText = section?.multiple_choice_multiple_answers?.question_text;
+        const prompt = (typeof sectionQuestionText === "string" && sectionQuestionText.trim())
+          ? sectionQuestionText.trim()
+          : (section?.instructions || "");
+        const maxSelections = Math.max(1, sourceQuestions.length || selections.length || 1);
+
+        return [{
+          id: questionId++,
+          type,
+          instruction: section?.instructions || "",
+          question: prompt,
+          options: selections,
+          maxSelections,
+        }];
+      }
 
       if (type === "multiple_choice" || type === "true_false_not_given" || type === "yes_no_not_given") {
         return sourceQuestions.map((question) => ({

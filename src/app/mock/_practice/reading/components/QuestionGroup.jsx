@@ -1,34 +1,8 @@
 'use client';
 
 import { memo, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { BsCheckCircle, BsCircle } from 'react-icons/bs';
 import QuestionComponent from './Question';
-
-// Check if question type displays its own content that would duplicate the main question text
-const shouldSuppressQuestionText = (question) => {
-    const typesWithOwnContent = [
-        'true_false_not_given',     // Shows question.statement
-        'yes_no_not_given',         // Shows question.statement  
-        'matching_headings',        // Shows question.instruction
-        'matching_information',     // Shows question.instruction
-        'matching_features',        // Shows question.instruction
-        'matching_sentences',       // Shows question.instruction + bank/options
-        'sentence_completion',      // Shows question.instruction
-        'summary_completion',       // Shows question.instruction
-        'table_completion',         // Shows question.instruction
-        'flow_chart_completion',    // Shows question.instruction
-        'diagram_labelling',        // Shows question.instruction
-        'advanced_short_answer'     // Shows question.instruction
-    ];
-    
-    // Also suppress for multi-question short_answer types since they show their own instruction
-    if (question.type === 'short_answer' && question.instruction && question.questions && Array.isArray(question.questions)) {
-        return true;
-    }
-    
-    return typesWithOwnContent.includes(question.type);
-};
 
 const QuestionGroup = memo(({ 
     questions, 
@@ -42,14 +16,11 @@ const QuestionGroup = memo(({
     inlinePickedOption = null,
     onInlinePickOptionChange = () => {}
 }) => {
-    const { t } = useTranslation('reading');
-    
     if (!questions || questions.length === 0) {
         return null;
     }
 
     const questionType = questions[0].type;
-    const firstQuestion = questions[0];
     
     // Get the question range for the entire group
     const groupRange = {
@@ -80,30 +51,6 @@ const QuestionGroup = memo(({
 
         return /^\d$/.test(groupDisplayNumber) ? 'single-digit' : 'range-number';
     }, [groupDisplayNumber]);
-
-    // Check if all questions have the same instruction text
-    const hasRepeatedInstructions = useMemo(() => {
-        // Only check for true_false_not_given and yes_no_not_given types
-        if (questionType !== 'true_false_not_given' && questionType !== 'yes_no_not_given') {
-            return false;
-        }
-
-        if (questions.length <= 1) {
-            return false;
-        }
-
-        const firstInstruction = questionType === 'true_false_not_given' 
-            ? t('trueFalseNotGiven.instruction')
-            : t('yesNoNotGiven.instruction');
-
-        // Check if all questions would have the same instruction
-        return questions.every(question => {
-            const questionInstruction = question.type === 'true_false_not_given' 
-                ? t('trueFalseNotGiven.instruction')
-                : t('yesNoNotGiven.instruction');
-            return questionInstruction === firstInstruction;
-        });
-    }, [questions, questionType, t]);
 
     // Check if all questions in the group have been answered
     const hasAllAnswers = questions.every(question => {
@@ -182,6 +129,10 @@ const QuestionGroup = memo(({
             return !!answer;
         } else if (question.type === 'multiple_choice_multiple') {
             // For multiple choice multiple, check if the required number of selections is made
+            if (Number.isFinite(question.maxSelections) && question.maxSelections > 0) {
+                const selectedAnswers = Array.isArray(answer) ? answer : [answer];
+                return selectedAnswers.length === question.maxSelections && selectedAnswers.every(val => val !== undefined && val !== null && val !== '');
+            }
             if (question.instruction) {
                 // Parse instruction to get required number of selections
                 const match = question.instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
@@ -250,6 +201,10 @@ const QuestionGroup = memo(({
             if (typeof answer === 'object' && answer !== null) {
                 // For multiple choice multiple, check if the required number of selections is made
                 if (question.type === 'multiple_choice_multiple' && question.instruction) {
+                    if (Number.isFinite(question.maxSelections) && question.maxSelections > 0) {
+                        const selectedAnswers = Array.isArray(answer) ? answer : [answer];
+                        return selectedAnswers.length === question.maxSelections && selectedAnswers.every(val => val !== undefined && val !== null && val !== '');
+                    }
                     const match = question.instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
                     if (match) {
                         const numberWord = match[1].toLowerCase();
@@ -271,28 +226,6 @@ const QuestionGroup = memo(({
         }
     });
 
-    // Get the instruction text for the group (from first question)
-    const getGroupInstruction = () => {
-        if (questionType === 'true_false_not_given' || questionType === 'yes_no_not_given') {
-            return null; // These types show individual statements
-        }
-        
-        // For types that have their own instruction display, return null
-        if (shouldSuppressQuestionText(firstQuestion)) {
-            return null;
-        }
-        
-        // For short answer with multiple questions, show the instruction
-        if (questionType === 'short_answer' && firstQuestion.instruction && firstQuestion.questions && Array.isArray(firstQuestion.questions)) {
-            return firstQuestion.instruction;
-        }
-        
-        // For other types, return null as they handle their own display
-        return null;
-    };
-
-    const groupInstruction = getGroupInstruction();
-
     return (
         <div 
             className={`reading-question-card ${hasAllAnswers ? 'answered' : 'unanswered'} ${isReviewMode ? 'review-mode' : ''} question-type-${questionType.replace('_', '-')}`}
@@ -312,12 +245,6 @@ const QuestionGroup = memo(({
                     </div>
                 )}
             </div>
-
-            {groupInstruction && (
-                <div className="question-content">
-                    <h3 className="question-text">{groupInstruction}</h3>
-                </div>
-            )}
 
             <div className="question-body">
                 {questions.map((question, index) => {
@@ -366,7 +293,7 @@ const QuestionGroup = memo(({
                                 difficulty={difficulty}
                                 reviewMap={reviewMap}
                                 isGrouped={true}
-                                showInstruction={!hasRepeatedInstructions || index === 0}
+                                showInstruction={false}
                                 globalNumber={globalNumber}
                                 inlinePickedOption={inlinePickedOption}
                                 onInlinePickOptionChange={onInlinePickOptionChange}

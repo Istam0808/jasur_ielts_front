@@ -501,10 +501,6 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
 
     return (
         <div className={styles.matchingQuestionContainer}>
-            <div className={styles.questionInstruction}>
-                <p className={styles.instructionText}>{question.instruction}</p>
-            </div>
-
             {renderContent()}
         </div>
     );

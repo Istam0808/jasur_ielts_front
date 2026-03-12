@@ -186,6 +186,9 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
         } else if (question.type === 'multiple_choice_multiple') {
             // For multiple choice multiple, check if user selected the required number of answers
             if (Array.isArray(answer)) {
+                if (Number.isFinite(question.maxSelections) && question.maxSelections > 0) {
+                    return answer.length === question.maxSelections;
+                }
                 // First try to get from correct properties in options
                 const requiredCount = question.options?.filter(opt => opt.correct)?.length || 0;
                 if (requiredCount > 0) {

@@ -46,7 +46,7 @@ const MatchingHeadingsDragBank = ({
         <div className="inline-matching-bank" data-question-type="matching-headings-inline">
             <div className="inline-matching-bank-header">
                 <p className="inline-matching-bank-instruction">
-                    {question?.instruction || t('matchingHeadings.note', 'Drag an option to the matching blank in the text.')}
+                    {t('matchingHeadings.note', 'Drag an option to the matching blank in the text.')}
                 </p>
             </div>
 

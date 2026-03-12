@@ -607,11 +607,6 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
 
     return (
         <div className="completion-question-container">
-            {question.instruction && (
-                <div className="question-instruction">
-                    <p className="instruction-text">{question.instruction}</p>
-                </div>
-            )}
             {renderContent()}
         </div>
     );
