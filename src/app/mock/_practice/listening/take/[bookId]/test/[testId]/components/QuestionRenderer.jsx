@@ -50,15 +50,6 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
                         />
                     </div>
                 )}
-                {(section.options_box || section.options) && (
-                    <div className="options-box-container">
-                        <ul className="options-box-list selectable-content">
-                            {(section.options_box || section.options).map((opt, i) => (
-                                <li key={i} className="options-box-item">{opt}</li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
                 {/* Recurse to render the content of the section */}
                 <QuestionRenderer 
                     item={section} 

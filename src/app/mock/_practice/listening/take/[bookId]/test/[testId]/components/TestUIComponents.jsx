@@ -3,6 +3,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiChevronLeft, FiChevronRight, FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle, FiVolume2 } from 'react-icons/fi';
+import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 
 export const TestHeader = ({ testTitle, testName, backTo }) => {
     return (
@@ -157,80 +158,36 @@ export const MockExamBottomNav = ({
 }) => {
     const { t } = useTranslation('listening');
 
+    const getActivePartLabel = (partNum) => `${t('part')} ${partNum}`;
+
+    const getInactivePartButtonLabel = (partNum, answered, total) =>
+        `${t('part')} ${partNum} ${answered}/${total}`;
+
+    const getQuestionAriaLabel = (questionNumber) =>
+        `${t('part', { ns: 'listening' })} question ${questionNumber}`;
+
+    const previousAriaLabel = t('previous', { ns: 'common' });
+    const nextAriaLabel = t('next', { ns: 'common' });
+
     return (
         <div className="mock-exam-bottom-nav mock-exam-bottom-nav--ielts">
             <div className="mock-exam-nav-top-line" aria-hidden />
-            <div className="mock-exam-nav-inner">
-                {/* Fixed slots: Part 1, Part 2, Part 3, Part 4 — always in order; active shows questions */}
-                <div className="mock-exam-part-slots">
-                    {parts.map((part, index) => {
-                        const isActive = index === currentPartIndex;
-                        const total = partTotals[index] ?? 0;
-                        const answered = partAnsweredCounts[index] ?? 0;
-                        const partNum = part.part ?? index + 1;
-
-                        return (
-                            <div
-                                key={`mock-part-${index}`}
-                                className={`mock-exam-part-slot ${isActive ? 'mock-exam-part-slot--active' : ''}`}
-                            >
-                                {isActive ? (
-                                    <div className="mock-exam-part-questions-row">
-                                        <span className="mock-exam-part-label mock-exam-part-label--active">
-                                            {t('part')} {partNum}
-                                        </span>
-                                        <div className="mock-exam-question-numbers" aria-label="Question navigation">
-                                            {activePartQuestionNumbers.map((questionNumber) => {
-                                                const isQuestionActive = currentQuestionNumber === questionNumber;
-                                                return (
-                                                    <button
-                                                        key={questionNumber}
-                                                        type="button"
-                                                        className={`mock-exam-question-btn ${isQuestionActive ? 'active' : ''}`}
-                                                        onClick={() => onSelectQuestion(questionNumber)}
-                                                        aria-current={isQuestionActive ? 'true' : undefined}
-                                                        aria-label={`${t('part', { ns: 'listening' })} question ${questionNumber}`}
-                                                    >
-                                                        {questionNumber}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        className="mock-exam-part-slot-btn"
-                                        onClick={() => onSelectPart(index)}
-                                    >
-                                        {t('part')} {partNum} {answered}/{total}
-                                    </button>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Arrows: vertical stack, Previous on top, Next below */}
-                <div className="mock-exam-nav-arrows">
-                    <button
-                        type="button"
-                        className="mock-exam-arrow-btn"
-                        onClick={() => onPrevNextQuestion(-1)}
-                        aria-label={t('previous', { ns: 'common' })}
-                    >
-                        <FiChevronLeft aria-hidden />
-                    </button>
-                    <button
-                        type="button"
-                        className="mock-exam-arrow-btn"
-                        onClick={() => onPrevNextQuestion(1)}
-                        aria-label={t('next', { ns: 'common' })}
-                    >
-                        <FiChevronRight aria-hidden />
-                    </button>
-                </div>
-            </div>
+            <MockExamQuestionNav
+                parts={parts}
+                currentPartIndex={currentPartIndex}
+                onSelectPart={onSelectPart}
+                activePartQuestionNumbers={activePartQuestionNumbers}
+                currentQuestionNumber={currentQuestionNumber}
+                onSelectQuestion={onSelectQuestion}
+                onPrevNextQuestion={onPrevNextQuestion}
+                partTotals={partTotals}
+                partAnsweredCounts={partAnsweredCounts}
+                getActivePartLabel={getActivePartLabel}
+                getInactivePartButtonLabel={getInactivePartButtonLabel}
+                getQuestionAriaLabel={getQuestionAriaLabel}
+                previousAriaLabel={previousAriaLabel}
+                nextAriaLabel={nextAriaLabel}
+            />
         </div>
     );
 };

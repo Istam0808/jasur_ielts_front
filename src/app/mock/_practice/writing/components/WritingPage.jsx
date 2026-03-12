@@ -10,7 +10,8 @@ import { useLoading } from '@/components/common/LoadingContext';
 import { WRITING_TASK_1 } from '@/store';
 import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
-import { TestNavbar, TestFooter } from '@/components/common';
+import { TestNavbar } from '@/components/common';
+import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 import WritingResultsPanel from './WritingResultsPanel';
 import '../WritingResultsPanel.scss';
 
@@ -438,6 +439,53 @@ function WritingPageContent({
         router.back();
     }, [router, setIsLoading, isPlacementTest]);
 
+    // Precompute tasks and navigation helpers (must come before any early returns to keep hooks order stable)
+    const writingTasksFromData = Array.isArray(writingData?.tasks) ? writingData.tasks : [];
+
+    const activePartQuestionNumbers = useMemo(() => {
+        if (!writingTasksFromData.length) return [];
+        const task = writingTasksFromData[activePartIndex] || writingTasksFromData[0];
+        const partNum = Number(task?.part) || activePartIndex + 1;
+        return [partNum];
+    }, [writingTasksFromData, activePartIndex]);
+
+    const writingPartTotals = useMemo(
+        () => writingTasksFromData.map(() => 1),
+        [writingTasksFromData]
+    );
+
+    const writingPartAnsweredCounts = useMemo(
+        () =>
+            writingTasksFromData.map((task, index) => {
+                const text = responsesByPart[index];
+                return text && String(text).trim() ? 1 : 0;
+            }),
+        [writingTasksFromData, responsesByPart]
+    );
+
+    const getActivePartLabel = useCallback(
+        (partNum) => `Part ${partNum}`,
+        []
+    );
+
+    const getInactivePartButtonLabel = useCallback(
+        (partNum, answered, total) => `Part ${partNum} ${answered}/${total}`,
+        []
+    );
+
+    const getQuestionAriaLabel = useCallback(
+        (questionNumber) =>
+            t('writingQuestionAria', {
+                ns: 'writing',
+                defaultValue: 'Writing question {{number}}',
+                number: questionNumber
+            }),
+        [t]
+    );
+
+    const previousAriaLabel = t('previous', { ns: 'common', defaultValue: 'Previous' });
+    const nextAriaLabel = t('next', { ns: 'common', defaultValue: 'Next' });
+
     // Combined loading state
     const isLoading = loading || submissionLoading;
 
@@ -513,7 +561,6 @@ function WritingPageContent({
 
     if (!writingData) return null;
 
-    const writingTasksFromData = Array.isArray(writingData?.tasks) ? writingData.tasks : [];
     const currentTask = writingTasksFromData[activePartIndex] || writingTasksFromData[0] || null;
     const rawWritingTopicTitle = currentTask?.questionText || writingData?.topic || t('defaultTitle', { ns: 'writing', defaultValue: 'Writing Task' });
     const writingTopicTitle = extractPromptText(rawWritingTopicTitle);
@@ -816,29 +863,37 @@ function WritingPageContent({
                 </Modal>
             )}
 
-            {/* Bottom Part Navigation (similar to listening mock footer) */}
-            {writingTasksFromData.length > 1 && !hasSubmitted && (
-                <div className="writing-part-footer" role="navigation" aria-label="Writing parts navigation">
-                    <div className="writing-part-navigation" role="tablist">
-                        {writingTasksFromData.map((task, index) => (
-                            <button
-                                key={`writing-part-footer-${task.id || index}`}
-                                type="button"
-                                role="tab"
-                                aria-selected={index === activePartIndex}
-                                className={`writing-part-tab ${index === activePartIndex ? 'active' : ''}`}
-                                onClick={() => setActivePartIndex(index)}
-                                disabled={hasSubmitted}
-                            >
-                                Part {task.part || index + 1}
-                            </button>
-                        ))}
-                    </div>
+            {/* Bottom Navigation using MockExamQuestionNav (IELTS-style footer) */}
+            {writingTasksFromData.length > 1 && !hasSubmitted && hasTimerStarted && (
+                <div className="mock-exam-bottom-nav mock-exam-bottom-nav--ielts" role="navigation" aria-label="Writing parts navigation">
+                    <div className="mock-exam-nav-top-line" aria-hidden />
+                    <MockExamQuestionNav
+                        parts={writingTasksFromData}
+                        currentPartIndex={activePartIndex}
+                        onSelectPart={setActivePartIndex}
+                        activePartQuestionNumbers={activePartQuestionNumbers}
+                        currentQuestionNumber={activePartQuestionNumbers[0]}
+                        onSelectQuestion={() => {}}
+                        onPrevNextQuestion={(delta) => {
+                            setActivePartIndex((prev) => {
+                                const next = prev + delta;
+                                if (next < 0) return 0;
+                                if (next > writingTasksFromData.length - 1) {
+                                    return writingTasksFromData.length - 1;
+                                }
+                                return next;
+                            });
+                        }}
+                        partTotals={writingPartTotals}
+                        partAnsweredCounts={writingPartAnsweredCounts}
+                        getActivePartLabel={getActivePartLabel}
+                        getInactivePartButtonLabel={getInactivePartButtonLabel}
+                        getQuestionAriaLabel={getQuestionAriaLabel}
+                        previousAriaLabel={previousAriaLabel}
+                        nextAriaLabel={nextAriaLabel}
+                    />
                 </div>
             )}
-
-            {/* Test Footer */}
-            {!isPlacementTest && <TestFooter />}
 
         </div>
     );

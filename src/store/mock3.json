@@ -1,0 +1,1300 @@
+{
+  "id": 3,
+  "listening_p1": {
+    "id": 2,
+    "part": 1,
+    "audio_file": "https://jasur-ielts-backend.onrender.com/media/listening_parts/pack4-t1.mp3",
+    "sections": [
+      {
+        "id": 2,
+        "order": 1,
+        "section_type": "raw_html",
+        "instructions": ".",
+        "title": "Building Work",
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "questions": [
+          {
+            "id": 1,
+            "order": 1,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 2,
+            "order": 2,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 3,
+            "order": 3,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 4,
+            "order": 4,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 5,
+            "order": 5,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 6,
+            "order": 6,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 7,
+            "order": 7,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 8,
+            "order": 8,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 9,
+            "order": 9,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 10,
+            "order": 10,
+            "question_text": "---",
+            "options": []
+          }
+        ],
+        "raw_html": {
+          "id": 1,
+          "html_content": "<p>Address: 15 Hill Street</p>\r\n\r\n<p><b>Contact Information</b></p>\r\n<ul>\r\n  <li>Name: Sally {{question:1}}</li>\r\n  <li>Phone: 027 584 6613</li>\r\n</ul>\r\n\r\n<p><b>Kitchen</b></p>\r\n<ul>\r\n  <li>Needs a bigger window</li>\r\n  <li>The kitchen is too hot - fit a {{question:2}}</li>\r\n</ul>\r\n\r\n<p><b>Bathroom</b></p>\r\n<ul>\r\n  <li>put a {{question:3}} on the back wall</li>\r\n  <li>decide the {{question:4}} of the small tiles later.</li>\r\n</ul>\r\n\r\n<p><b>Outside</b></p>\r\n<ul>\r\n  <li>put a higher {{question:5}} in the garden.</li>\r\n  <li>put a new {{question:6}} on the garage door.</li>\r\n  <li>fix the roof - it was damaged by a {{question:7}}</li>\r\n  <li>fit a new rain gutter made of {{question:8}}</li>\r\n</ul>\r\n\r\n<p><b>Other information</b></p>\r\n<p>Start date: {{question:9}}</p>\r\n<p>Security code: {{question:10}}</p>"
+        },
+        "table_completion": null
+      }
+    ]
+  },
+  "listening_p2": {
+    "id": 3,
+    "part": 2,
+    "audio_file": null,
+    "sections": [
+      {
+        "id": 3,
+        "order": 1,
+        "section_type": "multiple_choice",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "questions": [
+          {
+            "id": 11,
+            "order": 11,
+            "question_text": "The speaker's job requires",
+            "options": [
+              {
+                "id": 1,
+                "label": "A",
+                "text": "a great deal of walking",
+                "order": 1
+              },
+              {
+                "id": 2,
+                "label": "B",
+                "text": "a great deal of driving",
+                "order": 2
+              },
+              {
+                "id": 3,
+                "label": "C",
+                "text": "a great deal of paperwork",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 12,
+            "order": 12,
+            "question_text": "Why is the story being told?",
+            "options": [
+              {
+                "id": 4,
+                "label": "A",
+                "text": "to promote Charity-Water",
+                "order": 1
+              },
+              {
+                "id": 5,
+                "label": "B",
+                "text": "to share Helen's story",
+                "order": 2
+              },
+              {
+                "id": 6,
+                "label": "C",
+                "text": "to demonstrate the power of water projects",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 13,
+            "order": 13,
+            "question_text": "Why do the charity workers usually surprise communities?",
+            "options": [
+              {
+                "id": 7,
+                "label": "A",
+                "text": "It makes people happy",
+                "order": 1
+              },
+              {
+                "id": 8,
+                "label": "B",
+                "text": "It avoids long celebrations",
+                "order": 2
+              },
+              {
+                "id": 9,
+                "label": "C",
+                "text": "It is more efficient",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 14,
+            "order": 14,
+            "question_text": "When the villagers heard of the charity worker's arrival, they",
+            "options": [
+              {
+                "id": 10,
+                "label": "A",
+                "text": "had a party",
+                "order": 1
+              },
+              {
+                "id": 11,
+                "label": "B",
+                "text": "prepared a welcoming ceremony",
+                "order": 2
+              },
+              {
+                "id": 12,
+                "label": "C",
+                "text": "gathered quietly",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 15,
+            "order": 15,
+            "question_text": "Helen is feeling",
+            "options": [
+              {
+                "id": 13,
+                "label": "A",
+                "text": "ecstatic about her new life",
+                "order": 1
+              },
+              {
+                "id": 14,
+                "label": "B",
+                "text": "worried about the future",
+                "order": 2
+              },
+              {
+                "id": 15,
+                "label": "C",
+                "text": "uncertain about her health",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 16,
+            "order": 16,
+            "question_text": "What did the speaker notice about Helen?",
+            "options": [
+              {
+                "id": 16,
+                "label": "A",
+                "text": "she had bathed recently",
+                "order": 1
+              },
+              {
+                "id": 17,
+                "label": "B",
+                "text": "she had new clothes",
+                "order": 2
+              },
+              {
+                "id": 18,
+                "label": "C",
+                "text": "she was very shy",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 17,
+            "order": 17,
+            "question_text": "Making someone feel beautiful was",
+            "options": [
+              {
+                "id": 19,
+                "label": "A",
+                "text": "part of the speaker's job description",
+                "order": 1
+              },
+              {
+                "id": 20,
+                "label": "B",
+                "text": "unexpected but rewarding",
+                "order": 2
+              },
+              {
+                "id": 21,
+                "label": "C",
+                "text": "a difficult challenge",
+                "order": 3
+              }
+            ]
+          }
+        ],
+        "raw_html": null,
+        "table_completion": null
+      },
+      {
+        "id": 5,
+        "order": 2,
+        "section_type": "multiple_choice_multiple_answers",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [
+          {
+            "id": 1,
+            "label": "A",
+            "text": "her children enjoyed better health"
+          },
+          {
+            "id": 2,
+            "label": "B",
+            "text": "it increased her household income"
+          },
+          {
+            "id": 3,
+            "label": "C",
+            "text": "it gave her more free time"
+          },
+          {
+            "id": 4,
+            "label": "D",
+            "text": "she got a leadership position"
+          },
+          {
+            "id": 5,
+            "label": "E",
+            "text": "she had more choices and options"
+          },
+          {
+            "id": 6,
+            "label": "F",
+            "text": "she made new friends in her village"
+          },
+          {
+            "id": 7,
+            "label": "G",
+            "text": "it allowed her to go to school"
+          }
+        ],
+        "multiple_choice_multiple_answers": {
+          "id": 1,
+          "question_text": "which THREE ways did the news well improve Helen's life?"
+        },
+        "questions": [
+          {
+            "id": 18,
+            "order": 18,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 19,
+            "order": 19,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 20,
+            "order": 20,
+            "question_text": "---",
+            "options": []
+          }
+        ],
+        "raw_html": null,
+        "table_completion": null
+      }
+    ]
+  },
+  "listening_p3": {
+    "id": 4,
+    "part": 3,
+    "audio_file": null,
+    "sections": [
+      {
+        "id": 6,
+        "order": 1,
+        "section_type": "multiple_choice",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "questions": [
+          {
+            "id": 21,
+            "order": 21,
+            "question_text": "What problem is Lorna having with her report?",
+            "options": [
+              {
+                "id": 22,
+                "label": "A",
+                "text": "listing the references",
+                "order": 1
+              },
+              {
+                "id": 23,
+                "label": "B",
+                "text": "structuring the content",
+                "order": 2
+              },
+              {
+                "id": 24,
+                "label": "C",
+                "text": "meeting the word limit",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 22,
+            "order": 22,
+            "question_text": "Why did Charles take the song-writing course?",
+            "options": [
+              {
+                "id": 25,
+                "label": "A",
+                "text": "to improve his job prospects",
+                "order": 1
+              },
+              {
+                "id": 26,
+                "label": "B",
+                "text": "to support his hobby",
+                "order": 2
+              },
+              {
+                "id": 27,
+                "label": "C",
+                "text": "to help a friend",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 23,
+            "order": 23,
+            "question_text": "Which type of work did Lorna most enjoy?",
+            "options": [
+              {
+                "id": 28,
+                "label": "A",
+                "text": "individual work",
+                "order": 1
+              },
+              {
+                "id": 29,
+                "label": "B",
+                "text": "pair work",
+                "order": 2
+              },
+              {
+                "id": 30,
+                "label": "C",
+                "text": "group work",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 24,
+            "order": 24,
+            "question_text": "Which aspect of the course content did both students find interesting?",
+            "options": [
+              {
+                "id": 31,
+                "label": "A",
+                "text": "song structure",
+                "order": 1
+              },
+              {
+                "id": 32,
+                "label": "B",
+                "text": "writing a chorus",
+                "order": 2
+              },
+              {
+                "id": 33,
+                "label": "C",
+                "text": "lyrical styles and forms",
+                "order": 3
+              }
+            ]
+          },
+          {
+            "id": 25,
+            "order": 25,
+            "question_text": "Lorna found writing a song",
+            "options": [
+              {
+                "id": 34,
+                "label": "A",
+                "text": "impossible.",
+                "order": 1
+              },
+              {
+                "id": 35,
+                "label": "B",
+                "text": "tiring.",
+                "order": 2
+              },
+              {
+                "id": 36,
+                "label": "C",
+                "text": "amusing.",
+                "order": 3
+              }
+            ]
+          }
+        ],
+        "raw_html": null,
+        "table_completion": null
+      },
+      {
+        "id": 7,
+        "order": 2,
+        "section_type": "move_into_garden",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [
+          {
+            "id": 8,
+            "label": "A",
+            "text": "use of own memories"
+          },
+          {
+            "id": 9,
+            "label": "B",
+            "text": "full use of the stage"
+          },
+          {
+            "id": 10,
+            "label": "C",
+            "text": "relaxation techniques"
+          },
+          {
+            "id": 11,
+            "label": "D",
+            "text": "physical expression of character"
+          },
+          {
+            "id": 12,
+            "label": "E",
+            "text": "play readings"
+          },
+          {
+            "id": 13,
+            "label": "F",
+            "text": "acting without preparation"
+          },
+          {
+            "id": 14,
+            "label": "G",
+            "text": "using a range of accents"
+          },
+          {
+            "id": 15,
+            "label": "H",
+            "text": "following instructions"
+          }
+        ],
+        "multiple_choice_multiple_answers": null,
+        "questions": [
+          {
+            "id": 26,
+            "order": 26,
+            "question_text": "Bob Lacey",
+            "options": []
+          },
+          {
+            "id": 27,
+            "order": 27,
+            "question_text": "Evelyn Chance",
+            "options": []
+          },
+          {
+            "id": 28,
+            "order": 28,
+            "question_text": "Ted Winter",
+            "options": []
+          },
+          {
+            "id": 29,
+            "order": 29,
+            "question_text": "Kevin Gray",
+            "options": []
+          },
+          {
+            "id": 30,
+            "order": 30,
+            "question_text": "Dorothy Thomas",
+            "options": []
+          }
+        ],
+        "raw_html": null,
+        "table_completion": null
+      }
+    ]
+  },
+  "listening_p4": {
+    "id": 5,
+    "part": 4,
+    "audio_file": null,
+    "sections": [
+      {
+        "id": 8,
+        "order": 1,
+        "section_type": "raw_html",
+        "instructions": ".",
+        "title": "The Lontar Palm",
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "questions": [
+          {
+            "id": 31,
+            "order": 31,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 32,
+            "order": 32,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 33,
+            "order": 33,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 34,
+            "order": 34,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 35,
+            "order": 35,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 36,
+            "order": 36,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 37,
+            "order": 37,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 38,
+            "order": 38,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 39,
+            "order": 39,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 40,
+            "order": 40,
+            "question_text": "---",
+            "options": []
+          }
+        ],
+        "raw_html": {
+          "id": 2,
+          "html_content": "<p><b>The tree</b></p>\r\n<ul>\r\n  <li>grows on Roti, an Indonesian island</li>\r\n  <li>is known as the 'tree of life'</li>\r\n  <li>produces delicious juice</li>\r\n  <li>has a fruit resembling a {{question:31}} (female trees only)</li>\r\n</ul>\r\n\r\n<p><b>People climbing the trees</b></p>\r\n<ul>\r\n  <li>fix {{question:32}} to the tree trunks to help them climb</li>\r\n  <li>keep their tools attached to a {{question:33}}</li>\r\n  <li>often own particular trees</li>\r\n  <li>contribute to the upkeep of the communal fence</li>\r\n</ul>\r\n\r\n<p><b>Using the juice</b></p>\r\n<ul>\r\n  <li>It quickly becomes {{question:34}} if left unprocessed.</li>\r\n  <li>A concentrated form of it is drunk in the rainy season.</li>\r\n  <li>it can be made into sugary {{question:35}}</li>\r\n</ul>\r\n\r\n<p><b>Using other parts of the tree</b></p>\r\n<p>The leaf is used:</p>\r\n<ul>\r\n  <li>to make containers, bags and roofing</li>\r\n  <li>as garden {{question:36}}</li>\r\n  <li>for brightly decorated hats worn at a {{question:37}}</li>\r\n  <li>for a musical instrument which sounds like a {{question:38}}</li>\r\n</ul>\r\n<p>The stalk is used to make {{question:39}}</p>\r\n<p>The trunk is used in the construction of {{question:40}}</p>"
+        },
+        "table_completion": null
+      }
+    ]
+  },
+  "meta": {},
+  "reading_p1": {
+    "id": 3,
+    "title": "Making Copier",
+    "topic": "Making Copier",
+    "subtopic": "At first, nobody bought Chester Carlson’s strange idea. But trillions of documents later, his invention is the biggest thing in printing since Gutenberg.",
+    "passage_number": 1,
+    "text": "<b>A</b>\r\n<p>\r\n    Copying is the engine of civilization: culture is behavior duplicated. The oldest copier\r\ninvented by people is language, by which an idea of yours becomes an idea of mine. The\r\nsecond great copying machine was writing. When the Sumerians transposed spoken words\r\ninto stylus marks on clay tablets more than 5,000 years ago, the hugely extended the\r\nhuman network that language had created. Writing freed copying from the chain of living\r\ncontact. It made ideas permanent, portable and endlessly reproducible.\r\n</p>\r\n<b>B</b>\r\n<p>\r\n    Until Johann Gutenberg invented the printing press in the mid-1400s, producing a book in\r\nan edition of more than one generally meant writing it out again. Printing with moveable\r\ntype was not copying, however. Gutenberg couldn’t take a document that already existed,\r\nfeed it into his printing press and run off facsimiles. The first true mechanical copier was\r\nmanufactured in 1780, when James Watt, who is better known as the inventor of the\r\nmodern steam engine, created the copying press. Few people today know what a copying\r\npress was, but you may have seen one in an antique store, where it was perhaps called a\r\nbook press. A user took a document freshly written in special ink, placed a moistened sheet\r\nof translucent paper against the inked surface and squeezed the two sheets together in the\r\npress, causing some of the ink from the original to penetrate the second sheet, which could\r\nthen be read by turning it over and looking through its back. The high cost prohibits the\r\nwidespread use of this copier.\r\n</p>\r\n<b>C</b>\r\n<p>\r\n    Among the first modem copying machines, introduced in 1950 by 3M, was the Thermo-Fax,\r\nand it made a copy by shining infrared light through an original document and a sheet of\r\npaper that had been coated with heat-sensitive chemicals. Competing manufacturers soon\r\nintroduced other copying technologies and marketed machines called Dupliton, Dial-AMatic Autostat, Verifax, Copease and Copymation. These machines and their successors\r\nwere welcomed by secretaries, who had no other means of reproducing documents in\r\nhand, but each had serious drawbacks. All required expensive chemically treated papers.\r\nAnd all made copies that smelled bad, were hard to read, didn’t last long and tended to curl\r\nup into tubes. The machines were displaced, beginning in the late 1800s, by a combination\r\nof two 19th century inventions: the typewriter and carbon paper. For those reasons,\r\ncopying presses were standard equipment in offices for nearly a century and a half.\r\n</p>\r\n<b>D</b>\r\n<p>\r\n    None of those machines is still manufactured today. They were all made obsolete by a\r\nradically different machine, which had been developed by an obscure photographic-supply\r\ncompany. That company had been founded in 1906 as the Haloid Company and is known\r\ntoday as the Xerox Corporation. In 1959, it introduced an office copier called the Haloid\r\nXerox 914, a machine that, unlike its numerous competitors, made sharp, permanent\r\ncopies on ordinary paper-a huge breakthrough. The process, which Haloid called xerography (based on Greek words meaning “dry” and “writing”), was so unusual and\r\nnonnutritive that physicists who visited the drafty warehouses where the first machines\r\nwere built sometimes expressed doubt that it was even theoretically feasible.\r\n</p>\r\n<b>E</b>\r\n<p>\r\n    Remarkably, xerography was conceived by one person- Chester Carlson, a shy, softspoken patent attorney, who grew up in almost unspeakable poverty and worked his way\r\nthrough junior college and the California Institute of Technology. Chester Carlson was born\r\nin Seattle in 1906. His parents-Olof Adolph Carlson and Ellen Josephine Hawkins—had\r\ngrown up on neighboring farms in Grove City, Minnesota, a tiny Swedish farming\r\ncommunity about 75 miles west of Minneapolis. Compare with competitors, Carlson was\r\nnot a normal inventor in 20-century. He made his discovery in solitude in 1937 and offered\r\nit to more than 20 major corporations, among them IBM, General Electric, Eastman Kodak\r\nand RCA. All of them turned him down, expressing what he later called “an enthusiastic\r\nlack of interest” and thereby passing up the opportunity to manufacture what Fortune\r\nmagazine would describe as “the most successful product ever marketed in America.”\r\n</p>\r\n<b>F</b>\r\n<p>\r\n    Carlson’s invention was indeed a commercial triumph. Essentially overnight, people began\r\nmaking copies at a rate that was orders of magnitude higher than anyone had believed\r\npossible. And the rate is still growing. In fact, most documents handled by a typical\r\nAmerican office worker today are produced xerographically, either on copiers manufactured\r\nby Xerox and its competitors or on laser printers, which employ the same process (and\r\nwere invented, in the 1970s, by a Xerox researcher). This year, the world will produce more\r\nthan three trillion xerographic copies and laser-printed pages—about 500 for every human\r\non earth.\r\n</p>\r\n<b>G</b>\r\n<p>\r\n    Xerography eventually made Carlson a very wealthy man. (His royalties amounted to\r\nsomething like a 16th of a cent for every Xerox copy made, worldwide, through 1965.)\r\nNevertheless, he lived simply. He never owned a second home or a second car, and his\r\nwife had to urge him not to buy third-class train tickets when he traveled in Europe. People\r\nwho knew him casually seldom suspected that he was rich or even well-to-do; when\r\nCarlson told an acquaintance he worked at Xerox, the man assumed he was a factory\r\nworker and asked if he belonged to a union. “His possessions seemed to be composed of\r\nthe number of things he could easily do without,” his second wife said. He spent the last\r\nyears of his life quietly giving most of his fortune to charities. When he died in 1968, among\r\nthe eulogizers was the secretary-general of the United Nations.\r\n</p>",
+    "sections": [
+      {
+        "id": 7,
+        "order": 1,
+        "section_type": "true_false_not_given",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 8,
+            "order": 1,
+            "question_text": "The earliest languages were recorded on papyrus.",
+            "options": []
+          },
+          {
+            "id": 9,
+            "order": 2,
+            "question_text": "When applying Johann Gutenberg’s printing machine, it requires lots of training.",
+            "options": []
+          },
+          {
+            "id": 10,
+            "order": 3,
+            "question_text": "James Watt invented a modem steam engine before he made his first mechanical copier.",
+            "options": []
+          },
+          {
+            "id": 11,
+            "order": 4,
+            "question_text": "Using the Dupliton copiers and follower versions are very costly.",
+            "options": []
+          },
+          {
+            "id": 12,
+            "order": 5,
+            "question_text": "The typewriters with carbon papers were taken place of very soon because they were not sold well.",
+            "options": []
+          },
+          {
+            "id": 13,
+            "order": 6,
+            "question_text": "The Haloid Xerox 914 model also required specially treated paper for making copies.",
+            "options": []
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "order": 2,
+        "section_type": "summary_completion_no_options",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": {
+          "id": 1,
+          "title": "Carlson’s Journey to Success",
+          "text": "Calson, unlike a 20-century {{question:7}}, like to work on his own. In 1937, he\r\nunsuccessfully invited 20 major {{question:8}} to make his discovery. However, this action\r\nwas not welcome among shareholders at the beginning, all of them\r\n{{question:9}}. Eventually, Calson’s creation was undeniably a {{question:10}}. Thanks for\r\nthe discovery of Xerography, Calson became a very {{question:11}} person. Even so, his\r\nlife remains as simple as before. It looks as if he can live without his {{question:12}}. At the\r\nsame time, he gave lots of his money to {{question:13}}."
+        },
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 14,
+            "order": 7,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 15,
+            "order": 8,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 16,
+            "order": 9,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 17,
+            "order": 10,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 18,
+            "order": 11,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 19,
+            "order": 12,
+            "question_text": ".",
+            "options": []
+          },
+          {
+            "id": 20,
+            "order": 13,
+            "question_text": ".",
+            "options": []
+          }
+        ]
+      }
+    ]
+  },
+  "reading_p2": {
+    "id": 4,
+    "title": "The importance of law",
+    "topic": "The importance of law",
+    "subtopic": "---",
+    "passage_number": 2,
+    "text": "{{question:1}}\r\n<p>\r\n    The law influences all of us virtually all the time, it governs almost all aspects of our\r\n    behavior, and even what happens to us when we are no longer alive. It affects us from the\r\n    embryo onwards. It governs the air we breathe, the food and drink we consume, our travel,\r\n    family relationships, and our property. It applies at the bottom of the ocean and in space.\r\n</p>\r\n<p>\r\n    Each time we examine a label on a food product, engage in work as an employee or\r\n    employer, travel on the roads, go to school to learn or to teach, stay in a hotel, borrow a\r\n    library book, create or dissolve a commercial company, play sports, or engage the services\r\n    of someone for anything from plumbing a sink to planning a city, we are in the world of law.\r\n</p>\r\n{{question:2}}\r\n<p>\r\n    Law has also become much more widely recognized as the standard by which behavior\r\n    needs to be judged. A very telling development in recent history is the way in which the\r\n    idea of law has permeated all parts of social life. The universal standard of whether\r\n    something is socially tolerated is progressively becoming whether it is legal, rather than\r\n    something that has always been considered acceptable. In earlier times, most people were\r\n    illiterate.\r\n</p>\r\n\r\n<p>\r\n    Today, by contrast, a vast number of people can read, and it is becoming easier for people\r\nto take an interest in law, and for the general population to help actually shape the law in\r\nmany countries. However, law is a versatile instrument that can be used equally well for the\r\nimprovement or the degradation of humanity.\r\n</p>\r\n{{question:3}}\r\n<p>\r\n    This, of course, puts law in a very significant position. In our rapidly developing world, all\r\n    sorts of skills and knowledge are valuable. Those people, for example, with knowledge of\r\n    computers, the internet, and communications technology are relied upon by the rest of us.\r\n</p>\r\n<p>\r\n    There is now someone with IT skills or an IT help desk in every UK school, every company,\r\nevery hospital, every local and central government office. Without their knowledge, many\r\nparts of commercial and social life today would seize up in minutes. But legal\r\nunderstanding is just as vital and as universally needed. The American comedian Jerry\r\nSeinfeld put it like this, 'We are all throwing the dice, playing the game, moving our pieces\r\naround the board, but if there is a problem, the lawyer is the only person who has read the\r\ninside of the top of the box.' In other words, the lawyer is the only person who has read and\r\nmade sense of the rules.\r\n</p>\r\n\r\n{{question:4}}\r\n<p>\r\n    The number of laws has never been greater. In the UK alone, about 35 new Acts of\r\n    Parliament are produced every year, thereby delivering thousands of new rules. The\r\n    legislative output of the British Parliament has more than doubled in recent times from\r\n    1,100 pages a year in the early 1970s,to over 2,500 pages a year today. Between 1997\r\n    and 2006,the legislature passed 365 Acts of Parliament and more than 32,000 legally binding\r\n    statutory instruments. In a system with so much law, lawyers do a great deal not just to\r\n    vindicate the rights of citizens and organizations but also to help develop the law through\r\n    legal arguments, some of which are adapted by judges to become laws. Law courts can\r\n    and do produce new law and revise old law, but they do so having heard the arguments of\r\n    lawyers. \r\n</p>\r\n{{question:5}}\r\n<p>\r\n    However, despite their important role in developing the rules, lawyers are not universally admired. Anti-lawyer jokes have a long history going back to the ancient Greeks.\r\n\r\n</p>\r\n<p>\r\n    More recently the son of a famous Hollywood actor was asked at his junior school what his\r\n    father did for a living, to which he replied, \"My daddy is a movie actor, and sometimes he\r\n    plays the good guy, and sometimes he plays the lawyer\". For balance, though, it is worth\r\n    remembering that there are and have been many heroic and revered lawyers such as the\r\n    Roman philosopher and politician Cicero and Mahatma Gandhi, the Indian campaigner for\r\n    independence\r\n</p>\r\n{{question:6}}\r\n<p>\r\n    People sometimes make comments that characterize lawyers as professionals whose\r\nconcerns put personal reward above truth, or who gain financially from misfortune. There\r\nare undoubtedly lawyers that would fit that bill. Just as there are some scientists,\r\njournalists and others in that category. But, in general, it is no more just to say that\r\nlawyers are bad because they make a living from people's problems than it is to make the\r\nsame accusation in respect of nurses or IT consultants. A great many lawyers are involved\r\nin public law work, such as that involving civil liberties, housing and other issues. Such\r\nwork is not lavishly remunerated and the quality of the service provided by these lawyers\r\nrelies on considerable professional dedication. Moreover, much legal work has nothing to\r\ndo with conflict or misfortune, but is primarily concerned with drafting documents. Another\r\nsource of social disaffection for lawyers, and disaffection for the law, is a limited public\r\nunderstanding of how law works and how it could be changed. Greater clarity about these\r\nissues, maybe as a result of better public relations, would reduce many aspects of public\r\ndissatisfaction with the law.\r\n</p>",
+    "sections": [
+      {
+        "id": 9,
+        "order": 1,
+        "section_type": "matching_headings",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [
+          {
+            "id": 1,
+            "label": "1",
+            "text": "Different areas of professional expertise"
+          },
+          {
+            "id": 2,
+            "label": "2",
+            "text": "The role of law in everyday life"
+          },
+          {
+            "id": 3,
+            "label": "3",
+            "text": "The growing volume of legislation"
+          },
+          {
+            "id": 4,
+            "label": "4",
+            "text": "Public perceptions of lawyers"
+          },
+          {
+            "id": 5,
+            "label": "5",
+            "text": "Law as a measure of acceptable behavior"
+          },
+          {
+            "id": 6,
+            "label": "6",
+            "text": "The potential misuse of law"
+          }
+        ],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 21,
+            "order": 14,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 22,
+            "order": 15,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 23,
+            "order": 16,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 24,
+            "order": 17,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 25,
+            "order": 18,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 26,
+            "order": 19,
+            "question_text": "---",
+            "options": []
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "order": 2,
+        "section_type": "multiple_choice_multiple_answers",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [
+          {
+            "id": 9,
+            "label": "A",
+            "text": "There should be a person with legal training in every hospital."
+          },
+          {
+            "id": 10,
+            "label": "B",
+            "text": "Lawyers with experience in commercial law are the most in demand."
+          },
+          {
+            "id": 11,
+            "label": "C",
+            "text": "Knowledge of the law is as important as having computer skills."
+          },
+          {
+            "id": 12,
+            "label": "D",
+            "text": "D Society could not function effectively without legal experts"
+          }
+        ],
+        "multiple_choice_multiple_answers": {
+          "id": 1,
+          "question_text": "Which TWO of the following statements does the writer make about legal skills in today's world?"
+        },
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 27,
+            "order": 20,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 28,
+            "order": 21,
+            "question_text": "---",
+            "options": []
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "order": 3,
+        "section_type": "summary_completion_no_options",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": {
+          "id": 2,
+          "title": "Lawyers as professionals",
+          "text": "People sometimes say that {{question:9}} is of little interest to lawyers, who are more concerned with making money. This may well be the case with some individuals, in the same way that some {{question:10}} or scientific experts may also be driven purely by financial greed. However, criticizing lawyers because their work is concerned with people's problems would be similar to attacking IT staff or {{question:11}} for the same reason. In fact, many lawyers focus on questions relating, for example, to housing or civil liberties, which requires them to have {{question:12}} to their work. What's more, a lot of lawyers' time is spent writing {{question:13}} rather than dealing with people's misfortunes."
+        },
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 29,
+            "order": 22,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 30,
+            "order": 23,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 31,
+            "order": 24,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 32,
+            "order": 25,
+            "question_text": "---",
+            "options": []
+          },
+          {
+            "id": 33,
+            "order": 26,
+            "question_text": "---",
+            "options": []
+          }
+        ]
+      }
+    ]
+  },
+  "reading_p3": {
+    "id": 5,
+    "title": "Pacific navigation and voyaging",
+    "topic": "Pacific navigation and voyaging",
+    "subtopic": "How people migrated to the Pacific islands",
+    "passage_number": 3,
+    "text": "<p>\r\n    The many tiny islands of the Pacific Ocean had no human population until ancestors of\r\ntoday's islanders sailed from Southeast Asia in ocean-going canoes approximately 2,000\r\nyears ago. At the present time, the debate continues about exactly how they migrated such\r\nvast distances across the ocean, without any of the modern technologies we take for\r\ngranted.\r\n</p>\r\n\r\n\r\n<p>\r\n    Although the romantic vision of some early twentieth-century writers of fleets of heroic\r\nnavigators simultaneously setting sail had come to be considered by later investigators to\r\nbe exaggerated, no considered assessment of Pacific voyaging was forthcoming until 1956\r\nwhen the American historian Andrew Sharp published his research. Sharp challenged the\r\n'heroic vision' by asserting that the expertise of the navigators was limited, and that the\r\nsettlement of the islands was not systematic, being more dependent on good fortune by\r\ndrifting canoes. Sharp's theory was widely challenged, and deservedly so. If nothing else,\r\nhowever, it did spark renewed interest in the topic and precipitated valuable new research.    \r\n</p>\r\n\r\n\r\n<p>\r\n    Since the 1960s a wealth of investigations has been conducted, and most of them,\r\n    thankfully, have been of the 'non-armchair' variety. While it would be wrong to denigrate all\r\n    'armchair' research - that based on an examination of available published materials - it has\r\n    turned out that so little progress had been made in the area of Pacific voyaging because\r\n    most writers relied on the same old sources - travelers' journals or missionary narratives\r\n    compiled by unskilled observers. After Sharp, this began to change, and researchers\r\n    conducted most of their investigations not in libraries, but in the field. \r\n</p>\r\n\r\n\r\n<p>\r\n    In 1965, David Lewis, a physician and experienced yachtsman, set to work using his own\r\nunique philosophy: he took the yacht he had owned for many years and navigated through\r\nthe islands in order to contact those men who still find their way at sea using traditional\r\nmethods. He then accompanied these men, in their traditional canoes, on test voyages\r\nfrom which all modern instruments were banished from sight, though Lewis secretly used\r\nthem to confirm the navigators' calculations. His most famous such voyage was a return\r\ntrip of around 1,000 nautical miles between two islands in midocean. Far from drifting, as\r\nproposed by Sharp, Lewis found that ancient navigators would have known which course to\r\nsteer by memorizing which stars rose and set in certain positions along the horizon and this\r\ngave them fixed directions by which to steer their boats.\r\n\r\n</p>\r\n\r\n\r\n<p>\r\n    The geographer Edwin Doran followed a quite different approach. He was interested in\r\nobtaining exact data on canoe sailing performance, and to that end employed the latest\r\nelectronic instrumentation. Doran traveled on board traditional sailing canoes in some of\r\nthe most remote parts of the Pacific, all the while using his instruments to record canoe\r\nspeeds in different wind strengths - from gales to calms - the angle canoes could sail\r\nrelative to the wind. In the process, he provided the first really precise attributes of\r\ntraditional sailing canoes.\r\n</p>\r\n\r\n\r\n<p>\r\n    A further contribution was made by Steven Horvath. As a physiologist, Horvath's interest\r\n    was not in navigation techniques or in canoes, but in the physical capabilities of the men\r\n    themselves. By adapting standard physiological techniques, Horvath was able to calculate\r\n    the energy expenditure required to paddle canoes of this sort at times when there was no wind to fill the sails, or when the wind was contrary. He concluded that paddles, or perhaps\r\n    long oars, could indeed have propelled for long distances what were primarily sailing\r\n    vessels. \r\n</p>\r\n\r\n<p>\r\n    Finally, a team led by p Wall Garrard conducted important research, in this case by making\r\ninvestigations while remaining safely in the laboratory. Wall Garrard's unusual method was\r\nto use the findings of linguists who had studied the languages of the Pacific islands, many\r\nof which are remarkably similar although the islands where they are spoken are sometimes\r\nthousands of kilometres apart. Clever adaptation of computer simulation techniques\r\npioneered in other disciplines allowed him to produce convincing models suggesting the\r\nmigrations were indeed systematic, but not simultaneous. Wall Garrard proposed the\r\nmigrations should be seen not as a single journey made by a massed fleet of canoes, but\r\nas a series of ever more ambitious voyages, each pushing further into the unknown ocean.\r\n</p>\r\n\r\n<p>\r\n    What do we learn about Pacific navigation and voyaging from this research? Quite\r\ncorrectly, none of the researchers tried to use their findings to prove one theory or another;\r\nexperiments such as these cannot categorically confirm or negate a hypothesis. The\r\nstrength of this research lay in the range of methodologies employed. When we splice\r\ntogether these findings we can propose that traditional navigators used a variety of canoe\r\ntypes, sources of water and navigation techniques, and it was this adaptability which was\r\ntheir greatest accomplishment. These navigators observed the conditions prevailing at sea\r\nat the time a voyage was made and altered their techniques accordingly. Furthermore, the\r\ncanoes of the navigators were not drifting helplessly at sea but were most likely part of a\r\nsystematic migration; as such, the Pacific peoples were able to view the ocean as an\r\navenue, not a barrier, to communication before any other race on Earth. Finally, one\r\nunexpected but most welcome consequence of this research has been a renaissance in\r\nthe practice of traditional voyaging. In some groups of islands in the Pacific today young\r\npeople are resurrecting the skills of their ancestors, when a few decades ago it seemed\r\nthey would be lost forever.\r\n</p>",
+    "sections": [
+      {
+        "id": 12,
+        "order": 1,
+        "section_type": "yes_no_not_given",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 34,
+            "order": 27,
+            "question_text": "The Pacific islands were uninhabited when migrants arrived by sea from Southeast Asia.",
+            "options": []
+          },
+          {
+            "id": 35,
+            "order": 28,
+            "question_text": "Andrew Sharp was the first person to write about the migrants to islanders.",
+            "options": []
+          },
+          {
+            "id": 36,
+            "order": 29,
+            "question_text": "Andrew Sharp believed migratory voyages were based on more on luck than skill.",
+            "options": []
+          },
+          {
+            "id": 37,
+            "order": 30,
+            "question_text": "Despite being controversial, Andrew Sharp’s research had positive results.",
+            "options": []
+          },
+          {
+            "id": 38,
+            "order": 31,
+            "question_text": "Edwin Doran disagreed with the findings of Lewis’s research.",
+            "options": []
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "order": 2,
+        "section_type": "multiple_choice",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 39,
+            "order": 32,
+            "question_text": "David Lewis’s research was different because",
+            "options": [
+              {
+                "id": 1,
+                "label": "A",
+                "text": "he observed traditional navigators at work",
+                "order": 1
+              },
+              {
+                "id": 2,
+                "label": "B",
+                "text": "he conducted test voyages using his own yacht",
+                "order": 2
+              },
+              {
+                "id": 3,
+                "label": "C",
+                "text": "he carried no modern instruments on test voyages",
+                "order": 3
+              },
+              {
+                "id": 4,
+                "label": "D",
+                "text": "he spoke the same language as the islanders he sailed with",
+                "order": 4
+              }
+            ]
+          },
+          {
+            "id": 40,
+            "order": 33,
+            "question_text": "What did David Lewis’s research discover about traditional navigators?",
+            "options": [
+              {
+                "id": 5,
+                "label": "A",
+                "text": "They used the sun and moon to find their position",
+                "order": 1
+              },
+              {
+                "id": 6,
+                "label": "B",
+                "text": "They could not sail further than about 1,000 nautical miles",
+                "order": 2
+              },
+              {
+                "id": 7,
+                "label": "C",
+                "text": "They knew which direction they were sailing in",
+                "order": 3
+              },
+              {
+                "id": 8,
+                "label": "D",
+                "text": "They were able to drift for long distances",
+                "order": 4
+              }
+            ]
+          },
+          {
+            "id": 41,
+            "order": 34,
+            "question_text": "What are we told about Edwin Doran’s research?",
+            "options": [
+              {
+                "id": 9,
+                "label": "A",
+                "text": "Data were collected after the canoes had returned to land",
+                "order": 1
+              },
+              {
+                "id": 10,
+                "label": "B",
+                "text": "Canoe characteristics were recorded using modern instruments",
+                "order": 2
+              },
+              {
+                "id": 11,
+                "label": "C",
+                "text": "Research was conducted in the most densely populated regions",
+                "order": 3
+              },
+              {
+                "id": 12,
+                "label": "D",
+                "text": "Navigators were not allowed to see the instruments Doran used",
+                "order": 4
+              }
+            ]
+          },
+          {
+            "id": 42,
+            "order": 35,
+            "question_text": "Which of the following did Steven Horvath discover during his research?",
+            "options": [
+              {
+                "id": 13,
+                "label": "A",
+                "text": "Canoe design was less important than human strength",
+                "order": 1
+              },
+              {
+                "id": 14,
+                "label": "B",
+                "text": "Traditional navigators were physically weak",
+                "order": 2
+              },
+              {
+                "id": 15,
+                "label": "C",
+                "text": "Paddling long distances was impossible without sails",
+                "order": 3
+              },
+              {
+                "id": 16,
+                "label": "D",
+                "text": "Canoes primarily relied on sails but could be paddled for long distances",
+                "order": 4
+              }
+            ]
+          },
+          {
+            "id": 43,
+            "order": 36,
+            "question_text": "What is the writer’s opinion of p Wall Garrard’s research?",
+            "options": [
+              {
+                "id": 17,
+                "label": "A",
+                "text": "He is disappointed it was conducted in the laboratory",
+                "order": 1
+              },
+              {
+                "id": 18,
+                "label": "B",
+                "text": "He is impressed by the originality of the techniques used",
+                "order": 2
+              },
+              {
+                "id": 19,
+                "label": "C",
+                "text": "He is surprised it was used to help linguists with their research",
+                "order": 3
+              },
+              {
+                "id": 20,
+                "label": "D",
+                "text": "He is concerned that the islands studied are long distances apart",
+                "order": 4
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "order": 3,
+        "section_type": "matching_sentences",
+        "instructions": ".",
+        "title": null,
+        "list_selections": [
+          {
+            "id": 13,
+            "label": "A",
+            "text": "was the variety of experimental techniques used"
+          },
+          {
+            "id": 14,
+            "label": "B",
+            "text": "was not of interest to young islanders today"
+          },
+          {
+            "id": 15,
+            "label": "C",
+            "text": "was not conclusive evidence in support of a single theory"
+          },
+          {
+            "id": 16,
+            "label": "D",
+            "text": "was being able to change their practices when necessary"
+          },
+          {
+            "id": 17,
+            "label": "E",
+            "text": "was the first time humans intentionally crossed an ocean"
+          },
+          {
+            "id": 18,
+            "label": "F",
+            "text": "was the speed with which it was conducted"
+          }
+        ],
+        "multiple_choice_multiple_answers": null,
+        "summary_completion": null,
+        "table_completion": null,
+        "diagram_completion": null,
+        "flow_chart_data": null,
+        "flow_charts": [],
+        "questions": [
+          {
+            "id": 45,
+            "order": 37,
+            "question_text": "One limitation in the information produced by all of this research is that it",
+            "options": []
+          },
+          {
+            "id": 46,
+            "order": 38,
+            "question_text": "The best thing about this type of research",
+            "options": []
+          },
+          {
+            "id": 47,
+            "order": 39,
+            "question_text": "The most important achievement of traditional navigators",
+            "options": []
+          },
+          {
+            "id": 48,
+            "order": 40,
+            "question_text": "The migration of people from Asia to the Pacific",
+            "options": []
+          }
+        ]
+      }
+    ]
+  },
+  "writing_task1": {
+    "id": 3,
+    "task_number": 1,
+    "question_text": "The chart below shows the number of men and women in further education in Britain in three periods and whether they were studying full-time or part-time",
+    "images": [
+      {
+        "id": 1,
+        "order": 1,
+        "image": "https://jasur-ielts-backend.onrender.com/media/writing_tasks/photo_2026-03-11_02-12-26.jpg"
+      }
+    ]
+  },
+  "writing_task2": {
+    "id": 2,
+    "task_number": 2,
+    "question_text": "Employees sometimes ask people applying for jobs or personal information, such as their hobbies and interest, and whether they married or single. Some people say that this information may be relevant and useful. Others disagree. \r\n\r\nDiscuss both these views and give your own opinion.",
+    "images": []
+  }
+}
+
