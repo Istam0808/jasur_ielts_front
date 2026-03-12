@@ -202,6 +202,75 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     const processedReadingData = useMemo(() => {
         if (!readingExercise) return null;
 
+        const buildMatchingSentencesQuestion = (section) => {
+            const sectionQuestions = Array.isArray(section?.questions) ? section.questions : [];
+            const items = sectionQuestions
+                .slice()
+                .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
+                .map((q) => ({
+                    id: q.id,
+                    order: q.order,
+                    text: q.question_text || q.text || ''
+                }));
+
+            const options = (Array.isArray(section?.list_selections) ? section.list_selections : [])
+                .map((s) => {
+                    const label = (s?.label || '').toString().trim();
+                    const text = (s?.text || '').toString().trim();
+                    if (!label && !text) return '';
+                    return `${label} ${text}`.trim();
+                })
+                .filter(Boolean);
+
+            const syntheticOrder = items.length
+                ? Math.min(...items.map((it) => (typeof it.order === 'number' ? it.order : Number.POSITIVE_INFINITY)))
+                : section?.order;
+
+            return {
+                id: section.id,
+                type: 'matching_sentences',
+                instruction: section.instructions || '',
+                items,
+                options,
+                // keep raw selections for future needs (e.g., showing label separately)
+                list_selections: section.list_selections || [],
+                order: syntheticOrder
+            };
+        };
+
+        const normalizePassageQuestions = (passage) => {
+            const baseQuestions = Array.isArray(passage?.questions) ? passage.questions : [];
+            const sections = Array.isArray(passage?.sections) ? passage.sections : [];
+
+            const matchingSections = sections
+                .filter((s) => s?.section_type === 'matching_sentences')
+                .map(buildMatchingSentencesQuestion)
+                .filter((q) => q?.items?.length);
+
+            if (matchingSections.length === 0) {
+                return baseQuestions;
+            }
+
+            // Avoid duplicates if backend already provides matching_sentences in passage.questions
+            const hasMatchingAlready = baseQuestions.some((q) => q?.type === 'matching_sentences');
+            const merged = hasMatchingAlready ? baseQuestions : [...baseQuestions, ...matchingSections];
+
+            // Ensure stable ordering: prefer numeric `order` when available, otherwise keep original order.
+            return merged
+                .map((q, idx) => ({ q, __idx: idx }))
+                .sort((a, b) => {
+                    const ao = a.q?.order;
+                    const bo = b.q?.order;
+                    const aHas = typeof ao === 'number' && !Number.isNaN(ao);
+                    const bHas = typeof bo === 'number' && !Number.isNaN(bo);
+                    if (aHas && bHas) return ao - bo;
+                    if (aHas && !bHas) return -1;
+                    if (!aHas && bHas) return 1;
+                    return a.__idx - b.__idx;
+                })
+                .map((x) => x.q);
+        };
+
         const baseData = {
             id: parseInt(id),
             level: difficulty,
@@ -215,13 +284,18 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         };
 
         if (isMultiPassage) {
+            const normalizedPassages = (readingExercise.passages || []).map((p) => ({
+                ...p,
+                questions: normalizePassageQuestions(p)
+            }));
+
             return {
                 ...baseData,
                 topic: readingExercise.topic,
                 total_questions: readingExercise.total_questions,
                 total_passages: readingExercise.total_passages,
-                passages: readingExercise.passages,
-                questions: readingExercise.passages.flatMap(p => p.questions || []),
+                passages: normalizedPassages,
+                questions: normalizedPassages.flatMap(p => p.questions || []),
                 isMultiPassage: true
             };
         }

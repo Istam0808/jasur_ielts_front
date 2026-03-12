@@ -13,6 +13,7 @@ import MultipleChoiceMultiple from './question-types/MultipleChoiceMultiple';
 import TrueFalseNotGiven from './question-types/TrueFalseNotGiven';
 import MatchingHeadings from './question-types/MatchingHeadings';
 import MatchingQuestion from './question-types/MatchingQuestion';
+import MatchingSentences from './question-types/MatchingSentences';
 import CompletionQuestion from './question-types/CompletionQuestion';
 import AdvancedShortAnswer from './question-types/AdvancedShortAnswer';
 
@@ -439,6 +440,18 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
             case 'sentence_completion':
                 return (
                     <MatchingQuestion
+                        question={question}
+                        answer={answer}
+                        onAnswerChange={onAnswerChange}
+                        isReviewMode={isReviewMode}
+                        readingId={readingId}
+                        reviewMap={reviewMap}
+                    />
+                );
+
+            case 'matching_sentences':
+                return (
+                    <MatchingSentences
                         question={question}
                         answer={answer}
                         onAnswerChange={onAnswerChange}

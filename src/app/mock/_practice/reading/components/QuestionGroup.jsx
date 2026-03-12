@@ -13,6 +13,7 @@ const shouldSuppressQuestionText = (question) => {
         'matching_headings',        // Shows question.instruction
         'matching_information',     // Shows question.instruction
         'matching_features',        // Shows question.instruction
+        'matching_sentences',       // Shows question.instruction + bank/options
         'sentence_completion',      // Shows question.instruction
         'summary_completion',       // Shows question.instruction
         'table_completion',         // Shows question.instruction

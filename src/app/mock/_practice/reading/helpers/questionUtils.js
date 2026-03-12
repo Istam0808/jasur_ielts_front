@@ -136,6 +136,9 @@ export const getQuestionAnswerCount = (question) => {
         case 'matching_features':
             return question.features?.length || 1;
 
+        case 'matching_sentences':
+            return question.items?.length || 1;
+
         case 'matching':
             return question.options?.length || 1;
 
@@ -227,6 +230,7 @@ export const getProvidedAnswerCount = (answer, question) => {
         case 'matching_headings':
         case 'matching_information':
         case 'matching_features':
+        case 'matching_sentences':
         case 'sentence_completion':
         case 'summary_completion':
         case 'table_completion':
@@ -272,6 +276,7 @@ export const hasValidAnswer = (answer, question) => {
         case 'matching_headings':
         case 'matching_information':
         case 'sentence_completion':
+        case 'matching_sentences':
         case 'summary_completion':
         case 'table_completion':
         case 'flow_chart_completion':
