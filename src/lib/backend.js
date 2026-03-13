@@ -39,6 +39,11 @@ function normalizeApiPath(pathname) {
     return withoutTrailingSlash;
   }
 
+  // Detail endpoint для mocks должен быть только со слешем в конце.
+  if (/^\/api\/v1\/mocks\/[^/]+$/i.test(withoutTrailingSlash)) {
+    return `${withoutTrailingSlash}/`;
+  }
+
   return rawPath;
 }
 
