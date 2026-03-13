@@ -30,12 +30,23 @@ function normalizeBackendUrl(value) {
 
 export const BACKEND_URL = normalizeBackendUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 
+function normalizeApiPath(pathname) {
+  const rawPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const withoutTrailingSlash = rawPath.replace(/\/+$/, "");
+
+  // Authentication endpoints в backend объявлены без хвостового слеша.
+  if (/^\/api\/v1\/auth\/(login|logout|heartbeat)$/i.test(withoutTrailingSlash)) {
+    return withoutTrailingSlash;
+  }
+
+  return rawPath;
+}
+
 export function buildBackendUrl(pathname) {
   if (!pathname) return BACKEND_URL;
 
-  // Гарантируем только ведущий слеш у пути.
-  // Хвостовой слеш будет добавлен на стороне backend‑rewrite.
-  const path = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  // Гарантируем корректную форму пути для backend endpoint'ов.
+  const path = normalizeApiPath(pathname);
 
   // В браузере ходим через Next.js proxy `/api/backend/...`,
   // чтобы избежать прямых запросов с localhost:3000 на внешний домен.
