@@ -21,7 +21,7 @@ function normalizeBackendUrl(value) {
 const backendUrl = normalizeBackendUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 const nextConfig = {
   // Отключаем авто-редирект Next.js между URL со слешом/без слеша.
-  // Это важно для backend endpoint, где хвостовой слеш обязателен.
+  // Это важно для backend endpoint'ов с разными правилами по слешам.
   skipTrailingSlashRedirect: true,
   async rewrites() {
     return [
@@ -30,13 +30,8 @@ const nextConfig = {
         source: "/api/backend/api/v1/mocks/list/",
         destination: `${backendUrl.replace(/\/+$/, "")}/api/v1/mocks/list/`,
       },
-      // Правило для backend‑запросов, у которых в исходном URL есть завершающий слеш.
-      // Например: /api/backend/api/v1/mocks/2/ -> .../api/v1/mocks/2/
-      {
-        source: "/api/backend/:path*/",
-        destination: `${backendUrl.replace(/\/+$/, "")}/:path*/`,
-      },
-      // Общее правило для остальных backend‑запросов (auth, mocks и т.д.) без завершающего слеша.
+      // Общее прокси‑правило: сохраняем путь как есть, без принудительного добавления `/`.
+      // Это нужно, чтобы auth endpoint'ы оставались без слеша (например, /api/v1/auth/login).
       {
         source: "/api/backend/:path*",
         destination: `${backendUrl.replace(/\/+$/, "")}/:path*`,
