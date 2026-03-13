@@ -1,11 +1,31 @@
-const DEFAULT_BACKEND_URL = "https://jasur-ielts-backend.onrender.com/";
+const DEFAULT_BACKEND_URL = "https://jasur-ielts-backend.onrender.com";
+
+function stripKnownApiSuffix(pathname) {
+  if (!pathname) return "";
+  let cleanPath = pathname.replace(/\/+$/, "");
+
+  // Защита от ошибочно заданной базы вида:
+  // .../api/backend, .../api/v1, .../api/backend/api/v1
+  cleanPath = cleanPath.replace(/(\/api\/backend|\/api\/v1)+$/i, "");
+
+  return cleanPath === "/" ? "" : cleanPath;
+}
 
 function normalizeBackendUrl(value) {
-  const raw = (value || DEFAULT_BACKEND_URL).trim().replace(/\/+$/, "");
+  const fallback = DEFAULT_BACKEND_URL;
+  const raw = (value || fallback).trim();
+
   if (!raw || !/^https?:\/\//i.test(raw)) {
     return DEFAULT_BACKEND_URL;
   }
-  return raw;
+
+  try {
+    const parsed = new URL(raw);
+    const cleanPath = stripKnownApiSuffix(parsed.pathname);
+    return `${parsed.origin}${cleanPath}`;
+  } catch (_) {
+    return fallback;
+  }
 }
 
 export const BACKEND_URL = normalizeBackendUrl(process.env.NEXT_PUBLIC_BACKEND_URL);

@@ -1,6 +1,24 @@
 /** @type {import('next').NextConfig} */
-const backendUrl =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "https://jasur-ielts-backend.onrender.com/";
+const DEFAULT_BACKEND_URL = "https://jasur-ielts-backend.onrender.com";
+
+function normalizeBackendUrl(value) {
+  const raw = (value || DEFAULT_BACKEND_URL).trim();
+  if (!raw || !/^https?:\/\//i.test(raw)) {
+    return DEFAULT_BACKEND_URL;
+  }
+
+  try {
+    const parsed = new URL(raw);
+    const cleanPath = parsed.pathname
+      .replace(/\/+$/, "")
+      .replace(/(\/api\/backend|\/api\/v1)+$/i, "");
+    return `${parsed.origin}${cleanPath === "/" ? "" : cleanPath}`;
+  } catch (_) {
+    return DEFAULT_BACKEND_URL;
+  }
+}
+
+const backendUrl = normalizeBackendUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 const nextConfig = {
   // Отключаем авто-редирект Next.js между URL со слешом/без слеша.
   // Это важно для backend endpoint, где хвостовой слеш обязателен.
