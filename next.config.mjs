@@ -30,6 +30,12 @@ const nextConfig = {
         source: "/api/backend/api/v1/mocks/list/",
         destination: `${backendUrl.replace(/\/+$/, "")}/api/v1/mocks/list/`,
       },
+      // Для detail endpoint mocks также сохраняем хвостовой слеш.
+      // Иначе через catch-all правило :path* финальный / может теряться.
+      {
+        source: "/api/backend/api/v1/mocks/:id/",
+        destination: `${backendUrl.replace(/\/+$/, "")}/api/v1/mocks/:id/`,
+      },
       // Общее прокси‑правило: сохраняем путь как есть, без принудительного добавления `/`.
       // Это нужно, чтобы auth endpoint'ы оставались без слеша (например, /api/v1/auth/login).
       {
