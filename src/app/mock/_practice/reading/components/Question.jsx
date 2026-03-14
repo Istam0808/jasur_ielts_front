@@ -328,6 +328,7 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
             'matching_headings',        // Shows question.instruction
             'matching_information',     // Shows question.instruction
             'matching_features',        // Shows question.instruction
+            'matching_sentences',       // Shows its own item content
             'sentence_completion',      // Shows question.instruction
             'summary_completion',       // Shows question.instruction
             'table_completion',         // Shows question.instruction

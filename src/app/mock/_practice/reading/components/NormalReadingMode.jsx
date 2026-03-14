@@ -246,6 +246,7 @@ export default function NormalReadingMode({
                                 <PassageWithDropzones
                                     htmlText={passageParagraphs[0]}
                                     question={inlineMatchingQuestion}
+                                    questionRange={questionRanges?.[inlineMatchingQuestion.id]}
                                     answer={inlineMatchingAnswer}
                                     isReviewMode={isReviewMode}
                                     onAnswerChange={onAnswerChange}

@@ -810,25 +810,122 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         createTimeout(() => {
             targetElement.classList.remove('highlight-question');
         }, HIGHLIGHT_DURATION);
+
+        // Move keyboard focus to the specific answer field when possible.
+        // Fallback to the first interactive element in the question card.
+        const focusTarget = () => {
+            const isFocusable = (el) => {
+                if (!el) return false;
+                return (
+                    el.matches?.('input, textarea, select, button, [contenteditable="true"]') ||
+                    (el.tabIndex != null && el.tabIndex >= 0)
+                );
+            };
+
+            let preferredElement = null;
+            if (blankId) {
+                preferredElement = questionsContent.querySelector(
+                    `[data-question-id="${questionId}"][data-blank-id="${blankId}"]`
+                );
+            }
+
+            if (!preferredElement) {
+                preferredElement = targetElement.querySelector(
+                    'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [contenteditable="true"]'
+                );
+            }
+
+            if (preferredElement && isFocusable(preferredElement)) {
+                preferredElement.focus({ preventScroll: true });
+                if (preferredElement.select && typeof preferredElement.select === 'function') {
+                    preferredElement.select();
+                }
+                return;
+            }
+
+            if (!targetElement.hasAttribute('tabindex')) {
+                targetElement.setAttribute('tabindex', '-1');
+            }
+            targetElement.focus({ preventScroll: true });
+        };
+
+        createTimeout(focusTarget, 120);
     }, [createTimeout]);
 
     // Extract blank ID helper
     const extractBlankId = useCallback((answerSlot) => {
-        if (answerSlot.questionType !== 'note_completion' || !answerSlot.question) {
+        if (!answerSlot?.question) {
             return null;
         }
 
-        let blankIndex = 0;
-        for (const note of answerSlot.question.notes) {
-            const blankMatches = note.match(/(?:___(\d+)___|(\d+)\.{2,})/g) || [];
-            for (const match of blankMatches) {
-                if (blankIndex === answerSlot.answerIndex) {
-                    const numberMatch = match.match(/(\d+)/);
-                    return numberMatch ? numberMatch[1] : null;
+        const { question, questionType, answerIndex } = answerSlot;
+
+        if (questionType === 'summary_completion' && typeof question.summary === 'string') {
+            const blankMatches = question.summary.match(/___(\d+)___/g) || [];
+            const match = blankMatches[answerIndex];
+            if (!match) return null;
+            const numberMatch = match.match(/(\d+)/);
+            return numberMatch ? numberMatch[1] : null;
+        }
+
+        if (questionType === 'table_completion' && question.table?.rows && question.table?.headers) {
+            let blankIndex = 0;
+            for (const row of question.table.rows) {
+                for (const header of question.table.headers) {
+                    const cell = row?.[header];
+                    const match = typeof cell === 'string' ? cell.match(/___(\d+)___/) : null;
+                    if (!match) continue;
+                    if (blankIndex === answerIndex) {
+                        return match[1];
+                    }
+                    blankIndex++;
                 }
-                blankIndex++;
+            }
+            return null;
+        }
+
+        if (questionType === 'flow_chart_completion' && question.flow_chart) {
+            if (question.flow_chart.type === 'vertical' && Array.isArray(question.flow_chart.steps)) {
+                let blankIndex = 0;
+                for (const step of question.flow_chart.steps) {
+                    if (step.blank) {
+                        if (blankIndex === answerIndex) return String(step.blank);
+                        blankIndex++;
+                    }
+                    if (step.blank2) {
+                        if (blankIndex === answerIndex) return String(step.blank2);
+                        blankIndex++;
+                    }
+                }
+            } else if (typeof question.flow_chart === 'string') {
+                const blankMatches = question.flow_chart.match(/___(\d+)___/g) || [];
+                const match = blankMatches[answerIndex];
+                if (!match) return null;
+                const numberMatch = match.match(/(\d+)/);
+                return numberMatch ? numberMatch[1] : null;
+            }
+            return null;
+        }
+
+        if (questionType === 'diagram_labelling' && Array.isArray(question.labels)) {
+            const label = question.labels[answerIndex];
+            return label?.position ? String(label.position) : null;
+        }
+
+        if (questionType === 'note_completion' && Array.isArray(question.notes)) {
+            let blankIndex = 0;
+            for (const note of question.notes) {
+                const blankMatches = note.match(/(?:___(\d+)___|(\d+)\.{2,})/g) || [];
+                for (const match of blankMatches) {
+                    if (blankIndex === answerIndex) {
+                        const numberMatch = match.match(/(\d+)/);
+                        return numberMatch ? numberMatch[1] : null;
+                    }
+                    blankIndex++;
+                }
             }
         }
+
         return null;
     }, []);
 

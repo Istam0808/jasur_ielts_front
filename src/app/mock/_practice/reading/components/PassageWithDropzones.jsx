@@ -8,6 +8,7 @@ const PLACEHOLDER_PATTERN = /\{\{question:(\d+)\}\}/g;
 const PassageWithDropzones = ({
     htmlText,
     question,
+    questionRange,
     answer,
     isReviewMode,
     onAnswerChange,
@@ -60,6 +61,32 @@ const PassageWithDropzones = ({
 
         return parts;
     }, [htmlText]);
+
+    const placeholderLabelById = useMemo(() => {
+        const labels = new Map();
+        const startNumber = Number(questionRange?.start);
+
+        if (!Number.isFinite(startNumber)) {
+            return labels;
+        }
+
+        const placeholderIds = parsedParts
+            .filter((part) => part.type === 'placeholder')
+            .map((part) => Number(part.value))
+            .filter((value) => Number.isFinite(value));
+
+        if (!placeholderIds.length) {
+            return labels;
+        }
+
+        const minPlaceholderId = Math.min(...placeholderIds);
+        placeholderIds.forEach((rawId) => {
+            const displayNumber = startNumber + (rawId - minPlaceholderId);
+            labels.set(String(rawId), String(displayNumber));
+        });
+
+        return labels;
+    }, [parsedParts, questionRange?.start]);
 
     const assignValueToPlaceholder = (placeholderId, value) => {
         if (isReviewMode || !value) return;
@@ -155,7 +182,9 @@ const PassageWithDropzones = ({
                             </span>
                         ) : (
                             <span className="inline-drop-empty-label">
-                                {inlinePickedOption ? 'Click to place' : `Drop #${placeholderId}`}
+                                {inlinePickedOption
+                                    ? 'Click to place'
+                                    : (placeholderLabelById.get(placeholderId) || placeholderId)}
                             </span>
                         )}
                     </span>

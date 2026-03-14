@@ -295,6 +295,7 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
                       contentParts={contentParts}
                       values={userAnswers}
                       onChange={handleBlankChange}
+                      dataQuestionId={question.id}
                     />
                 </div>
             </div>

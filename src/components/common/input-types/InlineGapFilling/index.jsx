@@ -16,6 +16,7 @@ export default function InlineGapFilling({
   contentParts = [],
   values = {},
   onChange,
+  dataQuestionId = null,
   disabled = false,
   readOnly = false,
 }) {
@@ -47,6 +48,8 @@ export default function InlineGapFilling({
               key={`blank-${blankId}`}
               className={styles.blank}
               data-invalid={hasError || undefined}
+              data-question-id={dataQuestionId ?? undefined}
+              data-blank-id={blankId}
               value={value}
               placeholder={placeholder}
               onChange={(e) => onChange && onChange(blankId, e.target.value)}
