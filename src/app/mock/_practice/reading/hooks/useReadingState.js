@@ -1107,9 +1107,10 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
         // Submit state
         canSubmit: selectedQuestionTypes.length === 0
-            ? answerCounts.allQuestionsAnswered
+            ? (allAnswersData.totalAnswers > 0 &&
+                answerCounts.totalAnsweredCount >= allAnswersData.totalAnswers)
             : (answerCounts.filteredGlobalTotalQuestions > 0 &&
-                answerCounts.filteredGlobalAnsweredCount === answerCounts.filteredGlobalTotalQuestions),
+                answerCounts.filteredGlobalAnsweredCount >= answerCounts.filteredGlobalTotalQuestions),
         submitAnsweredCount: selectedQuestionTypes.length === 0
             ? answerCounts.totalAnsweredCount
             : answerCounts.filteredGlobalAnsweredCount,
