@@ -4,20 +4,7 @@
 
 .root {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
   gap: $spacing-lg;
-  align-items: start;
-
-  @media (max-width: 784px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.left {
-  min-width: 0;
-}
-
-.right {
   min-width: 0;
 }
 
@@ -39,33 +26,18 @@
   background: $background-primary;
   border: 1px solid $border-light;
   border-radius: $border-radius-md;
-  padding: $spacing-md;
+  padding: $spacing-md $spacing-md $spacing-sm;
   display: grid;
   gap: $spacing-sm;
 }
 
 .itemText {
-  display: flex;
-  gap: $spacing-sm;
-  align-items: flex-start;
-}
-
-.itemNumber {
-  min-width: 42px;
-  height: 26px;
-  border-radius: $border-radius-sm;
-  background: $background-secondary;
-  color: $text-muted;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: $font-weight-semibold;
-  @include font-size($font-size-sm, 1.1);
+  color: $text-primary;
+  @include font-size($font-size-sm, 1.45);
 }
 
 .itemQuestion {
-  color: $text-primary;
-  @include font-size($font-size-sm, 1.4);
+  display: block;
 }
 
 .dropZone {
@@ -73,12 +45,34 @@
   border-radius: $border-radius-md;
   background: $background-secondary;
   padding: $spacing-sm $spacing-md;
-  min-height: 44px;
+  min-height: 52px;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .placeholder {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+}
+
+.placeholderNumber {
+  min-width: 52px;
+  height: 30px;
+  border-radius: $border-radius-sm;
+  border: 1px solid $border-light;
+  background: $background-primary;
+  color: $text-primary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-semibold;
+  @include font-size($font-size-sm, 1.2);
+}
+
+.placeholderHint {
   color: $text-muted;
   @include font-size($font-size-sm, 1.2);
 }
@@ -90,8 +84,23 @@
   justify-content: space-between;
 }
 
+.selectedNumber {
+  min-width: 42px;
+  height: 26px;
+  border-radius: $border-radius-sm;
+  border: 1px solid $border-light;
+  background: $background-primary;
+  color: $text-primary;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-semibold;
+  @include font-size($font-size-xs, 1.1);
+}
+
 .selectedText {
   color: $text-primary;
+  flex: 1 1 auto;
   @include font-size($font-size-sm, 1.3);
 }
 
@@ -130,6 +139,7 @@
 
 .bank {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: $spacing-sm;
 }
 
@@ -177,5 +187,12 @@
 
 .unanswered {
   border-color: $border-light;
+}
+
+.bankWrap {
+  background: $background-secondary;
+  border: 1px solid $border-light;
+  border-radius: $border-radius-md;
+  padding: $spacing-md;
 }
 

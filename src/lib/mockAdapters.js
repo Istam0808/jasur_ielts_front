@@ -49,6 +49,7 @@ function mapReadingType(sectionType) {
   if (normalized.includes("matching_headings")) return "matching_headings";
   if (normalized.includes("matching_information")) return "matching_information";
   if (normalized.includes("matching_features")) return "matching_features";
+  if (normalized.includes("matching_sentences")) return "matching_sentences";
   if (normalized.includes("sentence_completion")) return "sentence_completion";
   if (normalized.includes("summary_completion")) return "summary_completion";
   if (normalized.includes("table_completion")) return "table_completion";
@@ -381,6 +382,41 @@ export function adaptReadingMockToUi(mockDetail) {
           items: sourceQuestions[0]?.options?.length
             ? sourceQuestions[0].options.map(toOptionLabel)
             : [],
+        }];
+      }
+
+      if (type === "matching_sentences") {
+        const items = sourceQuestions
+          .slice()
+          .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0))
+          .map((question) => ({
+            id: Number(question?.id) || null,
+            order: Number(question?.order) || null,
+            text: question?.question_text || question?.text || "",
+          }));
+
+        const options = asArray(section?.list_selections)
+          .map((selection) => {
+            const label = selection?.label != null ? String(selection.label).trim() : "";
+            const text = selection?.text != null ? String(selection.text).trim() : "";
+            if (!label && !text) return "";
+            return `${label} ${text}`.trim();
+          })
+          .filter(Boolean);
+
+        const numericOrders = items
+          .map((item) => item.order)
+          .filter((order) => Number.isFinite(order));
+        const minOrder = numericOrders.length ? Math.min(...numericOrders) : null;
+
+        return [{
+          id: questionId++,
+          type,
+          instruction: section?.instructions || "",
+          items,
+          options,
+          list_selections: asArray(section?.list_selections),
+          order: minOrder ?? (Number(section?.order) || null),
         }];
       }
 

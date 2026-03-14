@@ -86,63 +86,64 @@ const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) =
 
     return (
         <div className={styles.root} data-question-type="matching-sentences">
-            <div className={styles.left}>
-                <div className={styles.items}>
-                    {items.map((item) => {
-                        const key = String(item.id);
-                        const selected = userAnswers[key] || '';
-                        const answered = Boolean(selected);
+            <div className={styles.items}>
+                {items.map((item) => {
+                    const key = String(item.id);
+                    const selected = userAnswers[key] || '';
+                    const answered = Boolean(selected);
 
-                        return (
-                            <div
-                                key={item.id}
-                                className={`${styles.itemRow} ${answered ? styles.answered : styles.unanswered}`}
-                            >
-                                <div className={styles.itemText}>
-                                    <span className={styles.itemNumber}>{item.order ?? ''}</span>
-                                    <span className={styles.itemQuestion}>{item.text}</span>
-                                </div>
-
-                                <div
-                                    className={styles.dropZone}
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, item.id)}
-                                    onClick={() => assignPickedToItem(item.id)}
-                                    role="button"
-                                    tabIndex={isReviewMode ? -1 : 0}
-                                    aria-disabled={isReviewMode}
-                                >
-                                    {selected ? (
-                                        <div className={styles.selected}>
-                                            <span className={styles.selectedText}>{selected}</span>
-                                            {!isReviewMode && (
-                                                <button
-                                                    type="button"
-                                                    className={styles.clearBtn}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        clearItem(item.id);
-                                                    }}
-                                                >
-                                                    {t('clear', 'Clear')}
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <span className={styles.placeholder}>
-                                            {pickedOption
-                                                ? t('matching.tapToAssign', 'Click to assign selected option')
-                                                : t('matching.dropHere', 'Drop here')}
-                                        </span>
-                                    )}
-                                </div>
+                    return (
+                        <div
+                            key={item.id}
+                            className={`${styles.itemRow} ${answered ? styles.answered : styles.unanswered}`}
+                        >
+                            <div className={styles.itemText}>
+                                <span className={styles.itemQuestion}>{item.text}</span>
                             </div>
-                        );
-                    })}
-                </div>
+
+                            <div
+                                className={styles.dropZone}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, item.id)}
+                                onClick={() => assignPickedToItem(item.id)}
+                                role="button"
+                                tabIndex={isReviewMode ? -1 : 0}
+                                aria-disabled={isReviewMode}
+                            >
+                                {selected ? (
+                                    <div className={styles.selected}>
+                                        <span className={styles.selectedNumber}>{item.order ?? ''}</span>
+                                        <span className={styles.selectedText}>{selected}</span>
+                                        {!isReviewMode && (
+                                            <button
+                                                type="button"
+                                                className={styles.clearBtn}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    clearItem(item.id);
+                                                }}
+                                            >
+                                                {t('clear', 'Clear')}
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className={styles.placeholder}>
+                                        <span className={styles.placeholderNumber}>{item.order ?? ''}</span>
+                                        {pickedOption ? (
+                                            <span className={styles.placeholderHint}>
+                                                {t('matching.tapToAssign', 'Click to assign selected option')}
+                                            </span>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className={styles.right}>
+            <div className={styles.bankWrap}>
                 <div className={styles.bankHeader}>
                     <div className={styles.bankTitle}>
                         {t('matching.options', 'Options')}
