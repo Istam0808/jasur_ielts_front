@@ -2,12 +2,9 @@
 import "../../styles/readingProcess.scss";
 
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import Radio from '@/components/common/input-types/Radio';
 
 const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, reviewMap, globalNumber = null }) => {
-    const { t } = useTranslation('reading');
-
     // Get correct answer for review mode (global numbers for advanced)
     const correctAnswer = useMemo(() => {
         if (!isReviewMode || !readingId || !reviewMap) return null;
@@ -105,7 +102,6 @@ const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, rea
         <div className="true-false-not-given-container">
             <div className="statement-container">
                 <div className="statement-text">
-                    <span className="statement-label">{t('statement')}:</span>
                     <p className="statement-content">
                         <b>{question.statement.slice(0, question.statement.indexOf("."))}. </b>
                         {question.statement.slice(question.statement.indexOf(".")+1)}
