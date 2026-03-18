@@ -8,6 +8,7 @@
 @use "./question-types";
 @use "./multiPassage";
 @use "./_mobile";
+@use "@/components/mock/mockExamFooter";
 
 
 // Modern Design Reading page - Using existing settings variables
@@ -40,6 +41,10 @@
         border-radius: 0;
         padding: 0;
         background: $background-primary;
+
+        &.mock-footer-active {
+            padding-bottom: 96px;
+        }
     }
 
     &.with-unified-header {

@@ -11,7 +11,7 @@ import { WRITING_TASK_1 } from '@/store';
 import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
 import { TestNavbar } from '@/components/common';
-import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
+import MockExamFooter from '@/components/mock/MockExamFooter';
 import WritingResultsPanel from './WritingResultsPanel';
 import '../WritingResultsPanel.scss';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
@@ -467,13 +467,19 @@ function WritingPageContent({
         [writingTasksFromData, responsesByPart]
     );
 
+    const activeAttemptedQuestionNumbers = useMemo(() => {
+        if (!activePartQuestionNumbers.length) return [];
+        const text = responsesByPart[activePartIndex];
+        return text && String(text).trim() ? [activePartQuestionNumbers[0]] : [];
+    }, [activePartQuestionNumbers, responsesByPart, activePartIndex]);
+
     const getActivePartLabel = useCallback(
         (partNum) => `Part ${partNum}`,
         []
     );
 
     const getInactivePartButtonLabel = useCallback(
-        (partNum, answered, total) => `Part ${partNum} ${answered}/${total}`,
+        (partNum, answered, total) => `Part ${partNum} ${answered} of ${total}`,
         []
     );
 
@@ -584,7 +590,7 @@ function WritingPageContent({
 
     return (
         <div
-            className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''} ${useUnifiedMockHeader ? 'mock-unified-header-active' : ''}`}
+            className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''} ${useUnifiedMockHeader ? 'mock-unified-header-active' : ''} ${useUnifiedMockHeader && hasTimerStarted && !hasSubmitted ? 'writing-container--mock-footer' : ''}`}
             data-mock-text-size={useUnifiedMockHeader ? textSize : undefined}
         >
             {useUnifiedMockHeader && <MockUnifiedHeader />}
@@ -596,7 +602,7 @@ function WritingPageContent({
                 isTimerActive={isTimerRunning && hasTimerStarted && !hasSubmitted && !externalTimerPaused}
                 startTime={hasTimerStarted ? (externalTimerStartTime || startTimeRef.current) : undefined}
                 title={isPlacementTest && hasTimerStarted ? writingTopicTitle : null}
-                showHeaderAction={hasTimerStarted && !hasSubmitted && !isPlacementTest}
+                showHeaderAction={hasTimerStarted && !hasSubmitted && !isPlacementTest && !useUnifiedMockHeader}
                 headerActionLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
                 onHeaderAction={handleSubmit}
                 headerActionDisabled={isHeaderSubmitDisabled}
@@ -872,36 +878,52 @@ function WritingPageContent({
                 </Modal>
             )}
 
-            {/* Bottom Navigation using MockExamQuestionNav (IELTS-style footer) */}
-            {writingTasksFromData.length > 1 && !hasSubmitted && hasTimerStarted && (
-                <div className="mock-exam-bottom-nav mock-exam-bottom-nav--ielts" role="navigation" aria-label="Writing parts navigation">
-                    <div className="mock-exam-nav-top-line" aria-hidden />
-                    <MockExamQuestionNav
-                        parts={writingTasksFromData}
-                        currentPartIndex={activePartIndex}
-                        onSelectPart={setActivePartIndex}
-                        activePartQuestionNumbers={activePartQuestionNumbers}
-                        currentQuestionNumber={activePartQuestionNumbers[0]}
-                        onSelectQuestion={() => {}}
-                        onPrevNextQuestion={(delta) => {
-                            setActivePartIndex((prev) => {
-                                const next = prev + delta;
-                                if (next < 0) return 0;
-                                if (next > writingTasksFromData.length - 1) {
-                                    return writingTasksFromData.length - 1;
-                                }
-                                return next;
-                            });
-                        }}
-                        partTotals={writingPartTotals}
-                        partAnsweredCounts={writingPartAnsweredCounts}
-                        getActivePartLabel={getActivePartLabel}
-                        getInactivePartButtonLabel={getInactivePartButtonLabel}
-                        getQuestionAriaLabel={getQuestionAriaLabel}
-                        previousAriaLabel={previousAriaLabel}
-                        nextAriaLabel={nextAriaLabel}
-                    />
-                </div>
+            {/* Bottom Navigation and Submit (IELTS-style footer) */}
+            {useUnifiedMockHeader && !hasSubmitted && hasTimerStarted && (
+                <MockExamFooter
+                    parts={writingTasksFromData}
+                    currentPartIndex={activePartIndex}
+                    onSelectPart={setActivePartIndex}
+                    activePartQuestionNumbers={activePartQuestionNumbers}
+                    attemptedQuestionNumbers={activeAttemptedQuestionNumbers}
+                    currentQuestionNumber={activePartQuestionNumbers[0]}
+                    onSelectQuestion={() => {}}
+                    onPrevNextQuestion={(delta) => {
+                        setActivePartIndex((prev) => {
+                            const next = prev + delta;
+                            if (next < 0) return 0;
+                            if (next > writingTasksFromData.length - 1) {
+                                return writingTasksFromData.length - 1;
+                            }
+                            return next;
+                        });
+                    }}
+                    partTotals={writingPartTotals}
+                    partAnsweredCounts={writingPartAnsweredCounts}
+                    getActivePartLabel={getActivePartLabel}
+                    getInactivePartButtonLabel={getInactivePartButtonLabel}
+                    getQuestionAriaLabel={getQuestionAriaLabel}
+                    previousAriaLabel={previousAriaLabel}
+                    nextAriaLabel={nextAriaLabel}
+                    navigationAriaLabel={t('writingPartsNavigation', {
+                        ns: 'writing',
+                        defaultValue: 'Writing parts navigation'
+                    })}
+                    showSubmitButton={true}
+                    submitDisabled={isHeaderSubmitDisabled || !hasTimerStarted}
+                    submitAriaLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
+                    onSubmit={handleSubmit}
+                    confirmTitle={t('confirmSubmitTitle', {
+                        ns: 'test',
+                        defaultValue: 'Submit your writing?'
+                    })}
+                    confirmDescription={t('confirmSubmitDescription', {
+                        ns: 'test',
+                        defaultValue: 'Are you sure you want to submit? You will not be able to edit your writing after submission.'
+                    })}
+                    confirmCancelLabel={t('cancel', { ns: 'common', defaultValue: 'Cancel' })}
+                    confirmSubmitLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
+                />
             )}
 
         </div>

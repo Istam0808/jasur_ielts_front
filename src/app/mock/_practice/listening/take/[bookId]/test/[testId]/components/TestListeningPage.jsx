@@ -8,7 +8,7 @@ import Spinner from '@/components/common/spinner';
 import Timer from '@/components/common/Timer';
 import { useTestData } from '@/hooks/useTestData';
 import QuestionRenderer from './QuestionRenderer';
-import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation, MockExamBottomNav } from './TestUIComponents';
+import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation } from './TestUIComponents';
 import TestProgress from './TestProgress';
 import ResultsModal from './ResultsModal';
 import NoteModal from '@/components/common/NoteModal';
@@ -16,6 +16,7 @@ import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
 import { validateListeningMockAnswers } from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
+import MockExamFooter from '@/components/mock/MockExamFooter';
 import './testListeningPage.scss';
 
 // Add new component for Notes Viewer Modal
@@ -311,6 +312,21 @@ const TestListeningPage = ({
             return numbers.filter((num) => userAnswers[num] != null && userAnswers[num] !== '').length;
         });
     }, [testParts, extractQuestionNumbers, userAnswers]);
+
+    const activeAttemptedQuestionNumbers = useMemo(() => {
+        const isAnsweredValue = (value) => {
+            if (value === null || value === undefined || value === '') return false;
+            if (Array.isArray(value)) {
+                return value.some((item) => item !== null && item !== undefined && item !== '');
+            }
+            if (typeof value === 'object') {
+                return Object.values(value).some((item) => item !== null && item !== undefined && String(item).trim() !== '');
+            }
+            return true;
+        };
+
+        return activePartQuestionNumbers.filter((num) => isAnsweredValue(userAnswers[num]));
+    }, [activePartQuestionNumbers, userAnswers]);
 
     const activePartAudioUrl = useMemo(() => {
         const part = testParts[currentPartIndex];
@@ -1352,16 +1368,33 @@ const TestListeningPage = ({
             />
 
             {isMockExam && (
-                <MockExamBottomNav
+                <MockExamFooter
                     parts={testParts}
                     currentPartIndex={currentPartIndex}
                     onSelectPart={handlePartNavigation}
                     activePartQuestionNumbers={activePartQuestionNumbers}
+                    attemptedQuestionNumbers={activeAttemptedQuestionNumbers}
                     currentQuestionNumber={currentQuestionNumber}
                     onSelectQuestion={scrollToQuestion}
                     onPrevNextQuestion={goToPrevNextQuestion}
                     partTotals={partTotals}
                     partAnsweredCounts={partAnsweredCounts}
+                    getActivePartLabel={(partNum) => `${t('part')} ${partNum}`}
+                    getInactivePartButtonLabel={(partNum, answered, total) => `${t('part')} ${partNum} ${answered} of ${total}`}
+                    getQuestionAriaLabel={(questionNumber) => `${t('question', { defaultValue: 'Question' })} ${questionNumber}`}
+                    previousAriaLabel={t('previous', { ns: 'common', defaultValue: 'Previous' })}
+                    nextAriaLabel={t('next', { ns: 'common', defaultValue: 'Next' })}
+                    showSubmitButton={true}
+                    submitDisabled={!testStarted || isTestSubmitted}
+                    submitAriaLabel={t('submitTest', { ns: 'common', defaultValue: 'Submit test' })}
+                    onSubmit={() => handleSubmit(false)}
+                    confirmTitle={t('confirmSubmitTitle', { ns: 'test', defaultValue: 'Submit your answers?' })}
+                    confirmDescription={t('confirmSubmitDescription', {
+                        ns: 'test',
+                        defaultValue: 'Are you sure you want to submit? You will not be able to change your answers after submission.'
+                    })}
+                    confirmCancelLabel={t('cancel', { ns: 'common', defaultValue: 'Cancel' })}
+                    confirmSubmitLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
                 />
             )}
         </div>
