@@ -301,7 +301,11 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
 
     const activePartAudioUrl = useMemo(() => {
         const part = testParts[currentPartIndex];
-        return part?.audioUrl ?? part?.audio_file ?? '';
+        const rawUrl = part?.audioUrl ?? part?.audio_file ?? '';
+        if (typeof rawUrl !== 'string') {
+            return '';
+        }
+        return rawUrl.trim();
     }, [testParts, currentPartIndex]);
 
     const hasNoAudioInAnyPart = useMemo(() => {
@@ -1067,15 +1071,33 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         if (!activePartAudioUrl || !testStarted || isTestSubmitted) return;
         const el = audioRef.current;
         if (!el) return;
+        // Дополнительный лог для диагностики проблем с аудио
+        try {
+            console.debug('Listening autoplay attempt', {
+                src: el.currentSrc || el.src,
+                activePartAudioUrl,
+                readyState: el.readyState,
+                networkState: el.networkState,
+                bookId,
+                testId,
+                currentPartIndex,
+            });
+        } catch (logError) {
+            console.debug('Failed to log autoplay debug info', logError);
+        }
         const playPromise = el.play();
         if (playPromise && typeof playPromise.catch === 'function') {
             playPromise.catch((err) => {
                 const msg = err?.message ?? String(err);
-                console.warn('Audio autoplay prevented or failed:', msg);
-                setAudioError(t('audioLoadError', 'Audio could not be played. Try refreshing or check your connection.'));
+                console.warn('Audio autoplay prevented or failed:', {
+                    message: msg,
+                    name: err?.name,
+                    code: err?.code,
+                });
+                setAudioError(t('audioLoadError', 'Аудио не удалось воспроизвести автоматически. Нажмите на кнопку воспроизведения или проверьте подключение к сети.'));
             });
         }
-    }, [activePartAudioUrl, testStarted, isTestSubmitted, currentPartIndex, t]);
+    }, [activePartAudioUrl, testStarted, isTestSubmitted, currentPartIndex, t, bookId, testId]);
 
     const mockTimeLeftText = useMemo(() => {
         if (mockTimeLeftSeconds <= 0) {
@@ -1253,9 +1275,15 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
                                         networkState: audioEl?.networkState,
                                         readyState: audioEl?.readyState,
                                         eventType: e.type,
+                                        bookId,
+                                        testId,
+                                        currentPartIndex,
                                     };
                                     console.error('Audio loading error:', errorInfo);
-                                    setAudioError(t('audioLoadError', 'Audio could not be loaded. Try refreshing or check your connection.'));
+                                    if (error) {
+                                        console.error('Audio element raw error object:', error);
+                                    }
+                                    setAudioError(t('audioLoadError', 'Аудио не удалось загрузить. Проверьте интернет-соединение или попробуйте ещё раз чуть позже.'));
                                 } catch (logError) {
                                     console.error('Audio onError handler failed', logError);
                                 }
