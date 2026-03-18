@@ -1149,11 +1149,10 @@ const TestListeningPage = ({
     const totalNotesCount = Object.values(partNotes).reduce((total, notes) => total + notes.length, 0);
 
     const shouldShowUnifiedHeader = isMockExam && useUnifiedMockHeader;
-    const testTakerUsername = useMemo(() => {
-        const sessionUsername = getMockSession()?.username;
-        const normalized = typeof sessionUsername === 'string' ? sessionUsername.trim() : '';
-        return normalized || 'unknown';
-    }, []);
+    const sessionUsername = getMockSession()?.username;
+    const testTakerUsername = typeof sessionUsername === 'string' && sessionUsername.trim()
+        ? sessionUsername.trim()
+        : 'unknown';
 
     return (
         <div
