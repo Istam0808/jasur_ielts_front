@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Question from './Question';
+import RawHtmlWithInputs from './RawHtmlWithInputs';
 
 // Helper function to clean instruction text for flowchart-type questions
 const cleanFlowchartInstruction = (instruction) => {
@@ -37,9 +38,23 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
             <div key={`${section.questionRange || section.questions}-${index}`} className="question-section">
                 {/* Render context, instruction, image, and options box at the section level */}
                 {section.context && <h4 className="selectable-content">{section.context}</h4>}
-                {section.instruction && (
-                    <p className="instruction-text selectable-content" 
-                       dangerouslySetInnerHTML={{ __html: cleanFlowchartInstruction(section.instruction) }} />
+                {(() => {
+                    const instruction = String(section.instruction ?? '').trim();
+                    if (!instruction || instruction === '.') return null;
+                    return (
+                        <p
+                            className="instruction-text selectable-content"
+                            dangerouslySetInnerHTML={{ __html: cleanFlowchartInstruction(instruction) }}
+                        />
+                    );
+                })()}
+
+                {section.rawHtmlContent && String(section.rawHtmlContent).trim() && (
+                    <RawHtmlWithInputs
+                        html={section.rawHtmlContent}
+                        userAnswers={userAnswers}
+                        onAnswerChange={onAnswerChange}
+                    />
                 )}
                 {section.imageLocalUrl && (
                     <div className="question-image-container">
@@ -50,13 +65,16 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
                         />
                     </div>
                 )}
-                {/* Recurse to render the content of the section */}
-                <QuestionRenderer 
-                    item={section} 
-                    userAnswers={userAnswers} 
-                    onAnswerChange={onAnswerChange}
-                    optionsBox={section.options_box || section.options || optionsBox}
-                />
+                {section.rawHtmlContent && String(section.rawHtmlContent).trim()
+                    ? null
+                    : (
+                        <QuestionRenderer
+                            item={section}
+                            userAnswers={userAnswers}
+                            onAnswerChange={onAnswerChange}
+                            optionsBox={section.options_box || section.options || optionsBox}
+                        />
+                    )}
             </div>
         ));
     }

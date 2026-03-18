@@ -1,6 +1,10 @@
 const LISTENING_KEYS = ["listening_p1", "listening_p2", "listening_p3", "listening_p4"];
 const READING_KEYS = ["reading_p1", "reading_p2", "reading_p3"];
 
+const LISTENING_AUDIO_OVERRIDES_BY_MOCK_ID = {
+  3: "https://pub-ba6b92e0eda64f32afb79c81ba6bf138.r2.dev/mock3/pack4-t1.mp3",
+};
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -168,6 +172,7 @@ export function adaptListening(mockDetail) {
 
 export function adaptListeningMockToUi(mockDetail) {
   const mockId = Number(mockDetail?.id) || 1;
+  const audioOverrideUrl = LISTENING_AUDIO_OVERRIDES_BY_MOCK_ID[mockId] || "";
   const answersByQuestionNumber = {};
   let questionNumber = 1;
 
@@ -177,6 +182,12 @@ export function adaptListeningMockToUi(mockDetail) {
 
     const startNumber = questionNumber;
     const sections = asArray(part.sections).map((section) => {
+      const sectionTypeRaw = section?.section_type != null ? String(section.section_type) : "";
+      const isRawHtmlSection = sectionTypeRaw.toLowerCase().includes("raw_html");
+      const rawHtmlContent = isRawHtmlSection
+        ? (section?.raw_html?.html_content != null ? String(section.raw_html.html_content) : "")
+        : "";
+
       const questions = asArray(section?.questions).map((question) => {
         const number = questionNumber;
         questionNumber += 1;
@@ -221,6 +232,7 @@ export function adaptListeningMockToUi(mockDetail) {
         instruction: section?.instructions || "Answer the questions below.",
         context: section?.title || `Part ${partIndex + 1}`,
         options_box: asArray(section?.options).map(toOptionLabel),
+        rawHtmlContent,
         questions,
       };
     });
@@ -231,7 +243,7 @@ export function adaptListeningMockToUi(mockDetail) {
     return {
       part: Number(part?.part) || partIndex + 1,
       questionRange: hasQuestions ? `${startNumber}-${endNumber}` : `${startNumber}-${startNumber}`,
-      audioUrl: part?.audio_file || "",
+      audioUrl: audioOverrideUrl || part?.audio_file || "",
       sections,
     };
   }).filter(Boolean);
