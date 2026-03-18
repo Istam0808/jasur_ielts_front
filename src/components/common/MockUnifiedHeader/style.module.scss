@@ -52,6 +52,27 @@
     white-space: nowrap;
 }
 
+.centerNode {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    :global(.timer-circular) {
+        padding: 0;
+
+        :global(.timer-circle-container) {
+            width: 2.5rem;
+            height: 2.5rem;
+
+            :global(.timer-display-center) {
+                :global(.timer-value-large) {
+                    font-size: $font-size-xs;
+                }
+            }
+        }
+    }
+}
+
 .right {
     justify-self: end;
     display: flex;
@@ -207,5 +228,14 @@
 
     .centerText {
         font-size: $font-size-xs;
+    }
+
+    .centerNode {
+        :global(.timer-circular) {
+            :global(.timer-circle-container) {
+                width: 2.2rem;
+                height: 2.2rem;
+            }
+        }
     }
 }

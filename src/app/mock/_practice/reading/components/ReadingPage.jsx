@@ -426,11 +426,6 @@ export default function ReadingPage({
     return (
         <NormalReadingMode
             {...commonProps}
-            isMobile={isMobile}
-            toggleFullScreen={toggleFullScreen}
-            selectedQuestionTypes={selectedQuestionTypes}
-            onQuestionTypeFilter={handleQuestionTypeFilter}
-            onTimeAdjustment={handleTimeAdjustment}
             nextHref={nextHref}
         />
     );

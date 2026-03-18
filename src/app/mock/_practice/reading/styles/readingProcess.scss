@@ -42,13 +42,13 @@
         background: $background-primary;
     }
 
+    &.with-unified-header {
+        padding-top: 72px;
+    }
+
     &.mock-unified-header-active {
         &.mock-fullscreen-like {
-            padding-top: 56px;
-        }
-
-        .reading-header.mock-fullscreen-like {
-            top: 56px;
+            padding-top: 72px;
         }
     }
 
@@ -78,6 +78,10 @@
         padding-bottom: env(safe-area-inset-bottom);
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
+
+        &.with-unified-header {
+            padding-top: max(env(safe-area-inset-top), 64px);
+        }
     }
 
     @media (max-width: 428px) {

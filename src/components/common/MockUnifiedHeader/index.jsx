@@ -51,12 +51,16 @@ export default function MockUnifiedHeader({
                 <div className={styles.left}>
                     <span className={styles.modeTitle}>IELTS MODE</span>
                     {testTakerId ? (
-                        <span className={styles.takerText}>Test taker ID: {testTakerId}</span>
+                        <span className={styles.takerText}>Test taker: {testTakerId}</span>
                     ) : null}
                 </div>
 
                 <div className={styles.center}>
-                    {centerContent ? <span className={styles.centerText}>{centerContent}</span> : null}
+                    {centerContent ? (
+                        typeof centerContent === "string"
+                            ? <span className={styles.centerText}>{centerContent}</span>
+                            : <div className={styles.centerNode}>{centerContent}</div>
+                    ) : null}
                 </div>
 
                 <div className={styles.right}>

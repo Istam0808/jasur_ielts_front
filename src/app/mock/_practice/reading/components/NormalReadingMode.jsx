@@ -1,9 +1,6 @@
 'use client';
 import "../styles/readingProcess.scss";
 import { useEffect, useMemo } from 'react';
-import { IoChevronBack } from 'react-icons/io5';
-import { FiEye } from 'react-icons/fi';
-import { MdFullscreen } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 import ResizableColumns from '@/components/common/ResizableColumns';
 import Timer from '@/components/common/Timer';
@@ -18,6 +15,7 @@ import sanitizeHtml from '@/utils/sanitizeHtml';
 import PassageWithDropzones from './PassageWithDropzones';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
+import { getMockSession } from '@/lib/mockSession';
 
 export default function NormalReadingMode({
     readingData,
@@ -58,11 +56,6 @@ export default function NormalReadingMode({
     onColumnResize,
     handleQuestionClick,
     handleHighlightClick,
-    isMobile,
-    toggleFullScreen,
-    selectedQuestionTypes,
-    onQuestionTypeFilter,
-    onTimeAdjustment,
     adjustedTimeLimit,
     timerStartTime,
     finalTimerState,
@@ -77,7 +70,7 @@ export default function NormalReadingMode({
 }) {
     const { t } = useTranslation('reading');
     const { textSize } = useMockUi();
-    const showUnifiedHeader = isMockFullscreenLike && useUnifiedMockHeader;
+    const showMockHeaderState = isMockFullscreenLike && useUnifiedMockHeader;
     const submitButtonText = isSubmitting
         ? t('submitting')
         : isReviewMode
@@ -85,6 +78,22 @@ export default function NormalReadingMode({
             : canSubmit
                 ? t('submitTest')
                 : t('submitProgress', { answered: submitAnsweredCount, total: submitTotalCount });
+    const testTakerId = useMemo(() => {
+        if (!showMockHeaderState) return '';
+        const username = getMockSession()?.username;
+        const normalized = typeof username === 'string' ? username.trim() : '';
+        return normalized || 'unknown';
+    }, [showMockHeaderState]);
+    const timerInHeader = readingData.metadata?.timeLimit > 0 ? (
+        <Timer
+            durationInMinutes={adjustedTimeLimit || readingData.metadata.timeLimit}
+            onTimeUp={handleTimeUp}
+            isActive={!isSubmitting && !isReviewMode && !isTimerPaused}
+            startTime={timerStartTime}
+            isReviewMode={isReviewMode}
+            finalTimeLeft={finalTimerState !== null ? finalTimerState : undefined}
+        />
+    ) : null;
 
     const inlineMatchingQuestion = useMemo(() => {
         const sourceQuestions = Array.isArray(currentPassageQuestions) ? currentPassageQuestions : [];
@@ -119,79 +128,14 @@ export default function NormalReadingMode({
 
     return (
         <div
-            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''} ${showUnifiedHeader ? 'mock-unified-header-active' : ''}`}
+            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''} ${showMockHeaderState ? 'mock-unified-header-active' : ''} with-unified-header`}
             data-level={readingData?.level}
-            data-mock-text-size={showUnifiedHeader ? textSize : undefined}
+            data-mock-text-size={showMockHeaderState ? textSize : undefined}
         >
-            {showUnifiedHeader && <MockUnifiedHeader />}
-            {/* Header */}
-            <header className={`reading-header ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''}`}>
-                <div className="header-left">
-                    {!isMockFullscreenLike && (
-                        <button className="back-btn" onClick={handleBack}>
-                            <IoChevronBack size={20} />
-                            <span className="back-btn-text">{t('back')}</span>
-                        </button>
-                    )}
-
-                    {/* Full-screen toggle button - hidden for mobile devices */}
-                    {!isMobile && !isMockFullscreenLike && (
-                        <button
-                            className="fullscreen-toggle-btn"
-                            onClick={toggleFullScreen}
-                            title={`${t('enterFullScreen')} (F11)`}
-                        >
-                            <MdFullscreen size={20} />
-                            <span className="fullscreen-text">{t('fullScreen')}</span>
-                        </button>
-                    )}
-                </div>
-
-                <div className="title-section">
-                    {readingData.metadata?.timeLimit > 0 && (
-                <Timer
-                            durationInMinutes={adjustedTimeLimit || readingData.metadata.timeLimit}
-                            onTimeUp={handleTimeUp}
-                    isActive={!isSubmitting && !isReviewMode && !isTimerPaused}
-                            startTime={timerStartTime}
-                            isReviewMode={isReviewMode}
-                            finalTimeLeft={finalTimerState !== null ? finalTimerState : undefined}
-                        />
-                    )}
-                </div>
-
-                <div className="header-right">
-                    {/* Review Mode Badge */}
-                    {isReviewMode && (
-                        <span className="review-mode-badge">
-                            <FiEye className="review-icon" />
-                            {t('reviewMode')}
-                        </span>
-                    )}
-
-                    {isMockFullscreenLike && !isReviewMode && (
-                        <button
-                            className={`btn btn-submit mock-submit-btn ${canSubmit ? 'ready' : 'incomplete'}`}
-                            onClick={handleSubmit}
-                            disabled={isSubmitting || isReviewMode || !canSubmit}
-                        >
-                            {submitButtonText}
-                        </button>
-                    )}
-
-                    {!isMockFullscreenLike && (
-                        <QuestionTypeFilter
-                            questions={readingData.isMultiPassage ? readingData.questions : readingData.questions}
-                            selectedTypes={selectedQuestionTypes}
-                            onFilterChange={onQuestionTypeFilter}
-                            onTimeAdjustment={onTimeAdjustment}
-                            originalTimeLimit={readingData.metadata?.timeLimit}
-                            isMultiPassage={readingData.isMultiPassage}
-                            currentPassage={currentPassage}
-                        />
-                    )}
-                </div>
-            </header>
+            <MockUnifiedHeader
+                testTakerId={testTakerId}
+                centerContent={timerInHeader}
+            />
 
             {/* Progress Bar */}
             <ProgressBar
