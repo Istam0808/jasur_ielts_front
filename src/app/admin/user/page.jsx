@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { FiActivity, FiCpu, FiLogOut, FiSettings } from "react-icons/fi";
 import "../styles/style_admin.scss";
 
 // Dummy machines for demo
@@ -49,19 +50,26 @@ export default function AdminUserPage() {
   }
 
   useEffect(() => {
-    const ok =
-      typeof window !== "undefined" && sessionStorage.getItem("adminAuth") === "true";
-    setIsAuth(ok);
-    setAuthChecked(true);
-    if (!ok) {
-      router.replace("/admin");
-    }
+    if (typeof window === "undefined") return;
+
+    queueMicrotask(() => {
+      const ok = sessionStorage.getItem("adminAuth") === "true";
+      setIsAuth(ok);
+      setAuthChecked(true);
+      if (!ok) {
+        router.replace("/admin");
+      }
+    });
   }, [router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = localStorage.getItem(ADMIN_THEME_KEY);
-    if (saved === THEME_DARK || saved === THEME_LIGHT) setTheme(saved);
+    queueMicrotask(() => {
+      const saved = localStorage.getItem(ADMIN_THEME_KEY);
+      if (saved === THEME_DARK || saved === THEME_LIGHT) {
+        setTheme(saved);
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -136,23 +144,35 @@ export default function AdminUserPage() {
     <div className="admin-dashboard" data-theme={theme}>
       <header className="admin-dashboard__header">
         <div className="admin-dashboard__header-inner">
-          <h1 className="admin-dashboard__title">Admin panel</h1>
+          <div className="admin-dashboard__title-block">
+            <span className="admin-dashboard__title-icon" aria-hidden="true">
+              <FiCpu />
+            </span>
+            <div className="admin-dashboard__title-text">
+              <h1 className="admin-dashboard__title">Админ-панель</h1>
+              <p className="admin-dashboard__title-subtitle">
+                Управление компьютерами и сессиями тестов
+              </p>
+            </div>
+          </div>
           <div className="admin-dashboard__actions">
             <button
               type="button"
               className="admin-dashboard__settings-btn"
               onClick={() => setSettingsModalOpen(true)}
-              aria-label="Open settings"
+              aria-label="Открыть настройки панели"
             >
-              Settings
+              <FiSettings aria-hidden="true" />
+              <span>Настройки</span>
             </button>
             <button
               type="button"
               className="admin-dashboard__logout"
               onClick={() => setExitConfirmModalOpen(true)}
-              aria-label="Log out"
+              aria-label="Выйти из админ-панели"
             >
-              Exit
+              <FiLogOut aria-hidden="true" />
+              <span>Выйти</span>
             </button>
           </div>
         </div>
@@ -172,27 +192,27 @@ export default function AdminUserPage() {
             aria-labelledby="exit-confirm-title"
           >
             <h2 id="exit-confirm-title" className="admin-dashboard__modal-title">
-              Leave account
+              Выйти из аккаунта
             </h2>
             <p className="admin-dashboard__modal-text">
-              Are you sure you want to leave the account?
+              Вы уверены, что хотите выйти из аккаунта администратора?
             </p>
             <div className="admin-dashboard__modal-actions">
               <button
                 type="button"
                 className="admin-dashboard__btn-primary admin-dashboard__modal-confirm-btn"
                 onClick={handleLogout}
-                aria-label="Yes, leave account"
+                aria-label="Да, выйти из аккаунта"
               >
-                Yes, leave
+                Выйти
               </button>
               <button
                 type="button"
                 className="admin-dashboard__modal-close"
                 onClick={closeExitConfirmModal}
-                aria-label="Cancel"
+                aria-label="Отмена выхода"
               >
-                Cancel
+                Отмена
               </button>
             </div>
           </div>
@@ -213,18 +233,18 @@ export default function AdminUserPage() {
             aria-labelledby="settings-modal-title"
           >
             <h2 id="settings-modal-title" className="admin-dashboard__modal-title">
-              Settings
+              Настройки панели
             </h2>
             <div className="admin-dashboard__modal-row">
               <span className="admin-dashboard__modal-label">Theme</span>
-              <div className="admin-dashboard__theme-toggle" role="group" aria-label="Theme">
+              <div className="admin-dashboard__theme-toggle" role="group" aria-label="Тема оформления">
                 <button
                   type="button"
                   className={`admin-dashboard__theme-btn ${theme === THEME_LIGHT ? "admin-dashboard__theme-btn--active" : ""}`}
                   onClick={() => handleThemeChange(THEME_LIGHT)}
                   aria-pressed={theme === THEME_LIGHT}
                 >
-                  Light mode
+                  Светлая тема
                 </button>
                 <button
                   type="button"
@@ -232,7 +252,7 @@ export default function AdminUserPage() {
                   onClick={() => handleThemeChange(THEME_DARK)}
                   aria-pressed={theme === THEME_DARK}
                 >
-                  Dark mode
+                  Тёмная тема
                 </button>
               </div>
             </div>
@@ -240,16 +260,16 @@ export default function AdminUserPage() {
               type="button"
               className="admin-dashboard__modal-close"
               onClick={closeSettingsModal}
-              aria-label="Close settings"
+              aria-label="Закрыть настройки панели"
             >
-              Close
+              Закрыть
             </button>
           </div>
         </div>
       )}
 
       <div className="admin-dashboard__body">
-        <nav className="admin-dashboard__nav" aria-label="Panel sections">
+        <nav className="admin-dashboard__nav" aria-label="Разделы панели">
           <ul className="admin-dashboard__nav-list">
             <li className="admin-dashboard__nav-item">
               <button
@@ -258,7 +278,7 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_MACHINES)}
                 aria-current={activeNav === NAV_MACHINES ? "true" : undefined}
               >
-                Machines
+                <span className="admin-dashboard__nav-label">Компьютеры</span>
               </button>
             </li>
             <li className="admin-dashboard__nav-item">                          
@@ -268,7 +288,7 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_ONGOING_SESSIONS)}
                 aria-current={activeNav === NAV_ONGOING_SESSIONS ? "true" : undefined}
               >
-                Ongoing sessions
+                <span className="admin-dashboard__nav-label">Идут тесты</span>
               </button>
             </li>
             <li className="admin-dashboard__nav-item">
@@ -278,7 +298,7 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_FINISH_TESTS)}
                 aria-current={activeNav === NAV_FINISH_TESTS ? "true" : undefined}
               >
-                Finish tests
+                <span className="admin-dashboard__nav-label">Завершение</span>
               </button>
             </li>
           </ul>
@@ -417,10 +437,10 @@ export default function AdminUserPage() {
               aria-labelledby="ongoing-sessions-title"
             >
               <h2 id="ongoing-sessions-title" className="admin-dashboard__section-title">
-                Ongoing sessions
+                Идут тесты
               </h2>
               <div className="admin-dashboard__placeholder">
-                Ongoing sessions section in development.
+                Здесь будет отображаться список активных сессий: какой компьютер, какой тест и оставшееся время.
               </div>
             </section>
           )}
@@ -431,10 +451,10 @@ export default function AdminUserPage() {
               aria-labelledby="finish-tests-title"
             >
               <h2 id="finish-tests-title" className="admin-dashboard__section-title">
-                Finish tests
+                Завершение тестов
               </h2>
               <div className="admin-dashboard__placeholder">
-                Finish tests section in development.
+                Здесь появится управление завершением тестов и проверкой результатов для выбранных сессий.
               </div>
             </section>
           )}
