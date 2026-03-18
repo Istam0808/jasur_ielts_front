@@ -70,6 +70,7 @@ export default function MockReadingByIdPage() {
       id={String(mockId)}
       nextHref={`/mock/${mockId}/writing`}
       uiVariant="mock-fullscreen-like"
+      useUnifiedMockHeader={true}
     />
   );
 }

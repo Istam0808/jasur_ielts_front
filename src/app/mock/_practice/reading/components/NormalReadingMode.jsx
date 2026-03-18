@@ -16,6 +16,8 @@ import ResultsModal from '../../common/ModalResults';
 import { useDistractionDetector } from '@/hooks/useDistractionDetector';
 import sanitizeHtml from '@/utils/sanitizeHtml';
 import PassageWithDropzones from './PassageWithDropzones';
+import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
+import { useMockUi } from '@/components/common/MockUiContext';
 
 export default function NormalReadingMode({
     readingData,
@@ -70,9 +72,12 @@ export default function NormalReadingMode({
     inlinePassagePick,
     onInlinePassagePickChange,
     isMockFullscreenLike = false,
+    useUnifiedMockHeader = false,
     nextHref = null
 }) {
     const { t } = useTranslation('reading');
+    const { textSize } = useMockUi();
+    const showUnifiedHeader = isMockFullscreenLike && useUnifiedMockHeader;
     const submitButtonText = isSubmitting
         ? t('submitting')
         : isReviewMode
@@ -114,9 +119,11 @@ export default function NormalReadingMode({
 
     return (
         <div
-            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''}`}
+            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''} ${showUnifiedHeader ? 'mock-unified-header-active' : ''}`}
             data-level={readingData?.level}
+            data-mock-text-size={showUnifiedHeader ? textSize : undefined}
         >
+            {showUnifiedHeader && <MockUnifiedHeader />}
             {/* Header */}
             <header className={`reading-header ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''}`}>
                 <div className="header-left">

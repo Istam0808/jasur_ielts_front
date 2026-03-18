@@ -42,6 +42,28 @@
         background: $background-primary;
     }
 
+    &.mock-unified-header-active {
+        &.mock-fullscreen-like {
+            padding-top: 56px;
+        }
+
+        .reading-header.mock-fullscreen-like {
+            top: 56px;
+        }
+    }
+
+    &[data-mock-text-size="regular"] {
+        font-size: 1rem;
+    }
+
+    &[data-mock-text-size="large"] {
+        font-size: 1.08rem;
+    }
+
+    &[data-mock-text-size="extraLarge"] {
+        font-size: 1.16rem;
+    }
+
     // Mobile-first professional redesign
     @media (max-width: 784px) {
         padding: 0;
@@ -169,6 +191,7 @@
             }
         }
 
+
         // Mobile-first header redesign
         @media (max-width: 784px) {
             grid-template-columns: 1fr;
@@ -183,6 +206,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
         }
 
@@ -559,6 +583,7 @@
                     0 8px 32px rgba($primary-color, 0.2),
                     inset 0 1px 0 rgba(255, 255, 255, 0.2);
                 transform: translateY(-2px);
+                -webkit-backdrop-filter: blur(10px);
                 backdrop-filter: blur(10px);
                 position: relative;
 
@@ -1088,6 +1113,7 @@
             font-size: $font-size-base;
             letter-spacing: 0.025em;
             box-shadow: $shadow-sm;
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
 
             @media (max-width: 784px) {
@@ -1306,6 +1332,7 @@
                 0 4px 12px rgba($primary-color, 0.08),
                 0 2px 4px rgba(0, 0, 0, 0.05),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
             position: relative;
             z-index: 1;

@@ -159,6 +159,7 @@
             background-color: rgba($background-light, 0.95);
             border: 2px solid $border-light;
             box-shadow: $shadow-lg;
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
 
             &.warning {
@@ -639,6 +640,7 @@
     background: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     padding: $spacing-md;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     animation: fadeIn $transition-normal;
     @include flex(row, center, center);
@@ -898,88 +900,20 @@
     background: #f7f9fc;
     padding: 72px $spacing-lg 120px;
 
-    .mock-exam-top-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
-        border-bottom: 1px solid #d7dce5;
-        background: #ffffff;
-        z-index: 110;
-        padding: 0 $spacing-md;
-        @include flex(row, space-between, center, nowrap, $spacing-md);
+    &.mock-unified-header-active {
+        padding-top: 72px;
+    }
 
-        .mock-exam-brand {
-            font-size: $font-size-sm;
-            font-weight: $font-weight-bold;
-            letter-spacing: 0.08em;
-            color: #c92a2a;
-            text-transform: uppercase;
-        }
+    &[data-mock-text-size="regular"] {
+        font-size: 1rem;
+    }
 
-        .mock-exam-taker {
-            flex: 1;
-            font-size: $font-size-sm;
-            color: #4b5565;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    &[data-mock-text-size="large"] {
+        font-size: 1.08rem;
+    }
 
-        .mock-exam-time {
-            min-width: 130px;
-            text-align: center;
-            font-size: $font-size-sm;
-            color: #1f2937;
-            font-weight: $font-weight-semibold;
-
-            .timer {
-                background: transparent;
-                border: 0;
-                box-shadow: none;
-                padding: 0;
-                min-height: auto;
-            }
-        }
-
-        .mock-exam-actions {
-            @include flex(row, flex-end, center, nowrap, $spacing-sm);
-
-            .mock-icon-btn {
-                width: 32px;
-                height: 32px;
-                border: 1px solid #d7dce5;
-                border-radius: $border-radius-xs;
-                background: #ffffff;
-                color: #374151;
-                cursor: pointer;
-                @include flex(row, center, center);
-
-                &:hover {
-                    background: #f3f5f9;
-                }
-            }
-
-            .mock-submit-btn {
-                height: 32px;
-                border: 1px solid #111827;
-                border-radius: $border-radius-xs;
-                background: #111827;
-                color: #ffffff;
-                font-size: $font-size-xs;
-                font-weight: $font-weight-semibold;
-                padding: 0 $spacing-sm;
-                cursor: pointer;
-
-                &:disabled {
-                    border-color: #b5bcc9;
-                    background: #c8cfdb;
-                    color: #eef1f7;
-                    cursor: not-allowed;
-                }
-            }
-        }
+    &[data-mock-text-size="extraLarge"] {
+        font-size: 1.16rem;
     }
 
     .mock-listening-intro {
@@ -1209,17 +1143,8 @@
     .test-listening-page.mock-exam-mode {
         padding: 64px $spacing-sm 116px;
 
-        .mock-exam-top-bar {
-            gap: $spacing-xs;
-
-            .mock-exam-brand {
-                display: none;
-            }
-
-            .mock-exam-taker {
-                max-width: 160px;
-                font-size: $font-size-xs;
-            }
+        &.mock-unified-header-active {
+            padding-top: 64px;
         }
 
         .mock-exam-bottom-nav--ielts {

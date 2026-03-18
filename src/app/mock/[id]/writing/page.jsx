@@ -69,6 +69,7 @@ export default function MockWritingByIdPage() {
       difficulty="ielts"
       id={String(mockId)}
       startScreenVariant="ieltsAcademic"
+      useUnifiedMockHeader={true}
     />
   );
 }

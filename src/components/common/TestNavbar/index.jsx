@@ -23,6 +23,7 @@ import styles from './style.module.scss';
  * @param {string} props.headerActionLabel - Header action button label
  * @param {Function} props.onHeaderAction - Header action handler
  * @param {boolean} props.headerActionDisabled - Header action disabled state
+ * @param {number} props.topOffset - Sticky top offset in pixels
  */
 export default function TestNavbar({
   currentQuestion = 0,
@@ -40,6 +41,7 @@ export default function TestNavbar({
   headerActionLabel = '',
   onHeaderAction,
   headerActionDisabled = false,
+  topOffset = 0,
 }) {
   const { t } = useTranslation(['test', 'common', 'writing']);
 
@@ -74,7 +76,12 @@ export default function TestNavbar({
   const timerStartTime = startTime;
 
   return (
-    <nav className={styles.testNavbar} role="navigation" aria-label={t('test:navigation.testNavigation', 'Test navigation')}>
+    <nav
+      className={styles.testNavbar}
+      role="navigation"
+      aria-label={t('test:navigation.testNavigation', 'Test navigation')}
+      style={{ top: `${topOffset}px` }}
+    >
       <div className={styles.container}>
         {/* Logo (text-based, no image assets) */}
         <div className={styles.logo}>

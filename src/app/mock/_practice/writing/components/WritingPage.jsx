@@ -14,6 +14,8 @@ import { TestNavbar } from '@/components/common';
 import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 import WritingResultsPanel from './WritingResultsPanel';
 import '../WritingResultsPanel.scss';
+import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
+import { useMockUi } from '@/components/common/MockUiContext';
 
 // Custom hooks
 import { useWordCount } from '@/hooks/useWordCount';
@@ -73,11 +75,13 @@ function WritingPageContent({
     timerStartTime: externalTimerStartTime = null,
     timerDuration: externalTimerDuration = null,
     isTimerPaused: externalTimerPaused = false,
-    startScreenVariant = 'default'
+    startScreenVariant = 'default',
+    useUnifiedMockHeader = false
 }) {
     const router = useRouter();
     const { t, i18n } = useTranslation(['writing', 'practice', 'common', 'test']);
     const { setIsLoading } = useLoading();
+    const { textSize } = useMockUi();
     const isTabletOrBelow = false; // Site is PC-only
     const normalizedDifficulty = useMemo(() => {
         const raw = String(difficulty || '').toLowerCase();
@@ -579,7 +583,11 @@ function WritingPageContent({
         (submitError && submitError.isValidationError === true);
 
     return (
-        <div className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''}`}>
+        <div
+            className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''} ${useUnifiedMockHeader ? 'mock-unified-header-active' : ''}`}
+            data-mock-text-size={useUnifiedMockHeader ? textSize : undefined}
+        >
+            {useUnifiedMockHeader && <MockUnifiedHeader />}
             {/* Test Navbar */}
             <TestNavbar
                 progressType="none"
@@ -592,6 +600,7 @@ function WritingPageContent({
                 headerActionLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
                 onHeaderAction={handleSubmit}
                 headerActionDisabled={isHeaderSubmitDisabled}
+                topOffset={useUnifiedMockHeader ? 56 : 0}
             />
 
             {/* Writing Title Section - Only for Placement Test */}

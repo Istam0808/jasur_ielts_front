@@ -14,6 +14,22 @@
     overflow-y: hidden; // Lock page height to viewport
     max-width: 100vw; // Ensure container doesn't exceed viewport width
 
+    &.mock-unified-header-active {
+        padding-top: 56px;
+    }
+
+    &[data-mock-text-size="regular"] {
+        font-size: 1rem;
+    }
+
+    &[data-mock-text-size="large"] {
+        font-size: 1.08rem;
+    }
+
+    &[data-mock-text-size="extraLarge"] {
+        font-size: 1.16rem;
+    }
+
     // Placement test mode: Full-width navbar
     &--placement {
         padding: 0;

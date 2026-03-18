@@ -2,18 +2,20 @@
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { FiFileText, FiTrash2, FiX } from 'react-icons/fi';
 import Spinner from '@/components/common/spinner';
 import Timer from '@/components/common/Timer';
 import { useTestData } from '@/hooks/useTestData';
 import QuestionRenderer from './QuestionRenderer';
-import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation, MockExamTopBar, MockExamBottomNav } from './TestUIComponents';
+import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation, MockExamBottomNav } from './TestUIComponents';
 import TestProgress from './TestProgress';
 import ResultsModal from './ResultsModal';
 import NoteModal from '@/components/common/NoteModal';
-import { validateListeningMockAnswers, logoutAgent } from '@/lib/mockApi';
-import { getMockSession, clearMockSession } from '@/lib/mockSession';
+import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
+import { useMockUi } from '@/components/common/MockUiContext';
+import { validateListeningMockAnswers } from '@/lib/mockApi';
+import { getMockSession } from '@/lib/mockSession';
 import './testListeningPage.scss';
 
 // Add new component for Notes Viewer Modal
@@ -150,10 +152,21 @@ const NotesViewerModal = ({ isOpen, onClose, partNotes, onDeleteNote, onNavigate
     );
 };
 
-const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, difficultyOverride, nextHref, isMockExam = false, mockId = null }) => {
+const TestListeningPage = ({
+    bookData,
+    answersData,
+    bookId,
+    testId,
+    testTitle,
+    difficultyOverride,
+    nextHref,
+    isMockExam = false,
+    mockId = null,
+    useUnifiedMockHeader = false
+}) => {
     const { t, i18n } = useTranslation(['listening', 'common', 'test']);
-    const router = useRouter();
     const params = useParams();
+    const { textSize } = useMockUi();
     const difficulty = difficultyOverride || params?.difficulty;
 
     const { test, isLoading } = useTestData(bookData, bookId, testId);
@@ -1023,27 +1036,6 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
         setMockTimeLeftSeconds(testDuration * 60);
     }, [testDuration, test?.id]);
 
-    const handleLogout = useCallback(async () => {
-        const storedSession = getMockSession();
-        const token = storedSession?.accessToken;
-
-        // Если токена нет, просто чистим локальную сессию и уходим на главную без запроса
-        if (!token) {
-            clearMockSession();
-            router.replace('/');
-            return;
-        }
-
-        try {
-            await logoutAgent(token);
-        } catch (error) {
-            console.error('Mock agent logout failed:', error);
-        } finally {
-            clearMockSession();
-            router.replace('/');
-        }
-    }, [router]);
-
     useEffect(() => {
         if (!isMockExam || !testStarted || isTestSubmitted) return;
 
@@ -1156,17 +1148,25 @@ const TestListeningPage = ({ bookData, answersData, bookId, testId, testTitle, d
     // Calculate total notes across all parts
     const totalNotesCount = Object.values(partNotes).reduce((total, notes) => total + notes.length, 0);
 
+    const shouldShowUnifiedHeader = isMockExam && useUnifiedMockHeader;
+    const testTakerUsername = useMemo(() => {
+        const sessionUsername = getMockSession()?.username;
+        const normalized = typeof sessionUsername === 'string' ? sessionUsername.trim() : '';
+        return normalized || 'unknown';
+    }, []);
+
     return (
-        <div className={`test-listening-page ${isMockExam ? 'mock-exam-mode' : ''}`}>
-            {isMockExam ? (
-                <MockExamTopBar
-                    candidateId="candidate@ieltsx.com"
-                    timeText={mockTimeLeftText}
-                    onSubmit={() => handleSubmit(false)}
-                    isSubmitDisabled={!isSubmittable || isTestSubmitted}
-                    onLogout={handleLogout}
+        <div
+            className={`test-listening-page ${isMockExam ? 'mock-exam-mode' : ''} ${shouldShowUnifiedHeader ? 'mock-unified-header-active' : ''}`}
+            data-mock-text-size={shouldShowUnifiedHeader ? textSize : undefined}
+        >
+            {shouldShowUnifiedHeader && (
+                <MockUnifiedHeader
+                    testTakerId={testTakerUsername}
+                    centerContent={mockTimeLeftText}
                 />
-            ) : (
+            )}
+            {!isMockExam && (
                 <TestHeader testTitle={testTitle} testName={test.name} backTo="/mock/listening" />
             )}
 

@@ -12,7 +12,14 @@ import { useTextHighlighting } from '../hooks/useTextHighlighting';
 import FullscreenReadingMode from './FullscreenReadingMode';
 import NormalReadingMode from './NormalReadingMode';
 
-export default function ReadingPage({ readingExercise, difficulty, id, nextHref = null, uiVariant = 'default' }) {
+export default function ReadingPage({
+    readingExercise,
+    difficulty,
+    id,
+    nextHref = null,
+    uiVariant = 'default',
+    useUnifiedMockHeader = false
+}) {
     const { t } = useTranslation('reading');
 
     // PC only: fullscreen and keyboard shortcuts enabled
@@ -395,7 +402,8 @@ export default function ReadingPage({ readingExercise, difficulty, id, nextHref 
         setTimerPaused,
         inlinePassagePick,
         onInlinePassagePickChange: handleInlinePassagePickChange,
-        isMockFullscreenLike
+        isMockFullscreenLike,
+        useUnifiedMockHeader
     };
 
     // Render appropriate mode based on fullscreen state

@@ -73,6 +73,7 @@ export default function MockListeningByIdPage() {
       testTitle={payload.testTitle}
       nextHref={`/mock/${mockId}/reading`}
       isMockExam={true}
+      useUnifiedMockHeader={true}
     />
   );
 }

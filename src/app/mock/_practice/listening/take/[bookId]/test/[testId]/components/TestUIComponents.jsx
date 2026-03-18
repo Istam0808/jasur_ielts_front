@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FiChevronLeft, FiChevronRight, FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle, FiVolume2 } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 
 export const TestHeader = ({ testTitle, testName, backTo }) => {
@@ -106,44 +106,6 @@ export const TestNavigation = ({ currentPartIndex, totalParts, onNavigate, onSub
         </div>
     );
 }; 
-
-export const MockExamTopBar = ({
-    candidateId,
-    timeText,
-    onSubmit,
-    isSubmitDisabled,
-    onLogout,
-}) => {
-    return (
-        <div className="mock-exam-top-bar">
-            <div className="mock-exam-brand">JASUR IELTS 9.0</div>
-            <div className="mock-exam-taker">Test taker ID: {candidateId}</div>
-            <div className="mock-exam-time">{timeText}</div>
-            <div className="mock-exam-actions">
-                <button type="button" className="mock-icon-btn" aria-label="Audio settings">
-                    <FiVolume2 />
-                </button>
-                {onLogout && (
-                    <button
-                        type="button"
-                        className="mock-logout-btn"
-                        onClick={onLogout}
-                    >
-                        Logout
-                    </button>
-                )}
-                <button
-                    type="button"
-                    className="mock-submit-btn"
-                    onClick={onSubmit}
-                    disabled={isSubmitDisabled}
-                >
-                    Submit
-                </button>
-            </div>
-        </div>
-    );
-};
 
 export const MockExamBottomNav = ({
     parts,
