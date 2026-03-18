@@ -855,3 +855,36 @@
         cursor: default;
     }
 }
+
+// When `MockExamFooter` is visible (`position: fixed`), increase available height for
+// the scrolling columns so they don't end early and leave a blank gap.
+.reading-container.mock-fullscreen-like.mock-footer-active {
+    .reading-content {
+        // Override the base `max-height` from `.reading-content` above.
+        max-height: calc(100vh - 112px);
+    }
+
+    .passage-section {
+        max-height: calc(100vh - 112px);
+    }
+
+    .questions-section {
+        max-height: calc(100vh - 112px);
+    }
+}
+
+@media (max-width: 640px) {
+    .reading-container.mock-fullscreen-like.mock-footer-active {
+        .reading-content {
+            max-height: calc(100vh - 104px);
+        }
+
+        .passage-section {
+            max-height: calc(100vh - 104px);
+        }
+
+        .questions-section {
+            max-height: calc(100vh - 104px);
+        }
+    }
+}

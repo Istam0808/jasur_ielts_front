@@ -66,6 +66,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 
   input {
@@ -216,4 +217,44 @@
 
 .wrapper[data-inline] .option[data-feedback="true"][data-status="incorrect"]:has(input:checked) .inner {
   background: common.$error-color;
+}
+
+// TFNG/YNNG: make the inline `Radio` render as a vertical list of choices.
+// This container is rendered by `TrueFalseNotGiven.jsx` (TFNG/YNNG types in reading).
+:global(.true-false-not-given-container) {
+  .wrapper[data-inline] {
+    .group {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+    }
+
+    .option {
+      width: 100%;
+      justify-content: flex-start;
+
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background-color: common.$control-bg;
+      border: 1px solid common.$control-border;
+      box-shadow: none;
+
+      // Remove inline "segmented pills" separator.
+      &:not(:last-child)::before {
+        content: none;
+      }
+
+      &:hover {
+        background-color: color.change(common.$primary-color, $alpha: 0.03);
+        border-color: color.mix(common.$primary-color, common.$control-border, 35%);
+      }
+
+      &:has(input:checked),
+      &:focus-within {
+        background-color: color.change(common.$primary-color, $alpha: 0.06);
+        border-color: common.$primary-color;
+        box-shadow: 0 0 0 2px color.change(common.$primary-color, $alpha: 0.08);
+      }
+    }
+  }
 }

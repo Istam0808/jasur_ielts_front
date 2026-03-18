@@ -34,6 +34,14 @@
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        width: 100%;
+
+        // Ensure the Radio group takes full width.
+        // (Radio component is a CSS module, so we select by the stable DOM attribute.)
+        [role="radiogroup"] {
+            width: 100%;
+            flex-wrap: nowrap;
+        }
 
         .option-item {
             display: flex;

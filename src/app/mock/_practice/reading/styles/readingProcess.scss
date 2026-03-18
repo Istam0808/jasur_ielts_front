@@ -43,17 +43,20 @@
         background: $background-primary;
 
         &.mock-footer-active {
-            padding-bottom: 96px;
+            // `MockExamFooter` фиксируется внизу (`position: fixed`) и имеет min-height: 56px.
+            // Резервируем снизу ровно столько, чтобы убрать лишний "воздух" между футером и контентом.
+            padding-bottom: 56px;
         }
     }
 
     &.with-unified-header {
-        padding-top: 72px;
+        // `MockUnifiedHeader` is fixed with height 56px (see style.module.scss)
+        padding-top: 56px;
     }
 
     &.mock-unified-header-active {
         &.mock-fullscreen-like {
-            padding-top: 72px;
+            padding-top: 56px;
         }
     }
 
@@ -85,7 +88,15 @@
         padding-right: env(safe-area-inset-right);
 
         &.with-unified-header {
-            padding-top: max(env(safe-area-inset-top), 64px);
+            // `MockUnifiedHeader` is fixed with height 56px (up to 640px width)
+            padding-top: max(env(safe-area-inset-top), 56px);
+        }
+    }
+
+    @media (max-width: 640px) {
+        &.with-unified-header {
+            // `MockUnifiedHeader` switches to height 52px on narrow screens
+            padding-top: max(env(safe-area-inset-top), 52px);
         }
     }
 
@@ -94,6 +105,10 @@
         padding-bottom: max(env(safe-area-inset-bottom), 8px);
         padding-left: max(env(safe-area-inset-left), 4px);
         padding-right: max(env(safe-area-inset-right), 4px);
+
+        &.with-unified-header {
+            padding-top: max(env(safe-area-inset-top), 52px);
+        }
     }
 
     @media (max-width: 390px) {
@@ -101,12 +116,27 @@
         padding-bottom: max(env(safe-area-inset-bottom), 4px);
         padding-left: max(env(safe-area-inset-left), 2px);
         padding-right: max(env(safe-area-inset-right), 2px);
+
+        &.with-unified-header {
+            padding-top: max(env(safe-area-inset-top), 52px);
+        }
     }
 
     @media (max-width: 375px) {
         padding: 0;
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
+
+        &.with-unified-header {
+            padding-top: max(env(safe-area-inset-top), 52px);
+        }
+    }
+
+    @media (max-width: 992px) {
+        &.mock-fullscreen-like.mock-footer-active {
+            // `MockExamFooter` min-height drops to 52px below 992px
+            padding-bottom: 52px;
+        }
     }
 
     // Full-screen toggle button in normal mode
