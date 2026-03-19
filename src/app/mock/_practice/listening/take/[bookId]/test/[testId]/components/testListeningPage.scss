@@ -132,16 +132,7 @@
         }
     }
 
-    .back-button {
-        @include button-base;
-        background-color: $background-secondary;
-        color: $text-secondary;
-        border: 1px solid $border-light;
 
-        &:hover {
-            background-color: $neutral-200;
-        }
-    }
 
     .page-title {
         font-size: $font-size-xxxl;
@@ -248,11 +239,10 @@
         .part-content-card {
             border: 1px solid $border-light;
             border-radius: $border-radius-sm;
-            padding: $spacing-lg;
+            padding: $spacing-md;
             background-color: $background-light;
             box-shadow: $shadow-sm;
             border-top-left-radius: 0;
-            margin-top: -1px;
             z-index: 1;
             @include user-select-text;
 
@@ -279,6 +269,60 @@
                     &.badge-audio-missing {
                         background-color: color.scale($danger-color, $lightness: 85%);
                         color: color.scale($danger-color, $lightness: -15%);
+                    }
+                }
+            }
+
+            .audio-volume-controls {
+                margin-bottom: $spacing-md;
+                padding: $spacing-xs $spacing-md;
+                border-radius: $border-radius-xs;
+                border: 1px solid $border-light;
+                background-color: $background-secondary;
+                @include flex(row, space-between, center, nowrap, $spacing-sm);
+
+                &[data-audio-available='false'] {
+                    opacity: 0.65;
+                }
+
+                .audio-mute-button {
+                    background-color: transparent;
+                    border: 1px solid $border-light;
+                    border-radius: $border-radius-xs;
+                    padding: $spacing-xs $spacing-sm;
+                    cursor: pointer;
+                    transition: all $transition-fast;
+                    color: $text-secondary;
+                    @include flex(row, center, center, nowrap, $spacing-xs);
+
+                    &:hover {
+                        background-color: $neutral-200;
+                        border-color: $primary-color;
+                        color: $primary-color;
+                    }
+
+                    &.is-muted {
+                        color: color.scale($danger-color, $lightness: -5%);
+                        border-color: color.scale($danger-color, $lightness: 25%);
+                    }
+                }
+
+                .audio-volume-range {
+                    flex: 1;
+                    @include flex(row, flex-start, center, nowrap, $spacing-sm);
+
+                    input[type='range'] {
+                        width: 100%;
+                        accent-color: $primary-color;
+                        cursor: pointer;
+                    }
+
+                    .audio-volume-percent {
+                        min-width: 56px;
+                        text-align: right;
+                        color: $text-muted;
+                        font-size: $font-size-sm;
+                        font-weight: $font-weight-medium;
                     }
                 }
             }
@@ -425,10 +469,10 @@
 
     // Allow interaction for matching select elements
     .matching-select {
-        user-select: auto !important;
         -webkit-user-select: auto !important;
         -moz-user-select: auto !important;
         -ms-user-select: auto !important;
+        user-select: auto !important;
     }
 }
 

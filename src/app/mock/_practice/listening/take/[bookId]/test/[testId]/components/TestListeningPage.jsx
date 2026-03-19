@@ -3,7 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { FiFileText, FiTrash2, FiX } from 'react-icons/fi';
+import { FiFileText, FiTrash2, FiX, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import Spinner from '@/components/common/spinner';
 import Timer from '@/components/common/Timer';
 import { useTestData } from '@/hooks/useTestData';
@@ -191,6 +191,12 @@ const TestListeningPage = ({
     // Add new state for notes viewer
     const [isNotesViewerOpen, setIsNotesViewerOpen] = useState(false);
     const [audioError, setAudioError] = useState(null);
+
+    // Listening audio volume control (syncs with <audio ref={audioRef} />)
+    const [audioVolume, setAudioVolume] = useState(1); // 0..1, keeps last non-zero volume
+    const [isAudioMuted, setIsAudioMuted] = useState(false);
+    const audioSliderValue = isAudioMuted ? 0 : audioVolume;
+    const audioVolumePercent = Math.round(audioSliderValue * 100);
 
     // Make sure translations are loaded
     useEffect(() => {
@@ -1107,6 +1113,34 @@ const TestListeningPage = ({
         }
     }, [activePartAudioUrl, testStarted, isTestSubmitted, currentPartIndex, t, bookId, testId]);
 
+    const handleToggleAudioMute = useCallback(() => {
+        setIsAudioMuted((prev) => !prev);
+    }, []);
+
+    const handleAudioVolumeChange = useCallback((event) => {
+        const raw = event?.target?.value;
+        const next = Number(raw);
+        if (!Number.isFinite(next)) return;
+
+        // Keep `audioVolume` as "last non-zero". Slider shows 0 while muted.
+        if (next <= 0.001) {
+            setIsAudioMuted(true);
+        } else {
+            setAudioVolume(next);
+            setIsAudioMuted(false);
+        }
+    }, []);
+
+    // Sync volume/mute state with the real <audio> element
+    useEffect(() => {
+        const el = audioRef.current;
+        if (!el) return;
+
+        // Keep last non-zero volume in sync; mute flag controls the audible output.
+        el.volume = audioVolume;
+        el.muted = isAudioMuted;
+    }, [audioVolume, isAudioMuted, activePartAudioUrl]);
+
     const mockTimeLeftText = useMemo(() => {
         if (mockTimeLeftSeconds <= 0) {
             return '0 minutes left';
@@ -1263,6 +1297,33 @@ const TestListeningPage = ({
 
                 <div className="part-content-card">
                     <PartHeader partNumber={activePart.part} audioUrl={activePartAudioUrl} />
+                    <div
+                        className="audio-volume-controls"
+                        data-audio-available={activePartAudioUrl ? 'true' : 'false'}
+                    >
+                        <button
+                            type="button"
+                            className={`audio-mute-button ${isAudioMuted ? 'is-muted' : ''}`}
+                            onClick={handleToggleAudioMute}
+                            aria-label={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
+                            title={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
+                        >
+                            {isAudioMuted ? <FiVolumeX /> : <FiVolume2 />}
+                        </button>
+
+                        <div className="audio-volume-range">
+                            <input
+                                type="range"
+                                min={0}
+                                max={1}
+                                step={0.01}
+                                value={audioSliderValue}
+                                onChange={handleAudioVolumeChange}
+                                aria-label={t('audioVolume', 'Громкость')}
+                            />
+                            <span className="audio-volume-percent">{audioVolumePercent}%</span>
+                        </div>
+                    </div>
                     {hasNoAudioInAnyPart && (
                         <div className="no-audio-for-mock-message" role="status">
                             {t('noAudioForMock', 'Для этого мока аудио не загружено.')}
