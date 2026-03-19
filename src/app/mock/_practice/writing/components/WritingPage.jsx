@@ -7,7 +7,6 @@ import { BsExclamationCircle } from 'react-icons/bs';
 import { FiAlertTriangle } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { useLoading } from '@/components/common/LoadingContext';
-import { WRITING_TASK_1 } from '@/store';
 import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
 import { TestNavbar } from '@/components/common';
@@ -33,8 +32,14 @@ const VALID_DIFFICULTIES = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
 const DIFFICULTY_ALIASES = {
     ielts: 'c2'
 };
-const MAX_WORD_LIMIT = WRITING_TASK_1.maxWords;
-const MIN_WORD_REQUIREMENT = WRITING_TASK_1.minWords;
+// Используем IELTS-стандарты по умолчанию.
+// Ограничения (min/max/time) при наличии подхватываются из `writingExercise.tasks`.
+const TASK_1_MIN_WORDS = 150;
+const TASK_1_MAX_WORDS = 250;
+const TASK_1_TIME_MINUTES = 20;
+
+const MAX_WORD_LIMIT = TASK_1_MAX_WORDS;
+const MIN_WORD_REQUIREMENT = TASK_1_MIN_WORDS;
 const WRITING_TASK_2_MIN_WORDS = 250;
 const WRITING_TASK_2_RECOMMENDED_MINUTES = 40;
 
@@ -110,8 +115,8 @@ function WritingPageContent({
                     taskNumber: Number(task?.taskNumber) || Number(task?.task_number) || index + 1,
                     questionText: String(task?.questionText || task?.question_text || '').trim(),
                     images: Array.isArray(task?.images) ? task.images : [],
-                    minWords: Number(task?.minWords) || (index === 0 ? MIN_WORD_REQUIREMENT : WRITING_TASK_2_MIN_WORDS),
-                    recommendedMinutes: Number(task?.recommendedMinutes) || (index === 0 ? WRITING_TASK_1.timeMinutes : WRITING_TASK_2_RECOMMENDED_MINUTES)
+                    minWords: Number(task?.minWords) || (index === 0 ? TASK_1_MIN_WORDS : WRITING_TASK_2_MIN_WORDS),
+                    recommendedMinutes: Number(task?.recommendedMinutes) || (index === 0 ? TASK_1_TIME_MINUTES : WRITING_TASK_2_RECOMMENDED_MINUTES)
                 }))
                 .filter((task) => task.questionText);
         }
@@ -125,8 +130,8 @@ function WritingPageContent({
             taskNumber: 1,
             questionText: fallbackTopic,
             images: [],
-            minWords: MIN_WORD_REQUIREMENT,
-            recommendedMinutes: WRITING_TASK_1.timeMinutes
+            minWords: TASK_1_MIN_WORDS,
+            recommendedMinutes: TASK_1_TIME_MINUTES
         }];
     }, [id, writingExercise]);
 
@@ -574,7 +579,7 @@ function WritingPageContent({
     const writingTopicTitle = extractPromptText(rawWritingTopicTitle);
     const topicDescription = '';
     const currentTaskMinWords = Number(currentTask?.minWords) || MIN_WORD_REQUIREMENT;
-    const currentTaskMinutes = Number(currentTask?.recommendedMinutes) || WRITING_TASK_1.timeMinutes;
+    const currentTaskMinutes = Number(currentTask?.recommendedMinutes) || TASK_1_TIME_MINUTES;
     const currentTaskImages = Array.isArray(currentTask?.images) ? currentTask.images : [];
     const currentTaskLabel = Number(currentTask?.taskNumber) === 2
         ? t('writingTask2', { ns: 'writing', defaultValue: 'WRITING TASK 2' })
@@ -627,6 +632,8 @@ function WritingPageContent({
                                 title={writingTopicTitle}
                                 description={topicDescription}
                                 onStart={handleStartTimer}
+                                minWords={Number((writingTasksFromData[0] && writingTasksFromData[0].minWords) || TASK_1_MIN_WORDS)}
+                                timeMinutes={Number((writingTasksFromData[0] && writingTasksFromData[0].recommendedMinutes) || TASK_1_TIME_MINUTES)}
                             />
                         )
                     )}

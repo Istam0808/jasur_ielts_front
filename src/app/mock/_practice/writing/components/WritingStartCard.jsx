@@ -1,16 +1,17 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { WRITING_TASK_1 } from '@/store';
 
 /**
  * Start writing card - IELTS Task 1: shown before timer starts.
- * Standard instruction: 20 minutes, at least 150 words.
+ * Стартовая карточка для Writing Task 1.
  */
 export default function WritingStartCard({
   title,
   description,
-  onStart
+  onStart,
+  minWords = 150,
+  timeMinutes = 20
 }) {
   const { t } = useTranslation('writing');
 
@@ -26,15 +27,12 @@ export default function WritingStartCard({
         <p className="start-writing-task-label">
           {t('writingTask1', { defaultValue: 'WRITING TASK 1' })}
         </p>
-        <p className="start-writing-instruction">
-          {WRITING_TASK_1.instructionPrefix}
-        </p>
         {title && <h2 className="start-writing-title">{title}</h2>}
         {description && <p className="start-writing-description">{description}</p>}
         <p className="start-writing-requirement">
-          {t('minimumWords', { defaultValue: 'At least {{count}} words', count: WRITING_TASK_1.minWords })}
+          {t('minimumWords', { defaultValue: 'At least {{count}} words', count: minWords })}
           {' • '}
-          {t('timeLimitMinutes', { defaultValue: '{{count}} minutes', count: WRITING_TASK_1.timeMinutes })}
+          {t('timeLimitMinutes', { defaultValue: '{{count}} minutes', count: timeMinutes })}
         </p>
         <button
           className="btn btn-primary btn-start-writing-large"
