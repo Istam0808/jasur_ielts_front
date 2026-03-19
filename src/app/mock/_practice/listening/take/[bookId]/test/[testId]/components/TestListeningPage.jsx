@@ -1213,6 +1213,16 @@ const TestListeningPage = ({
                 <MockUnifiedHeader
                     testTakerId={testTakerUsername}
                     centerContent={mockTimeLeftText}
+                    listeningVolume={{
+                        sliderValue: audioSliderValue,
+                        muted: isAudioMuted,
+                        audioAvailable: Boolean(activePartAudioUrl),
+                        onVolumeChange: handleAudioVolumeChange,
+                        onToggleMute: handleToggleAudioMute,
+                        ariaVolume: t('audioVolume', 'Громкость'),
+                        ariaMute: t('mute', 'Отключить звук'),
+                        ariaUnmute: t('unmute', 'Включить звук'),
+                    }}
                 />
             )}
             {!isMockExam && (
@@ -1297,33 +1307,35 @@ const TestListeningPage = ({
 
                 <div className="part-content-card">
                     <PartHeader partNumber={activePart.part} audioUrl={activePartAudioUrl} />
-                    <div
-                        className="audio-volume-controls"
-                        data-audio-available={activePartAudioUrl ? 'true' : 'false'}
-                    >
-                        <button
-                            type="button"
-                            className={`audio-mute-button ${isAudioMuted ? 'is-muted' : ''}`}
-                            onClick={handleToggleAudioMute}
-                            aria-label={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
-                            title={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
+                    {!shouldShowUnifiedHeader && (
+                        <div
+                            className="audio-volume-controls"
+                            data-audio-available={activePartAudioUrl ? 'true' : 'false'}
                         >
-                            {isAudioMuted ? <FiVolumeX /> : <FiVolume2 />}
-                        </button>
+                            <button
+                                type="button"
+                                className={`audio-mute-button ${isAudioMuted ? 'is-muted' : ''}`}
+                                onClick={handleToggleAudioMute}
+                                aria-label={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
+                                title={isAudioMuted ? t('unmute', 'Включить звук') : t('mute', 'Отключить звук')}
+                            >
+                                {isAudioMuted ? <FiVolumeX /> : <FiVolume2 />}
+                            </button>
 
-                        <div className="audio-volume-range">
-                            <input
-                                type="range"
-                                min={0}
-                                max={1}
-                                step={0.01}
-                                value={audioSliderValue}
-                                onChange={handleAudioVolumeChange}
-                                aria-label={t('audioVolume', 'Громкость')}
-                            />
-                            <span className="audio-volume-percent">{audioVolumePercent}%</span>
+                            <div className="audio-volume-range">
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
+                                    value={audioSliderValue}
+                                    onChange={handleAudioVolumeChange}
+                                    aria-label={t('audioVolume', 'Громкость')}
+                                />
+                                <span className="audio-volume-percent">{audioVolumePercent}%</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     {hasNoAudioInAnyPart && (
                         <div className="no-audio-for-mock-message" role="status">
                             {t('noAudioForMock', 'Для этого мока аудио не загружено.')}

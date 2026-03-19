@@ -12,8 +12,6 @@ import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
 import { TestNavbar } from '@/components/common';
 import MockExamFooter from '@/components/mock/MockExamFooter';
-import WritingResultsPanel from './WritingResultsPanel';
-import '../WritingResultsPanel.scss';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
 
@@ -617,7 +615,7 @@ function WritingPageContent({
             )}
 
             {/* Main Content */}
-            <div className={`writing-content-grid ${hasSubmitted ? 'writing-content-grid--expanded' : 'writing-content-grid--single'} ${isPlacementTest ? 'writing-content-grid--placement' : ''}`}>
+            <div className={`writing-content-grid writing-content-grid--single ${isPlacementTest ? 'writing-content-grid--placement' : ''}`}>
                 {/* Left Column - Writing Area */}
                 <div className="writing-left-column">
                     {/* Start Writing Card or IELTS Academic instructions */}
@@ -724,18 +722,6 @@ function WritingPageContent({
 
                 </div>
 
-                {/* Right Column - Results Only */}
-                {hasSubmitted && (
-                    <div className="writing-right-column">
-                        {aiFeedback && (
-                            <WritingResultsPanel
-                                aiFeedback={aiFeedback}
-                                difficulty={normalizedDifficulty}
-                                userResponse={userResponse}
-                            />
-                        )}
-                    </div>
-                )}
             </div>
 
             {/* Retry Modal */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FiSettings, FiWifi, FiWifiOff, FiX } from "react-icons/fi";
+import { FiSettings, FiVolume2, FiVolumeX, FiWifi, FiWifiOff, FiX } from "react-icons/fi";
 import { useMockUi } from "@/components/common/MockUiContext";
 import styles from "./style.module.scss";
 
@@ -13,7 +13,15 @@ const TEXT_SIZE_OPTIONS = [
 
 export default function MockUnifiedHeader({
     testTakerId = "",
-    centerContent = null
+    centerContent = null,
+    /** @deprecated Prefer `listeningVolume` so controls render inside the header module. */
+    volumeSlot = null,
+    volumeAvailable = true,
+    /**
+     * Listening mock: pass handlers + labels; header renders mute + range (always in DOM).
+     * Shape: { sliderValue, muted, audioAvailable, onVolumeChange, onToggleMute, ariaVolume, ariaMute, ariaUnmute }
+     */
+    listeningVolume = null
 }) {
     const { textSize, setTextSize } = useMockUi();
     const [isOnline, setIsOnline] = useState(true);
@@ -45,6 +53,11 @@ export default function MockUnifiedHeader({
         return () => document.removeEventListener("keydown", closeOnEscape);
     }, [isSettingsOpen]);
 
+    const showVolumeWrap = listeningVolume != null || volumeSlot != null;
+    const audioAvailableForWrap = listeningVolume != null
+        ? Boolean(listeningVolume.audioAvailable)
+        : volumeAvailable;
+
     return (
         <>
             <header className={styles.header} id="mockUnifiedHeader">
@@ -64,6 +77,39 @@ export default function MockUnifiedHeader({
                 </div>
 
                 <div className={styles.right}>
+                    {showVolumeWrap ? (
+                        <div
+                            className={styles.volumeWrap}
+                            data-audio-available={audioAvailableForWrap ? "true" : "false"}
+                        >
+                            {listeningVolume != null ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        data-muted={listeningVolume.muted ? "true" : "false"}
+                                        onClick={listeningVolume.onToggleMute}
+                                        aria-label={listeningVolume.muted ? listeningVolume.ariaUnmute : listeningVolume.ariaMute}
+                                        title={listeningVolume.muted ? listeningVolume.ariaUnmute : listeningVolume.ariaMute}
+                                    >
+                                        {listeningVolume.muted ? <FiVolumeX /> : <FiVolume2 />}
+                                    </button>
+                                    <input
+                                        type="range"
+                                        min={0}
+                                        max={1}
+                                        step={0.01}
+                                        value={listeningVolume.sliderValue}
+                                        onChange={listeningVolume.onVolumeChange}
+                                        aria-label={listeningVolume.ariaVolume}
+                                        disabled={!listeningVolume.audioAvailable}
+                                    />
+                                </>
+                            ) : (
+                                volumeSlot
+                            )}
+                        </div>
+                    ) : null}
+
                     <span
                         className={`${styles.connection} ${isOnline ? styles.online : styles.offline}`}
                         title={isOnline ? "Connected to internet" : "No internet connection"}
