@@ -119,6 +119,12 @@ export default function StudentLoginPage() {
 
   return (
     <div className="student-login">
+        <header className="student-login__header" aria-label="IELTS Mode">
+          <div className="student-login__header-inner">
+            <span className="student-login__header-brand-ielts">IELTS</span>{" "}
+            <span className="student-login__header-brand-mode">MODE</span>
+          </div>
+        </header>
       <div className="student-login__card">
         {!session ? (
           <>
