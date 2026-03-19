@@ -8,7 +8,6 @@ import CorrectAnswerInfo from '@/components/common/CorrectAnswerInfo';
 import { MdAccountTree, MdTimeline } from 'react-icons/md';
 import InlineGapFilling from '@/components/common/input-types/InlineGapFilling';
 import KeyValueTable from '@/components/common/input-types/KeyValueTable';
-import FlowChartBoxes from '@/components/common/input-types/FlowChartBoxes';
 import DiagramLabels from '@/components/common/input-types/DiagramLabels';
 import React from 'react'; // Added missing import for React
 
@@ -329,6 +328,51 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
         );
     };
 
+    const renderFlowChartElements = (elements) => {
+        if (!Array.isArray(elements) || elements.length === 0) {
+            return <div>Invalid flow chart format</div>;
+        }
+
+        return (
+            <div className="flow-chart-completion">
+                <div className="flow-chart-header">
+                    <h4 className="flow-chart-title">
+                        <MdAccountTree className="title-icon" />
+                        {t('questionTypes.flowChartCompletion')}
+                    </h4>
+                </div>
+
+                <div className={`flow-chart-container ${isReviewMode ? 'review-mode' : ''}`}>
+                    <div className="flow-diagram">
+                        {elements.map((el, idx) => (
+                            <div className="flow-item" key={`${el.type}-${el.id ?? idx}-${idx}`}>
+                                <div className={`flow-box ${el.type === 'text' ? 'process-box' : 'input-box'}`}>
+                                    <div className="box-content">
+                                        {el.type === 'text' ? (
+                                            <div className="process-text">{el.content}</div>
+                                        ) : (
+                                            <div className="input-area">
+                                                {isReviewMode
+                                                    ? renderFlowChartBlankReview(el.blankId)
+                                                    : renderBlankInput(el.blankId)}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {el.hasArrow && (
+                                    <div className="flow-arrow" aria-hidden="true">
+                                        <MdTimeline />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderFlowChartCompletion = () => {
         if (!question.flow_chart) {
             return <div>No flow chart content available</div>;
@@ -336,17 +380,45 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
         
         // Check if it's the new vertical flow chart format
         if (question.flow_chart.type === "vertical") {
-            return (
-              <FlowChartBoxes
-                label={t('questionTypes.flowChartCompletion')}
-                flowChart={question.flow_chart}
-                values={userAnswers}
-                onChange={handleBlankChange}
-                isReviewMode={isReviewMode}
-                reviewMap={reviewMap}
-                correctAnswers={correctAnswers}
-              />
-            );
+            const items = [];
+
+            (question.flow_chart.steps || []).forEach((step, stepIndex, allSteps) => {
+                const stepText = [step?.title, step?.text, step?.content]
+                    .find((value) => typeof value === 'string' && value.trim());
+
+                if (stepText) {
+                    items.push({
+                        type: 'text',
+                        id: `step-text-${stepIndex}`,
+                        content: stepText.trim(),
+                        hasArrow: true
+                    });
+                }
+
+                if (step?.blank) {
+                    items.push({
+                        type: 'blank',
+                        id: `step-blank-${step.blank}`,
+                        blankId: String(step.blank),
+                        hasArrow: true
+                    });
+                }
+
+                if (step?.blank2) {
+                    items.push({
+                        type: 'blank',
+                        id: `step-blank2-${step.blank2}`,
+                        blankId: String(step.blank2),
+                        hasArrow: true
+                    });
+                }
+
+                if (items.length > 0 && stepIndex === allSteps.length - 1) {
+                    items[items.length - 1].hasArrow = false;
+                }
+            });
+
+            return renderFlowChartElements(items);
         }
         
         // Legacy string format support (fallback)
@@ -381,17 +453,7 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
                 }
             });
             
-            return (
-              <FlowChartBoxes
-                label={t('questionTypes.flowChartCompletion')}
-                parts={flowElements.map((el) => el.type === 'text' ? { type: 'text', content: el.content } : { type: 'blank', id: el.blankId, placeholder: String(el.blankId) })}
-                values={userAnswers}
-                onChange={handleBlankChange}
-                isReviewMode={isReviewMode}
-                reviewMap={reviewMap}
-                correctAnswers={correctAnswers}
-              />
-            );
+            return renderFlowChartElements(flowElements);
         }
         
         return <div>Invalid flow chart format</div>;
