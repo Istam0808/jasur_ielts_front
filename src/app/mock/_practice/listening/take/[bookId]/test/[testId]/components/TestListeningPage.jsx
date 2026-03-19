@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FiFileText, FiTrash2, FiX, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import Spinner from '@/components/common/spinner';
 import Timer from '@/components/common/Timer';
@@ -10,7 +10,6 @@ import { useTestData } from '@/hooks/useTestData';
 import QuestionRenderer from './QuestionRenderer';
 import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation } from './TestUIComponents';
 import TestProgress from './TestProgress';
-import ResultsModal from './ResultsModal';
 import NoteModal from '@/components/common/NoteModal';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
@@ -167,6 +166,7 @@ const TestListeningPage = ({
 }) => {
     const { t, i18n } = useTranslation(['listening', 'common', 'test']);
     const params = useParams();
+    const router = useRouter();
     const { textSize } = useMockUi();
     const difficulty = difficultyOverride || params?.difficulty;
 
@@ -174,9 +174,6 @@ const TestListeningPage = ({
     const [currentPartIndex, setCurrentPartIndex] = useState(0);
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(null);
     const [userAnswers, setUserAnswers] = useState({});
-    const [isSubmittable, setIsSubmittable] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [testResults, setTestResults] = useState(null);
     const [testStarted, setTestStarted] = useState(false);
     const [isTestSubmitted, setIsTestSubmitted] = useState(false);
     const testContainerRef = useRef(null);
@@ -419,15 +416,6 @@ const TestListeningPage = ({
         scrollToQuestion(activePartQuestionNumbers[nextIdx]);
     }, [activePartQuestionNumbers, currentQuestionNumber, currentPartIndex, testParts, extractQuestionNumbers, scrollToQuestion]);
 
-    useEffect(() => {
-        const answeredCount = Object.keys(userAnswers).length;
-        if (totalQuestions > 0) {
-            setIsSubmittable(answeredCount === totalQuestions);
-        } else {
-            setIsSubmittable(false);
-        }
-    }, [userAnswers, totalQuestions]);
-
     const handleAnswerChange = useCallback((questionNumber, answer) => {
         setUserAnswers(prevAnswers => {
             const newAnswers = { ...prevAnswers };
@@ -463,106 +451,23 @@ const TestListeningPage = ({
     };
 
     const handleSubmit = useCallback(async (isTimeUp = false) => {
-        // Prevent multiple submissions
+        // Предотвращаем повторные сабмиты
         if (isTestSubmitted) return;
-
         setIsTestSubmitted(true);
 
-        if (mockId) {
-            try {
-                const payload = await validateListeningMockAnswers(mockId, userAnswers);
-
-                const backendScore = Number(payload?.correct ?? payload?.score ?? payload?.correctCount ?? 0);
-                const backendTotal = Number(
-                    payload?.total ?? payload?.totalQuestions ?? payload?.count ?? totalQuestions
-                ) || totalQuestions;
-
-                setTestResults({
-                    score: backendScore,
-                    totalQuestions: backendTotal,
-                    userAnswers,
-                    correctAnswersData: payload?.correctAnswers || {},
-                    isTimeUp,
-                    scoredByBackend: true
-                });
-                setIsModalOpen(true);
-                return;
-            } catch (error) {
-                console.error('Backend listening validation failed:', error);
-                // Continue to local fallback if available.
+        try {
+            if (mockId) {
+                // В mock-режиме прогоняем валидацию ответов (для возможных сайд-эффектов),
+                // но результаты пользователям больше не показываем.
+                await validateListeningMockAnswers(mockId, userAnswers);
             }
+        } catch (error) {
+            console.error('Listening submission validation failed:', { isTimeUp, error });
+        } finally {
+            const target = nextHref || '/mock/listening';
+            router.push(target);
         }
-
-        if (!answersData) {
-            const answeredCount = Object.keys(userAnswers).length;
-            setTestResults({
-                score: 0,
-                totalQuestions: totalQuestions || answeredCount,
-                userAnswers,
-                correctAnswersData: {},
-                isTimeUp,
-                scoredByBackend: false
-            });
-            setIsModalOpen(true);
-            return;
-        }
-
-        const correctAnswersForTest = answersData[`test_${testId}`];
-        if (!correctAnswersForTest) {
-            console.error(`Answers for test ${testId} not found.`);
-            setIsTestSubmitted(false);
-            return;
-        }
-
-        let score = 0;
-        const normalize = (val) => (val || '').toString().toLowerCase().trim();
-
-        Object.keys(correctAnswersForTest).forEach(qNum => {
-            const userAnswer = userAnswers[qNum];
-            let correctAnswer = correctAnswersForTest[qNum];
-
-            if (userAnswer != null && userAnswer !== '' && correctAnswer != null) {
-                const normalizedUserAnswer = normalize(userAnswer);
-
-                // Ensure correctAnswer is a string before splitting
-                if (typeof correctAnswer !== 'string') {
-                    correctAnswer = correctAnswer.toString();
-                }
-
-                const possibleCorrectAnswers = correctAnswer.split('/').map(normalize);
-
-                const isMCQ = possibleCorrectAnswers.every(ans => ans.length === 1);
-
-                let isCorrect = false;
-                if (isMCQ) {
-                    if (normalizedUserAnswer.length > 0) {
-                        const userChoice = normalizedUserAnswer.charAt(0);
-                        if (possibleCorrectAnswers.includes(userChoice)) {
-                            isCorrect = true;
-                        }
-                    }
-                } else {
-                    if (possibleCorrectAnswers.includes(normalizedUserAnswer)) {
-                        isCorrect = true;
-                    }
-                }
-
-                if (isCorrect) {
-                    score++;
-                }
-            }
-        });
-
-        setTestResults({
-            score,
-            totalQuestions: Object.keys(correctAnswersForTest).length,
-            userAnswers,
-            correctAnswersData: correctAnswersForTest,
-            isTimeUp
-        });
-
-        setIsModalOpen(true);
-    }, [answersData, mockId, testId, totalQuestions, userAnswers, isTestSubmitted]);
+    }, [isTestSubmitted, mockId, userAnswers, nextHref, router]);
 
     // Handle timer expiration
     const handleTimeUp = useCallback(() => {
@@ -1401,22 +1306,10 @@ const TestListeningPage = ({
                         totalParts={testParts.length}
                         onNavigate={handlePartNavigation}
                         onSubmit={() => handleSubmit(false)}
-                        isSubmittable={isSubmittable && !isTestSubmitted}
+                        isSubmittable={!isTestSubmitted}
                     />
                 </div>
             </div>
-
-            {/* Results Modal */}
-            <ResultsModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                results={testResults}
-                bookId={bookId}
-                testId={testId}
-                ieltsScoreGuidance={answersData?.ielts_score_guidance}
-                nextHref={nextHref}
-                difficultyOverride={difficulty}
-            />
 
             {/* Notes Modal */}
             <NoteModal
