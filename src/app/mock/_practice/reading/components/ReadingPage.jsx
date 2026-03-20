@@ -9,7 +9,6 @@ import Spinner from '@/components/common/spinner';
 // Import extracted components and hooks
 import { useReadingState } from '../hooks/useReadingState';
 import { useTextHighlighting } from '../hooks/useTextHighlighting';
-import FullscreenReadingMode from './FullscreenReadingMode';
 import NormalReadingMode from './NormalReadingMode';
 
 export default function ReadingPage({
@@ -405,22 +404,6 @@ export default function ReadingPage({
         isMockFullscreenLike,
         useUnifiedMockHeader
     };
-
-    // Render appropriate mode based on fullscreen state
-    if (isFullScreen) {
-        return (
-            <FullscreenReadingMode
-                {...commonProps}
-                handleScrollDots={handleScrollDots}
-                showLeftArrow={showLeftArrow}
-                showRightArrow={showRightArrow}
-                dotsContainerRef={dotsContainerRef}
-                isFullScreen={isFullScreen}
-                toggleFullScreen={toggleFullScreen}
-                nextHref={nextHref}
-            />
-        );
-    }
 
     // Normal mode render
     return (

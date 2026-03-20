@@ -1,6 +1,6 @@
 'use client';
 import "../styles/readingProcess.scss";
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import ResizableColumns from '@/components/common/ResizableColumns';
 import Timer from '@/components/common/Timer';
@@ -70,6 +70,7 @@ export default function NormalReadingMode({
     useUnifiedMockHeader = false,
     nextHref = null
 }) {
+    const containerRef = useRef(null);
     const { t } = useTranslation('reading');
     const { textSize } = useMockUi();
     const showMockHeaderState = isMockFullscreenLike && useUnifiedMockHeader;
@@ -393,8 +394,64 @@ export default function NormalReadingMode({
         };
     }, [setTimerPaused]);
 
+    // Подгоняем max-height основного контентного блока под фактическую высоту футера.
+    // Это убирает "пустоту" между `reading-content` и видимой верхней границей MockExamFooter
+    // даже если размеры футера меняются (за счёт контента/брейкпоинтов/правок стилей).
+    useEffect(() => {
+        if (!isMockFullscreenLike) return;
+        if (!readingData?.isMultiPassage) return; // MockExamFooter рендерится только для multi-passage
+
+        const containerEl = containerRef.current;
+        if (!containerEl) return;
+
+        const readingContentEl = containerEl.querySelector('.reading-content');
+        const passageSectionEl = containerEl.querySelector('.passage-section');
+        const questionsSectionEl = containerEl.querySelector('.questions-section');
+        const footerEl = containerEl.querySelector('.mock-exam-bottom-nav--ielts');
+        const footerLayoutEl = containerEl.querySelector('.mock-exam-footer-layout');
+
+        if (!readingContentEl || !footerEl) return;
+
+        const footerAnchorEl = footerLayoutEl || footerEl;
+
+        const applyHeights = () => {
+            const footerRect = footerAnchorEl.getBoundingClientRect();
+            const footerTop = footerRect.top;
+
+            const setMaxHeightToTop = (el) => {
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                const maxH = Math.max(0, footerTop - rect.top);
+                el.style.maxHeight = `${maxH}px`;
+            };
+
+            setMaxHeightToTop(readingContentEl);
+            setMaxHeightToTop(passageSectionEl);
+            setMaxHeightToTop(questionsSectionEl);
+        };
+
+        // Сначала применяем после текущего layout'а.
+        const rafId = window.requestAnimationFrame(applyHeights);
+        window.addEventListener('resize', applyHeights);
+
+        return () => {
+            window.cancelAnimationFrame(rafId);
+            window.removeEventListener('resize', applyHeights);
+
+            // Убираем inline-переопределения, чтобы вернуть CSS поведение.
+            if (readingContentEl) readingContentEl.style.maxHeight = '';
+            if (passageSectionEl) passageSectionEl.style.maxHeight = '';
+            if (questionsSectionEl) questionsSectionEl.style.maxHeight = '';
+        };
+    }, [
+        containerRef,
+        isMockFullscreenLike,
+        readingData?.isMultiPassage
+    ]);
+
     return (
         <div
+            ref={containerRef}
             className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like mock-footer-active' : ''} ${showMockHeaderState ? 'mock-unified-header-active' : ''} with-unified-header`}
             data-level={readingData?.level}
             data-mock-text-size={showMockHeaderState ? textSize : undefined}
