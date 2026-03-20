@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiCheck } from "react-icons/fi";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa6";
 import { useTranslation } from "react-i18next";
 import Modal from "@/components/common/Modal";
 import MockExamQuestionNav from "./MockExamQuestionNav";
@@ -85,7 +86,7 @@ export default function MockExamFooter({
                             onClick={() => onPrevNextQuestion(-1)}
                             aria-label={previousAriaLabel || "Previous question"}
                         >
-                            <FiChevronLeft aria-hidden />
+                            <FaArrowLeft aria-hidden />
                         </button>
                         <button
                             type="button"
@@ -93,7 +94,7 @@ export default function MockExamFooter({
                             onClick={() => onPrevNextQuestion(1)}
                             aria-label={nextAriaLabel || "Next question"}
                         >
-                            <FiChevronRight aria-hidden />
+                            <FaArrowRight aria-hidden />
                         </button>
                     </div>
                 </div>

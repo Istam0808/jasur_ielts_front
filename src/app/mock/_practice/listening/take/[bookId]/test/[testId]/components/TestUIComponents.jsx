@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FiChevronLeft, FiChevronRight, FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa6';
+import { FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 
 export const TestHeader = ({ testTitle, testName, backTo }) => {
@@ -85,7 +86,7 @@ export const TestNavigation = ({ currentPartIndex, totalParts, onNavigate, onSub
                 disabled={currentPartIndex === 0}
                 className="nav-button prev-button"
             >
-                <FiChevronLeft /> {t('previous')}
+                <FaArrowLeft /> {t('previous')}
             </button>
             {currentPartIndex < totalParts - 1 ? (
                 <button
@@ -142,7 +143,7 @@ export const MockExamBottomNav = ({
                         onClick={() => onPrevNextQuestion(-1)}
                         aria-label={previousAriaLabel}
                     >
-                        <FiChevronLeft aria-hidden />
+                        <FaArrowLeft aria-hidden />
                     </button>
                     <button
                         type="button"
@@ -150,7 +151,7 @@ export const MockExamBottomNav = ({
                         onClick={() => onPrevNextQuestion(1)}
                         aria-label={nextAriaLabel}
                     >
-                        <FiChevronRight aria-hidden />
+                        <FaArrowRight aria-hidden />
                     </button>
                 </div>
             </div>

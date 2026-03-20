@@ -1,7 +1,6 @@
 import { createIcon } from "./_factory";
 
 export const FiX = createIcon("FiX");
-export const FiChevronLeft = createIcon("FiChevronLeft");
 export const FiInfo = createIcon("FiInfo");
 export const FiList = createIcon("FiList");
 export const FiHelpCircle = createIcon("FiHelpCircle");
