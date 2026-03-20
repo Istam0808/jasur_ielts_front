@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiCheck } from "react-icons/fi";
+import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import Modal from "@/components/common/Modal";
 import MockExamQuestionNav from "./MockExamQuestionNav";
@@ -77,6 +77,26 @@ export default function MockExamFooter({
         <>
             <div className={`mock-exam-bottom-nav mock-exam-bottom-nav--ielts ${containerClassName}`.trim()}>
                 <div className="mock-exam-nav-top-line" aria-hidden />
+                <div className="mock-exam-nav-arrows-row">
+                    <div className="mock-exam-nav-arrows">
+                        <button
+                            type="button"
+                            className="mock-exam-arrow-btn"
+                            onClick={() => onPrevNextQuestion(-1)}
+                            aria-label={previousAriaLabel || "Previous question"}
+                        >
+                            <FiChevronLeft aria-hidden />
+                        </button>
+                        <button
+                            type="button"
+                            className="mock-exam-arrow-btn"
+                            onClick={() => onPrevNextQuestion(1)}
+                            aria-label={nextAriaLabel || "Next question"}
+                        >
+                            <FiChevronRight aria-hidden />
+                        </button>
+                    </div>
+                </div>
                 <div className="mock-exam-footer-layout" role="navigation" aria-label={resolvedNavigationAriaLabel}>
                     <div className="mock-exam-footer-main">
                         <MockExamQuestionNav
@@ -87,14 +107,11 @@ export default function MockExamFooter({
                             attemptedQuestionNumbers={attemptedQuestionNumbers}
                             currentQuestionNumber={currentQuestionNumber}
                             onSelectQuestion={onSelectQuestion}
-                            onPrevNextQuestion={onPrevNextQuestion}
                             partTotals={partTotals}
                             partAnsweredCounts={partAnsweredCounts}
                             getActivePartLabel={getActivePartLabel}
                             getInactivePartButtonLabel={getInactivePartButtonLabel}
                             getQuestionAriaLabel={getQuestionAriaLabel}
-                            previousAriaLabel={previousAriaLabel}
-                            nextAriaLabel={nextAriaLabel}
                         />
                     </div>
 

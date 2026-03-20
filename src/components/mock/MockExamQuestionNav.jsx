@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 const MockExamQuestionNav = ({
     parts,
@@ -11,14 +10,11 @@ const MockExamQuestionNav = ({
     attemptedQuestionNumbers = [],
     currentQuestionNumber,
     onSelectQuestion,
-    onPrevNextQuestion,
     partTotals,
     partAnsweredCounts,
     getActivePartLabel,
     getInactivePartButtonLabel,
     getQuestionAriaLabel,
-    previousAriaLabel,
-    nextAriaLabel,
 }) => {
     const attemptedSet = new Set(attemptedQuestionNumbers);
 
@@ -134,25 +130,6 @@ const MockExamQuestionNav = ({
                         </div>
                     );
                 })}
-            </div>
-
-            <div className="mock-exam-nav-arrows">
-                <button
-                    type="button"
-                    className="mock-exam-arrow-btn"
-                    onClick={() => onPrevNextQuestion(-1)}
-                    aria-label={previousAriaLabel || 'Previous question'}
-                >
-                    <FiChevronLeft aria-hidden />
-                </button>
-                <button
-                    type="button"
-                    className="mock-exam-arrow-btn"
-                    onClick={() => onPrevNextQuestion(1)}
-                    aria-label={nextAriaLabel || 'Next question'}
-                >
-                    <FiChevronRight aria-hidden />
-                </button>
             </div>
         </div>
     );

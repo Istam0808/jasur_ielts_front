@@ -6,14 +6,45 @@
     @include flex($align: center, $gap: $spacing-sm);
 
     .blank-input {
-        border: none;
-        border-bottom: 2px solid $neutral-300;
+        // Стиль максимально близкий к вашему примеру textEntryInteraction:
+        // аккуратный border, padding, фиксированная высота и focus ring.
+        border: 1px solid $neutral-300;
+        border-radius: 3px;
         width: 150px;
+        height: 2.2em;
         text-align: center;
-        @include base.input-base;
+        padding: 0 $spacing-sm;
+        box-sizing: border-box;
 
-        &:focus {
-            border-bottom-color: $primary-color;
+        background: $background-light;
+        color: $text-primary;
+        font-size: $font-size-base;
+
+        transition: border $transition-fast linear, box-shadow $transition-fast linear;
+
+        &::placeholder {
+            font-weight: $font-weight-bold;
+            color: $text-primary;
+            text-align: center;
+        }
+
+        &:hover:not([disabled]) {
+            border-color: $primary-color;
+        }
+
+        &:focus:not([disabled]) {
+            outline: 0;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 1px $primary-color;
+        }
+
+        &.inputInvalidContent {
+            border-color: $danger-color;
+
+            &:focus,
+            &:hover {
+                border-color: $danger-color;
+            }
         }
     }
 }

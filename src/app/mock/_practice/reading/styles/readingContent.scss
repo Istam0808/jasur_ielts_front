@@ -861,30 +861,32 @@
 .reading-container.mock-fullscreen-like.mock-footer-active {
     .reading-content {
         // Override the base `max-height` from `.reading-content` above.
-        max-height: calc(100vh - 112px);
+        // 56px unified header + ~100px двухрядный футер
+        max-height: calc(100vh - 156px);
     }
 
     .passage-section {
-        max-height: calc(100vh - 112px);
+        max-height: calc(100vh - 156px);
     }
 
     .questions-section {
-        max-height: calc(100vh - 112px);
+        max-height: calc(100vh - 156px);
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 992px) {
     .reading-container.mock-fullscreen-like.mock-footer-active {
         .reading-content {
-            max-height: calc(100vh - 104px);
+            // Header ~52px + двухрядный футер ~92px
+            max-height: calc(100vh - 144px);
         }
 
         .passage-section {
-            max-height: calc(100vh - 104px);
+            max-height: calc(100vh - 144px);
         }
 
         .questions-section {
-            max-height: calc(100vh - 104px);
+            max-height: calc(100vh - 144px);
         }
     }
 }

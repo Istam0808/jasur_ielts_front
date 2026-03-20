@@ -134,22 +134,43 @@ export const MockExamBottomNav = ({
     return (
         <div className="mock-exam-bottom-nav mock-exam-bottom-nav--ielts">
             <div className="mock-exam-nav-top-line" aria-hidden />
-            <MockExamQuestionNav
-                parts={parts}
-                currentPartIndex={currentPartIndex}
-                onSelectPart={onSelectPart}
-                activePartQuestionNumbers={activePartQuestionNumbers}
-                currentQuestionNumber={currentQuestionNumber}
-                onSelectQuestion={onSelectQuestion}
-                onPrevNextQuestion={onPrevNextQuestion}
-                partTotals={partTotals}
-                partAnsweredCounts={partAnsweredCounts}
-                getActivePartLabel={getActivePartLabel}
-                getInactivePartButtonLabel={getInactivePartButtonLabel}
-                getQuestionAriaLabel={getQuestionAriaLabel}
-                previousAriaLabel={previousAriaLabel}
-                nextAriaLabel={nextAriaLabel}
-            />
+            <div className="mock-exam-nav-arrows-row">
+                <div className="mock-exam-nav-arrows">
+                    <button
+                        type="button"
+                        className="mock-exam-arrow-btn"
+                        onClick={() => onPrevNextQuestion(-1)}
+                        aria-label={previousAriaLabel}
+                    >
+                        <FiChevronLeft aria-hidden />
+                    </button>
+                    <button
+                        type="button"
+                        className="mock-exam-arrow-btn"
+                        onClick={() => onPrevNextQuestion(1)}
+                        aria-label={nextAriaLabel}
+                    >
+                        <FiChevronRight aria-hidden />
+                    </button>
+                </div>
+            </div>
+            <div className="mock-exam-footer-layout">
+                <div className="mock-exam-footer-main">
+                    <MockExamQuestionNav
+                        parts={parts}
+                        currentPartIndex={currentPartIndex}
+                        onSelectPart={onSelectPart}
+                        activePartQuestionNumbers={activePartQuestionNumbers}
+                        currentQuestionNumber={currentQuestionNumber}
+                        onSelectQuestion={onSelectQuestion}
+                        partTotals={partTotals}
+                        partAnsweredCounts={partAnsweredCounts}
+                        getActivePartLabel={getActivePartLabel}
+                        getInactivePartButtonLabel={getInactivePartButtonLabel}
+                        getQuestionAriaLabel={getQuestionAriaLabel}
+                    />
+                </div>
+            </div>
         </div>
     );
 };

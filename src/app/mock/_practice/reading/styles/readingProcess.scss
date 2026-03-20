@@ -43,9 +43,9 @@
         background: $background-primary;
 
         &.mock-footer-active {
-            // `MockExamFooter` фиксируется внизу (`position: fixed`) и имеет min-height: 56px.
+            // `MockExamFooter` фиксируется внизу (`position: fixed`); двухрядный футер ~100px.
             // Резервируем снизу ровно столько, чтобы убрать лишний "воздух" между футером и контентом.
-            padding-bottom: 56px;
+            padding-bottom: 100px;
         }
     }
 
@@ -134,8 +134,8 @@
 
     @media (max-width: 992px) {
         &.mock-fullscreen-like.mock-footer-active {
-            // `MockExamFooter` min-height drops to 52px below 992px
-            padding-bottom: 52px;
+            // Двухрядный `MockExamFooter` ниже 992px: min-height ~92px
+            padding-bottom: 92px;
         }
     }
 

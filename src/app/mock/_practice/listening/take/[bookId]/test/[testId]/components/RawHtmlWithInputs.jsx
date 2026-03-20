@@ -109,16 +109,19 @@ const RawHtmlWithInputs = ({ html, userAnswers, onAnswerChange }) => {
         return <span className="raw-html-placeholder raw-html-placeholder--invalid">___</span>;
       }
       return (
-        <span className="raw-html-blank">
+        <span className="question-fill-in-blank" style={{ display: "inline-flex" }}>
           <input
             type="text"
             id={`raw-q-${num}`}
             name={`raw-q-${num}`}
             value={userAnswers?.[num] ?? ""}
             onChange={(e) => onAnswerChange(num, e.target.value)}
-            className="blank-input raw-html-input"
+            className="blank-input"
             aria-label={`Question ${num}`}
             inputMode="text"
+            placeholder={String(num)}
+            maxLength={500}
+            spellCheck={false}
             autoComplete="off"
           />
         </span>

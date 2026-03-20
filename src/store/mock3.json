@@ -111,13 +111,13 @@
               {
                 "id": 2,
                 "label": "B",
-                "text": "a great deal of driving",
+                "text": "extensive travel",
                 "order": 2
               },
               {
                 "id": 3,
                 "label": "C",
-                "text": "a great deal of paperwork",
+                "text": "clean water",
                 "order": 3
               }
             ]
@@ -136,13 +136,13 @@
               {
                 "id": 5,
                 "label": "B",
-                "text": "to share Helen's story",
+                "text": "for entertainment purposes",
                 "order": 2
               },
               {
                 "id": 6,
                 "label": "C",
-                "text": "to demonstrate the power of water projects",
+                "text": "to encourage Helen",
                 "order": 3
               }
             ]
@@ -161,13 +161,13 @@
               {
                 "id": 8,
                 "label": "B",
-                "text": "It avoids long celebrations",
+                "text": "It is difficult to spread news",
                 "order": 2
               },
               {
                 "id": 9,
                 "label": "C",
-                "text": "It is more efficient",
+                "text": "It makes their work easier",
                 "order": 3
               }
             ]
@@ -186,13 +186,13 @@
               {
                 "id": 11,
                 "label": "B",
-                "text": "prepared a welcoming ceremony",
+                "text": "were suspicious",
                 "order": 2
               },
               {
                 "id": 12,
                 "label": "C",
-                "text": "gathered quietly",
+                "text": "took no notice",
                 "order": 3
               }
             ]
@@ -211,13 +211,13 @@
               {
                 "id": 14,
                 "label": "B",
-                "text": "worried about the future",
+                "text": "curious about the charity workers",
                 "order": 2
               },
               {
                 "id": 15,
                 "label": "C",
-                "text": "uncertain about her health",
+                "text": "nostalgic about her old life",
                 "order": 3
               }
             ]
@@ -236,13 +236,13 @@
               {
                 "id": 17,
                 "label": "B",
-                "text": "she had new clothes",
+                "text": "the care she took with her appearance",
                 "order": 2
               },
               {
                 "id": 18,
                 "label": "C",
-                "text": "she was very shy",
+                "text": "she was wearing a green uniform",
                 "order": 3
               }
             ]
@@ -261,13 +261,13 @@
               {
                 "id": 20,
                 "label": "B",
-                "text": "unexpected but rewarding",
+                "text": "an unexpected bonus for the speaker",
                 "order": 2
               },
               {
                 "id": 21,
                 "label": "C",
-                "text": "a difficult challenge",
+                "text": "of little importance to the speaker",
                 "order": 3
               }
             ]
@@ -376,13 +376,13 @@
               {
                 "id": 23,
                 "label": "B",
-                "text": "structuring the content",
+                "text": "keeping to the word limit",
                 "order": 2
               },
               {
                 "id": 24,
                 "label": "C",
-                "text": "meeting the word limit",
+                "text": "writing the evaluation",
                 "order": 3
               }
             ]
@@ -401,13 +401,13 @@
               {
                 "id": 26,
                 "label": "B",
-                "text": "to support his hobby",
+                "text": "to increase his self-confidence",
                 "order": 2
               },
               {
                 "id": 27,
                 "label": "C",
-                "text": "to help a friend",
+                "text": "to develop his self-expression",
                 "order": 3
               }
             ]
@@ -808,27 +808,37 @@
           {
             "id": 2,
             "label": "2",
-            "text": "The role of law in everyday life"
+            "text": "Reasons why it is unfair to criticize lawyers"
           },
           {
             "id": 3,
             "label": "3",
-            "text": "The growing volume of legislation"
+            "text": "The disadvantages of the legal system"
           },
           {
             "id": 4,
             "label": "4",
-            "text": "Public perceptions of lawyers"
+            "text": "The law applies throughout our lives"
           },
           {
             "id": 5,
             "label": "5",
-            "text": "Law as a measure of acceptable behavior"
+            "text": "The law has affected historical events"
           },
           {
             "id": 6,
             "label": "6",
-            "text": "The potential misuse of law"
+            "text": "A negative regard for lawyers"
+          },
+          {
+            "id": 7,
+            "label": "7",
+            "text": "Public's increasing ability to influence the law"
+          },
+          {
+            "id": 8,
+            "label": "8",
+            "text": "Growth in laws"
           }
         ],
         "multiple_choice_multiple_answers": null,
@@ -1155,13 +1165,13 @@
               {
                 "id": 14,
                 "label": "B",
-                "text": "Traditional navigators were physically weak",
+                "text": "Human energy may have been used to assist sailing canoes",
                 "order": 2
               },
               {
                 "id": 15,
                 "label": "C",
-                "text": "Paddling long distances was impossible without sails",
+                "text": "Navigators became very tired on the longest voyages",
                 "order": 3
               },
               {
