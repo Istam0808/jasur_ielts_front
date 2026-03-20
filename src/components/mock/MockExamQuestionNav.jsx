@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 const MockExamQuestionNav = ({
     parts,
@@ -17,9 +17,18 @@ const MockExamQuestionNav = ({
     getQuestionAriaLabel,
 }) => {
     const attemptedSet = new Set(attemptedQuestionNumbers);
+    const navRef = useRef(null);
+
+    useEffect(() => {
+        if (!navRef.current || currentQuestionNumber == null) return;
+        const activeBtn = navRef.current.querySelector('.mock-exam-question-btn--active');
+        if (activeBtn) {
+            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+    }, [currentQuestionNumber]);
 
     return (
-        <div className="mock-exam-nav-inner">
+        <div className="mock-exam-nav-inner" ref={navRef}>
             <div className="mock-exam-part-slots">
                 {parts.map((part, index) => {
                     const isActive = index === currentPartIndex;

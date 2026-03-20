@@ -179,6 +179,7 @@ const TestListeningPage = ({
     const testContainerRef = useRef(null);
     const isInitialRender = useRef(true);
     const audioRef = useRef(null);
+    const pendingScrollRef = useRef(null);
 
     // Notes functionality state
     const [partNotes, setPartNotes] = useState({}); // { partIndex: [{ id, text, note, partIndex }] }
@@ -222,6 +223,51 @@ const TestListeningPage = ({
             return;
         }
         testContainerRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [currentPartIndex]);
+
+    // Выполняем отложенный скролл к вопросу после того, как новый парт отрисован
+    useEffect(() => {
+        if (pendingScrollRef.current == null) return;
+        const target = pendingScrollRef.current;
+        pendingScrollRef.current = null;
+        requestAnimationFrame(() => {
+            const container = testContainerRef.current;
+            if (!container) return;
+
+            // Некоторые инпуты рендерятся не через <Question/> и не имеют data-question-number.
+            // Тогда фокус/скролл нужно делать напрямую по id.
+            const directInput =
+                container.querySelector(`#q-${target}`) ||
+                container.querySelector(`#raw-q-${target}`);
+            if (directInput) {
+                directInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                directInput.focus({ preventScroll: true });
+                return;
+            }
+
+            const blocks = container.querySelectorAll('[data-question-number]');
+            let targetEl = null;
+            let maxNum = -1;
+            blocks.forEach((el) => {
+                const num = parseInt(el.getAttribute('data-question-number'), 10);
+                if (Number.isFinite(num) && num <= target && num > maxNum) {
+                    maxNum = num;
+                    targetEl = el;
+                }
+            });
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const exactInput = container.querySelector(`#q-${target}`);
+                if (exactInput) {
+                    exactInput.focus({ preventScroll: true });
+                } else {
+                    const firstInput = targetEl.querySelector('input, textarea');
+                    if (firstInput) {
+                        firstInput.focus({ preventScroll: true });
+                    }
+                }
+            }
+        });
     }, [currentPartIndex]);
 
     const countQuestions = useCallback((item) => {
@@ -369,6 +415,18 @@ const TestListeningPage = ({
         requestAnimationFrame(() => {
             const container = testContainerRef.current;
             if (!container) return;
+
+            // Сначала пытаемся сфокусировать инпут напрямую по id.
+            // В RawHtmlWithInputs используются id вида raw-q-N.
+            const directInput =
+                container.querySelector(`#q-${questionNumber}`) ||
+                container.querySelector(`#raw-q-${questionNumber}`);
+            if (directInput) {
+                directInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                directInput.focus({ preventScroll: true });
+                return;
+            }
+
             const blocks = container.querySelectorAll('[data-question-number]');
             let target = null;
             let maxNum = -1;
@@ -381,9 +439,99 @@ const TestListeningPage = ({
             });
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Фокусируем инпут конкретного вопроса (fill_in_blank: id="q-N")
+                const exactInput = container.querySelector(`#q-${questionNumber}`);
+                if (exactInput) {
+                    exactInput.focus({ preventScroll: true });
+                } else {
+                    // Для других типов вопросов — первый инпут/textarea в блоке
+                    const firstInput = target.querySelector('input, textarea');
+                    if (firstInput) {
+                        firstInput.focus({ preventScroll: true });
+                    }
+                }
             }
         });
     }, []);
+
+    // Чтобы `Tab` не уводил фокус в футер, а переводил на следующий вопрос,
+    // перехватываем Tab только когда фокус находится внутри инпутов вопросов.
+    useEffect(() => {
+        if (!isMockExam || !testStarted || isTestSubmitted) return;
+
+        const handleTabKeyDown = (e) => {
+            if (e.key !== 'Tab') return;
+
+            const activeEl = document.activeElement;
+            if (!activeEl || typeof activeEl !== 'object') return;
+
+            const id = activeEl.id;
+            if (typeof id !== 'string') return;
+
+            // В этой странице инпуты вопросов имеют id:
+            // - `q-${N}` для большинства типов
+            // - `raw-q-${N}` для RawHtmlWithInputs
+            let focusedQuestionNum = null;
+            const mExact = id.match(/^q-(\d+)$/);
+            if (mExact) {
+                focusedQuestionNum = Number(mExact[1]);
+            } else {
+                const mRaw = id.match(/^raw-q-(\d+)$/);
+                if (mRaw) focusedQuestionNum = Number(mRaw[1]);
+            }
+
+            if (!Number.isFinite(focusedQuestionNum)) return;
+
+            const idx = activePartQuestionNumbers.indexOf(focusedQuestionNum);
+            if (idx === -1) return;
+
+            const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+            if (nextIdx < 0 || nextIdx >= activePartQuestionNumbers.length) {
+                // Дошли до границы part — переводим на соседний part.
+                if (!e.shiftKey) {
+                    // Tab: к следующему part (Part N -> Part N+1)
+                    if (currentPartIndex >= testParts.length - 1) return;
+                    const nextPartNums = extractQuestionNumbers(testParts[currentPartIndex + 1]);
+                    const firstNext = nextPartNums[0];
+                    if (firstNext == null) return;
+
+                    e.preventDefault();
+                    pendingScrollRef.current = firstNext;
+                    setCurrentPartIndex(currentPartIndex + 1);
+                    setCurrentQuestionNumber(firstNext);
+                } else {
+                    // Shift+Tab: к предыдущему part (Part N -> Part N-1)
+                    if (currentPartIndex <= 0) return;
+                    const prevPartNums = extractQuestionNumbers(testParts[currentPartIndex - 1]);
+                    const lastPrev = prevPartNums[prevPartNums.length - 1];
+                    if (lastPrev == null) return;
+
+                    e.preventDefault();
+                    pendingScrollRef.current = lastPrev;
+                    setCurrentPartIndex(currentPartIndex - 1);
+                    setCurrentQuestionNumber(lastPrev);
+                }
+
+                return;
+            }
+
+            // Есть следующий/предыдущий вопрос внутри текущего part — фокусируем его.
+            e.preventDefault();
+            scrollToQuestion(activePartQuestionNumbers[nextIdx]);
+        };
+
+        document.addEventListener('keydown', handleTabKeyDown, true);
+        return () => document.removeEventListener('keydown', handleTabKeyDown, true);
+    }, [
+        isMockExam,
+        testStarted,
+        isTestSubmitted,
+        activePartQuestionNumbers,
+        scrollToQuestion,
+        currentPartIndex,
+        testParts,
+        extractQuestionNumbers
+    ]);
 
     const goToPrevNextQuestion = useCallback((delta) => {
         const idx = activePartQuestionNumbers.indexOf(currentQuestionNumber);
@@ -398,18 +546,22 @@ const TestListeningPage = ({
                 const prevPartNums = extractQuestionNumbers(testParts[currentPartIndex - 1]);
                 const lastPrev = prevPartNums[prevPartNums.length - 1];
                 if (lastPrev != null) {
+                    pendingScrollRef.current = lastPrev;
                     setCurrentPartIndex(currentPartIndex - 1);
-                    scrollToQuestion(lastPrev);
+                    setCurrentQuestionNumber(lastPrev);
                 }
             }
             return;
         }
         if (nextIdx >= activePartQuestionNumbers.length) {
             if (currentPartIndex < testParts.length - 1) {
-                setCurrentPartIndex(currentPartIndex + 1);
                 const nextPartNums = extractQuestionNumbers(testParts[currentPartIndex + 1]);
                 const firstNext = nextPartNums[0];
-                if (firstNext != null) scrollToQuestion(firstNext);
+                if (firstNext != null) {
+                    pendingScrollRef.current = firstNext;
+                    setCurrentPartIndex(currentPartIndex + 1);
+                    setCurrentQuestionNumber(firstNext);
+                }
             }
             return;
         }

@@ -224,6 +224,107 @@ export default function NormalReadingMode({
         handleQuestionClick(slot);
     }, [allAnswersData, handleQuestionClick]);
 
+    // Клавиатурная навигация: `Tab`/`Shift+Tab` между вопросами (включая переход Part1 -> Part2).
+    // Перехватываем Tab только если фокус находится в пределах карточки вопроса
+    // и пользователь “проматывает” все фокусируемые элементы внутри неё.
+    useEffect(() => {
+        if (!isMockFullscreenLike || !readingData?.isMultiPassage || isReviewMode) return;
+        if (!allQuestionNumbers.length || currentQuestionNumber == null) return;
+
+        const FOCUSABLE_SELECTOR = [
+            'a[href]',
+            'button:not([disabled])',
+            'input:not([disabled])',
+            'select:not([disabled])',
+            'textarea:not([disabled])',
+            '[contenteditable="true"]',
+            '[tabindex]:not([tabindex="-1"])'
+        ].join(', ');
+
+        const getFocusables = (container) => {
+            if (!container || typeof container.querySelectorAll !== 'function') return [];
+            return Array.from(container.querySelectorAll(FOCUSABLE_SELECTOR)).filter((el) => {
+                // offsetParent null => элемент не отображается (не фокусируется)
+                return el.offsetParent != null && !el.hasAttribute('disabled');
+            });
+        };
+
+        const handleTabKeyDown = (e) => {
+            if (e.key !== 'Tab') return;
+
+            const questionsContent = document.querySelector('.questions-content');
+            if (!questionsContent) return;
+
+            const activeEl = document.activeElement;
+            if (!activeEl || !questionsContent.contains(activeEl)) return;
+
+            const questionCardEl = activeEl.closest('.reading-question-card[data-question-id], .grouped-question-content[data-question-id]');
+            if (!questionCardEl) return;
+
+            const questionId = questionCardEl.getAttribute('data-question-id');
+            if (!questionId) return;
+
+            const focusables = getFocusables(questionCardEl);
+            if (!focusables.length) return;
+
+            const activeIndex = focusables.indexOf(activeEl);
+            if (activeIndex === -1) return;
+
+            const isLeavingCard = e.shiftKey
+                ? activeIndex === 0
+                : activeIndex === focusables.length - 1;
+
+            if (!isLeavingCard) return;
+
+            // Определяем текущий последовательный номер вопроса
+            const slots = Array.isArray(allAnswersData?.individualAnswerSlots)
+                ? allAnswersData.individualAnswerSlots
+                : [];
+
+            const focusedSlot = slots.find((s) => String(s?.questionId) === String(questionId));
+            const focusedSequential = Number(focusedSlot?.sequentialNumber);
+            const currentSequential = Number.isFinite(focusedSequential) ? focusedSequential : Number(currentQuestionNumber);
+
+            const currentIndex = allQuestionNumbers.indexOf(currentSequential);
+            if (currentIndex === -1) return;
+
+            const targetIndex = currentIndex + (e.shiftKey ? -1 : 1);
+            if (targetIndex < 0 || targetIndex >= allQuestionNumbers.length) return;
+
+            const targetSequentialNumber = allQuestionNumbers[targetIndex];
+
+            e.preventDefault();
+            selectQuestionByNumber(targetSequentialNumber);
+
+            // После того как useReadingState переключит и проскроллит фокус,
+            // форсируем фокус на “цифры” вопроса (например, 12).
+            window.setTimeout(() => {
+                const targetSlot = slots.find((s) => Number(s?.sequentialNumber) === targetSequentialNumber);
+                if (!targetSlot?.questionId) return;
+
+                const card = document.querySelector(`[data-question-id="${targetSlot.questionId}"]`);
+                if (!card) return;
+
+                const numberEl = card.querySelector('.question-header .question-number') || card.querySelector('.question-number');
+                if (!numberEl) return;
+
+                numberEl.setAttribute('tabindex', '-1');
+                numberEl.focus({ preventScroll: true });
+            }, 180);
+        };
+
+        document.addEventListener('keydown', handleTabKeyDown, true);
+        return () => document.removeEventListener('keydown', handleTabKeyDown, true);
+    }, [
+        isMockFullscreenLike,
+        readingData?.isMultiPassage,
+        isReviewMode,
+        allQuestionNumbers,
+        currentQuestionNumber,
+        allAnswersData,
+        selectQuestionByNumber
+    ]);
+
     const handleMockPartSelect = useCallback((partIndex) => {
         const targetPassage = mockFooterPassages[partIndex];
         if (!targetPassage) return;
@@ -255,8 +356,21 @@ export default function NormalReadingMode({
 
         const targetIndex = currentIndex + delta;
         if (targetIndex < 0 || targetIndex >= allQuestionNumbers.length) return;
-        selectQuestionByNumber(allQuestionNumbers[targetIndex]);
-    }, [allQuestionNumbers, currentQuestionNumber, activePartQuestionNumbers, selectQuestionByNumber]);
+
+        const targetQuestion = allQuestionNumbers[targetIndex];
+
+        const targetPartIndex = mockFooterPassages.findIndex(
+            (p) => getPassageQuestionNumbers(p).includes(targetQuestion)
+        );
+
+        if (targetPartIndex !== -1 && targetPartIndex !== currentMockPartIndex) {
+            const targetPassage = mockFooterPassages[targetPartIndex];
+            onPassageChange(targetPassage.passage_id);
+            setTimeout(() => selectQuestionByNumber(targetQuestion), 120);
+        } else {
+            selectQuestionByNumber(targetQuestion);
+        }
+    }, [allQuestionNumbers, currentQuestionNumber, activePartQuestionNumbers, mockFooterPassages, currentMockPartIndex, getPassageQuestionNumbers, onPassageChange, selectQuestionByNumber]);
 
     // Distraction detection with silent pause/resume for reading sessions
     useDistractionDetector({
