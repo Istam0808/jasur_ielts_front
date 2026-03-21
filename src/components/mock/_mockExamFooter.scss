@@ -84,7 +84,7 @@
         &.mock-exam-part-slot--active {
             flex: 1 1 0;
             justify-content: flex-start;
-            background: #d6e9ff;
+            background: #eceff3;
             border-top-color: #2b6cb0;
         }
 
@@ -194,7 +194,7 @@
         align-items: center;
         gap: 4px;
         min-width: 0;
-        overflow-x: auto;
+        overflow-x: hidden;
         padding: 0 0 2px;
     }
 
