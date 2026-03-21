@@ -152,6 +152,12 @@ const NotesViewerModal = ({ isOpen, onClose, partNotes, onDeleteNote, onNavigate
     );
 };
 
+const resolvePartAudioUrl = (part) => {
+    const rawUrl = part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '';
+    if (typeof rawUrl !== 'string') return '';
+    return rawUrl.trim();
+};
+
 const TestListeningPage = ({
     bookData,
     answersData,
@@ -377,19 +383,26 @@ const TestListeningPage = ({
         return activePartQuestionNumbers.filter((num) => isAnsweredValue(userAnswers[num]));
     }, [activePartQuestionNumbers, userAnswers]);
 
+    const uniqueAudioUrls = useMemo(() => {
+        const urls = testParts
+            .map((part) => resolvePartAudioUrl(part))
+            .filter(Boolean);
+        return Array.from(new Set(urls));
+    }, [testParts]);
+
     const activePartAudioUrl = useMemo(() => {
-        const part = testParts[currentPartIndex];
-        const rawUrl = part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '';
-        if (typeof rawUrl !== 'string') {
-            return '';
-        }
-        return rawUrl.trim();
-    }, [testParts, currentPartIndex]);
+        const partAudioUrl = resolvePartAudioUrl(testParts[currentPartIndex]);
+        if (partAudioUrl) return partAudioUrl;
+
+        // Если во всем тесте только один валидный аудио URL, используем его для всех parts.
+        // Это позволяет не останавливать playback при переходе между частями без собственного аудио.
+        return uniqueAudioUrls.length === 1 ? uniqueAudioUrls[0] : '';
+    }, [testParts, currentPartIndex, uniqueAudioUrls]);
 
     const hasNoAudioInAnyPart = useMemo(() => {
         if (!testParts.length) return false;
-        return testParts.every((part) => !(part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '').trim());
-    }, [testParts]);
+        return uniqueAudioUrls.length === 0;
+    }, [testParts.length, uniqueAudioUrls]);
 
     useEffect(() => {
         if (currentPartIndex >= testParts.length) {

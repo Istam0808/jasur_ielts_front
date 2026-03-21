@@ -161,6 +161,31 @@ function normalizeWritingImages(task) {
   return [{ id: null, order: 1, url: String(singleUrl).trim() }];
 }
 
+function parseQuestionNumberRange(questionNumber) {
+  if (typeof questionNumber === "number" && Number.isFinite(questionNumber)) {
+    return [questionNumber];
+  }
+  if (typeof questionNumber !== "string") return [];
+
+  const raw = questionNumber.trim();
+  if (!raw) return [];
+  if (!raw.includes("-")) {
+    const one = Number(raw);
+    return Number.isFinite(one) ? [one] : [];
+  }
+
+  const [startRaw, endRaw] = raw.split("-");
+  const start = Number(startRaw);
+  const end = Number(endRaw);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return [];
+
+  const numbers = [];
+  for (let current = start; current <= end; current += 1) {
+    numbers.push(current);
+  }
+  return numbers;
+}
+
 export function adaptListening(mockDetail) {
   const adapted = adaptListeningMockToUi(mockDetail);
   return adapted?.bookData?.tests?.[0] ?? null;
@@ -183,44 +208,83 @@ export function adaptListeningMockToUi(mockDetail) {
         ? (section?.raw_html?.html_content != null ? String(section.raw_html.html_content) : "")
         : "";
 
-      const questions = asArray(section?.questions).map((question) => {
-        const number = questionNumber;
-        questionNumber += 1;
+      let questions = [];
+      const isMultipleChoiceMultipleAnswers = sectionTypeRaw
+        .toLowerCase()
+        .includes("multiple_choice_multiple_answers");
 
-        const type = mapListeningType(section?.section_type, question);
-        const rawText = question?.question_text;
-        const text = isPlaceholderQuestionText(rawText)
-          ? `Question ${number} _________`
-          : (rawText || `Question ${number} _________`);
-        const base = {
-          number,
-          type,
-          text,
-        };
+      if (isMultipleChoiceMultipleAnswers) {
+        const sourceQuestions = asArray(section?.questions);
+        const numberedQuestions = sourceQuestions.map((question) => {
+          const number = questionNumber;
+          questionNumber += 1;
 
-        if (type === "multiple_choice" || type === "multiple_choice_two") {
-          base.options = asArray(question?.options).map(toOptionLabel);
-        }
+          const rawAnswer =
+            question?.correct_answer ||
+            question?.answer ||
+            question?.correct ||
+            "";
+          answersByQuestionNumber[number] = String(rawAnswer || "");
 
-        if (type === "matching") {
-          base.text = question?.question_text || `Item ${number}`;
-        }
+          return { number };
+        });
 
-        if (type === "true_false") {
-          base.statement = question?.question_text || `Statement ${number}`;
-        }
+        const sectionStart = numberedQuestions[0]?.number ?? startNumber;
+        const sectionEnd = numberedQuestions[numberedQuestions.length - 1]?.number ?? sectionStart;
+        const promptRaw = section?.multiple_choice_multiple_answers?.question_text;
+        const prompt = typeof promptRaw === "string" && promptRaw.trim()
+          ? promptRaw.trim()
+          : (section?.instructions || `Choose answers for questions ${sectionStart}-${sectionEnd}.`);
 
-        const rawAnswer =
-          question?.correct_answer ||
-          question?.answer ||
-          question?.correct ||
-          "";
-        answersByQuestionNumber[number] = String(rawAnswer || "");
-        return base;
-      });
+        questions = [{
+          number: sectionStart === sectionEnd ? sectionStart : `${sectionStart}-${sectionEnd}`,
+          type: "multiple_choice_two",
+          text: prompt,
+          options: asArray(section?.list_selections).map(toOptionLabel),
+        }];
+      } else {
+        questions = asArray(section?.questions).map((question) => {
+          const number = questionNumber;
+          questionNumber += 1;
 
-      const start = questions[0]?.number || startNumber;
-      const end = questions[questions.length - 1]?.number || start;
+          const type = mapListeningType(section?.section_type, question);
+          const rawText = question?.question_text;
+          const text = isPlaceholderQuestionText(rawText)
+            ? `Question ${number} _________`
+            : (rawText || `Question ${number} _________`);
+          const base = {
+            number,
+            type,
+            text,
+          };
+
+          if (type === "multiple_choice" || type === "multiple_choice_two") {
+            base.options = asArray(question?.options).map(toOptionLabel);
+          }
+
+          if (type === "matching") {
+            base.text = question?.question_text || `Item ${number}`;
+          }
+
+          if (type === "true_false") {
+            base.statement = question?.question_text || `Statement ${number}`;
+          }
+
+          const rawAnswer =
+            question?.correct_answer ||
+            question?.answer ||
+            question?.correct ||
+            "";
+          answersByQuestionNumber[number] = String(rawAnswer || "");
+          return base;
+        });
+      }
+
+      const sectionNumbers = questions.flatMap((question) =>
+        parseQuestionNumberRange(question?.number)
+      );
+      const start = sectionNumbers.length ? Math.min(...sectionNumbers) : startNumber;
+      const end = sectionNumbers.length ? Math.max(...sectionNumbers) : start;
 
       return {
         questionRange: `${start}-${end}`,

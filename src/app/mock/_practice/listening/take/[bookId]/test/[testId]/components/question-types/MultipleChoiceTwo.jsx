@@ -28,8 +28,16 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
     // Safety check for userAnswer
     const safeUserAnswer = userAnswer || {};
 
+    const promptText = typeof question?.text === 'string' ? question.text.trim() : '';
+    const shouldShowPrompt = promptText && promptText !== '.';
+
     return (
         <div className="question-multiple-choice-two">
+            {shouldShowPrompt && (
+                <p className="question-text selectable-content">
+                    {promptText}
+                </p>
+            )}
             <div className="question-inputs">
                 {Array.from({ length: totalQuestions }, (_, index) => {
                     const questionNum = startNum + index;
@@ -49,7 +57,7 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
                                     const optionLetter = option.match(/^[A-Z]/)?.[0] || option;
                                     return (
                                         <option key={optIndex} value={optionLetter}>
-                                            {optionLetter}
+                                            {option}
                                         </option>
                                     );
                                 })}
