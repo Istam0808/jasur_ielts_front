@@ -54,6 +54,12 @@
     white-space: nowrap;
 }
 
+.centerTimer {
+    color: $text-primary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+}
+
 .centerNode {
     display: flex;
     align-items: center;

@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa6';
-import { FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiHeadphones, FiXCircle, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
+import { FiInfo, FiList, FiHelpCircle, FiClock, FiFileText, FiXCircle, FiArrowRight, FiCheckCircle } from 'react-icons/fi';
 import MockExamQuestionNav from '@/components/mock/MockExamQuestionNav';
 
 export const TestHeader = ({ testTitle, testName, backTo }) => {
@@ -64,11 +64,7 @@ export const PartHeader = ({ partNumber, audioUrl }) => {
     return (
         <div className="part-header">
             <h2>{t('part')} {partNumber}</h2>
-            {audioUrl ? (
-                <span className="badge badge-audio-ready">
-                    <FiHeadphones /> {t('audioReady')}
-                </span>
-            ) : (
+            {!audioUrl && (
                 <span className="badge badge-audio-missing">
                     <FiXCircle /> {t('audioMissing')}
                 </span>

@@ -181,17 +181,47 @@ const Timer = ({
     };
   }, [isActive, isReviewMode, calculateTimeLeft]);
 
-  // Memoized timer state calculations
-  // Memoized time formatter
+  // MM:SS + «N minutes left» (как в listening); при hover — «MM:SS minutes left» с секундами
   const formattedTime = useMemo(() => {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, [timeLeft]);
 
+  const minutesCeil = useMemo(
+    () => (timeLeft <= 0 ? 0 : Math.ceil(timeLeft / 60)),
+    [timeLeft]
+  );
+
+  // Второй аргумент — default со строкой интерполяции (см. ContinuousTestTimer). Если в бандле перевод без интерполяции — подставляем числа вручную.
+  const compactDisplay = useMemo(() => {
+    const raw = t('timer.minutesLeftCompact', '{{count}} minutes left', {
+      count: minutesCeil,
+      ns: 'test',
+    });
+    return raw.includes('{{count}}') ? `${minutesCeil} minutes left` : raw;
+  }, [minutesCeil, t]);
+
+  const detailedDisplay = useMemo(() => {
+    const raw = t('timer.minutesLeftWithSeconds', '{{time}} minutes left', {
+      time: formattedTime,
+      ns: 'test',
+    });
+    return raw.includes('{{time}}') ? `${formattedTime} minutes left` : raw;
+  }, [formattedTime, t]);
+
   return (
-    <div className="timer-text" aria-live="polite">
-      {formattedTime}
+    <div
+      className="timer-text"
+      aria-live="polite"
+      aria-label={detailedDisplay}
+      title={detailedDisplay}
+      tabIndex={0}
+    >
+      <span className="timer-text__compact">{compactDisplay}</span>
+      <span className="timer-text__detailed" aria-hidden="true">
+        {detailedDisplay}
+      </span>
     </div>
   );
 };

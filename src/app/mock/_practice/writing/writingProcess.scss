@@ -962,11 +962,21 @@
     background-color: $background-secondary;
 }
 
-.ielts-writing-exam-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: $spacing-md;
+.ielts-writing-exam-layout.resizable-columns {
+    height: auto;
     min-height: 560px;
+    width: 100%;
+
+    .resizable-column {
+        padding: 0;
+        height: auto;
+        min-height: inherit;
+    }
+}
+
+.ielts-writing-exam-layout.resizable-columns-mobile {
+    width: 100%;
+    height: auto;
 }
 
 .ielts-writing-left-pane,
@@ -1017,14 +1027,18 @@
     border-radius: $border-radius-sm;
     background-color: $background-light;
     padding: $spacing-sm;
+    text-align: center;
 }
 
 .writing-task-image {
     width: 100%;
+    max-width: min(480px, 100%);
     height: auto;
     border: 1px solid $border-light;
     border-radius: $border-radius-sm;
     display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .requirements-section {
@@ -1138,8 +1152,8 @@
 }
 
 @media (max-width: 992px) {
-    .ielts-writing-exam-layout {
-        grid-template-columns: 1fr;
+    .ielts-writing-exam-layout.resizable-columns,
+    .ielts-writing-exam-layout.resizable-columns-mobile {
         min-height: 0;
     }
 

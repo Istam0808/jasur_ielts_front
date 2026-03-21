@@ -14,6 +14,8 @@ const TEXT_SIZE_OPTIONS = [
 export default function MockUnifiedHeader({
     testTakerId = "",
     centerContent = null,
+    /** Writing mock: countdown timer in the center (takes precedence over `centerContent` when set). */
+    timerContent = null,
     /** @deprecated Prefer `listeningVolume` so controls render inside the header module. */
     volumeSlot = null,
     volumeAvailable = true,
@@ -69,7 +71,9 @@ export default function MockUnifiedHeader({
                 </div>
 
                 <div className={styles.center}>
-                    {centerContent ? (
+                    {timerContent != null ? (
+                        <div className={`${styles.centerNode} ${styles.centerTimer}`}>{timerContent}</div>
+                    ) : centerContent ? (
                         typeof centerContent === "string"
                             ? <span className={styles.centerText}>{centerContent}</span>
                             : <div className={styles.centerNode}>{centerContent}</div>

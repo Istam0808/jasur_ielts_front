@@ -10,6 +10,7 @@ import { useLoading } from '@/components/common/LoadingContext';
 import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/spinner';
 import { TestNavbar } from '@/components/common';
+import Timer from '@/components/common/Timer';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
@@ -28,6 +29,7 @@ import WritingFeedbackSection from './WritingFeedbackSection';
 import WritingStartCard from './WritingStartCard';
 import IELTSAcademicInstructionsCard from './IELTSAcademicInstructionsCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import ResizableColumns from '@/components/common/ResizableColumns';
 
 // Constants: IELTS Writing Task 1 only (150–250 words, 20 min)
 const VALID_DIFFICULTIES = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2'];
@@ -202,7 +204,7 @@ function WritingPageContent({
         difficulty: normalizedDifficulty,
         isPlacementTest,
         externalTimerStartTime,
-        externalTimerDuration,
+        externalTimerDuration: useUnifiedMockHeader ? 60 : externalTimerDuration,
         externalTimerPaused
     });
 
@@ -671,21 +673,35 @@ function WritingPageContent({
             className={`writing-container ${isPlacementTest ? 'writing-container--placement' : ''} ${useUnifiedMockHeader ? 'mock-unified-header-active' : ''} ${useUnifiedMockHeader && hasTimerStarted && !hasSubmitted ? 'writing-container--mock-footer' : ''}`}
             data-mock-text-size={useUnifiedMockHeader ? textSize : undefined}
         >
-            {useUnifiedMockHeader && <MockUnifiedHeader />}
-            {/* Test Navbar */}
-            <TestNavbar
-                progressType="none"
-                timerDuration={timeLimit / 60}
-                onTimeUp={submitOnTimeUp}
-                isTimerActive={isTimerRunning && hasTimerStarted && !hasSubmitted && !externalTimerPaused}
-                startTime={hasTimerStarted ? (externalTimerStartTime || startTimeRef.current) : undefined}
-                title={isPlacementTest && hasTimerStarted ? writingTopicTitle : null}
-                showHeaderAction={hasTimerStarted && !hasSubmitted && !isPlacementTest && !useUnifiedMockHeader}
-                headerActionLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
-                onHeaderAction={handleSubmit}
-                headerActionDisabled={isHeaderSubmitDisabled}
-                topOffset={useUnifiedMockHeader ? 56 : 0}
-            />
+            {useUnifiedMockHeader && (
+                <MockUnifiedHeader
+                    timerContent={
+                        hasTimerStarted && !hasSubmitted ? (
+                            <Timer
+                                durationInMinutes={timeLimit / 60}
+                                onTimeUp={submitOnTimeUp}
+                                isActive={isTimerRunning && hasTimerStarted && !hasSubmitted && !externalTimerPaused}
+                                startTime={hasTimerStarted ? (externalTimerStartTime || startTimeRef.current) : undefined}
+                            />
+                        ) : null
+                    }
+                />
+            )}
+            {!useUnifiedMockHeader && (
+                <TestNavbar
+                    progressType="none"
+                    timerDuration={timeLimit / 60}
+                    onTimeUp={submitOnTimeUp}
+                    isTimerActive={isTimerRunning && hasTimerStarted && !hasSubmitted && !externalTimerPaused}
+                    startTime={hasTimerStarted ? (externalTimerStartTime || startTimeRef.current) : undefined}
+                    title={isPlacementTest && hasTimerStarted ? writingTopicTitle : null}
+                    showHeaderAction={hasTimerStarted && !hasSubmitted && !isPlacementTest}
+                    headerActionLabel={t('submit', { ns: 'common', defaultValue: 'Submit' })}
+                    onHeaderAction={handleSubmit}
+                    headerActionDisabled={isHeaderSubmitDisabled}
+                    topOffset={0}
+                />
+            )}
 
             {/* Writing Title Section - Only for Placement Test */}
             {isPlacementTest && hasTimerStarted && !hasSubmitted && (
@@ -716,7 +732,12 @@ function WritingPageContent({
                     {/* Writing Area */}
                     {hasTimerStarted && (
                         <div className={`writing-area-section ${hasSubmitted ? 'writing-area-section--submitted' : ''}`}>
-                            <div className="ielts-writing-exam-layout">
+                            <ResizableColumns
+                                className="ielts-writing-exam-layout"
+                                defaultLeftWidth={50}
+                                minLeftWidth={35}
+                                maxLeftWidth={65}
+                            >
                                 <div className="ielts-writing-left-pane">
                                     {/* IELTS-style instruction box: WRITING TASK */}
                                     <div className="ielts-task-instruction" role="region" aria-label="Task instructions">
@@ -775,7 +796,7 @@ function WritingPageContent({
                                         hasSubmitted={hasSubmitted}
                                     />
                                 </div>
-                            </div>
+                            </ResizableColumns>
 
                             {/* Submit Button Section - Placement Test Only */}
                             {isPlacementTest && !hasSubmitted && (

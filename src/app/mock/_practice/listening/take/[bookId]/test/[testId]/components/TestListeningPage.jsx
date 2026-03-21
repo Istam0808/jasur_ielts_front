@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from 'react-i18next';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FiVolume2, FiVolumeX } from 'react-icons/fi';
 import Spinner from '@/components/common/spinner';
@@ -602,28 +602,20 @@ const TestListeningPage = ({
     }, [handleSubmit]);
 
     const testDuration = test?.durationInMinutes || 40;
-    const [mockTimeLeftSeconds, setMockTimeLeftSeconds] = useState(testDuration * 60);
 
-    useEffect(() => {
-        setMockTimeLeftSeconds(testDuration * 60);
-    }, [testDuration, test?.id]);
+    /** Старт таймера mock listening: новый timestamp при смене теста (тот же Timer, что в reading/writing). */
+    const [listeningMockStartAt, setListeningMockStartAt] = useState(null);
 
-    useEffect(() => {
-        if (!isMockExam || !testStarted || isTestSubmitted) return;
+    const listeningMockTimerKey = useMemo(() => {
+        if (!isMockExam || !testStarted || !test) return '';
+        const tid = test?.id ?? testId;
+        return `${bookId}-${testId}-${tid}`;
+    }, [isMockExam, testStarted, test, bookId, testId]);
 
-        const intervalId = setInterval(() => {
-            setMockTimeLeftSeconds((prev) => {
-                if (prev <= 1) {
-                    clearInterval(intervalId);
-                    handleSubmit(true);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(intervalId);
-    }, [isMockExam, testStarted, isTestSubmitted, handleSubmit]);
+    useLayoutEffect(() => {
+        if (!listeningMockTimerKey) return;
+        setListeningMockStartAt(Date.now());
+    }, [listeningMockTimerKey]);
 
     // Clear audio error when part or URL changes
     useEffect(() => {
@@ -691,15 +683,6 @@ const TestListeningPage = ({
         el.muted = isAudioMuted;
     }, [audioVolume, isAudioMuted, activePartAudioUrl]);
 
-    const mockTimeLeftText = useMemo(() => {
-        if (mockTimeLeftSeconds <= 0) {
-            return '0 minutes left';
-        }
-
-        const minutesLeft = Math.ceil(mockTimeLeftSeconds / 60);
-        return `${minutesLeft} minutes left`;
-    }, [mockTimeLeftSeconds]);
-
     if (isLoading) {
         return (
             <div className="ielts-section loading" style={{
@@ -759,7 +742,19 @@ const TestListeningPage = ({
             {shouldShowUnifiedHeader && (
                 <MockUnifiedHeader
                     testTakerId={testTakerUsername}
-                    centerContent={mockTimeLeftText}
+                    timerContent={
+                        testStarted &&
+                        !isTestSubmitted &&
+                        listeningMockTimerKey &&
+                        listeningMockStartAt !== null ? (
+                            <Timer
+                                durationInMinutes={testDuration}
+                                onTimeUp={handleTimeUp}
+                                isActive={true}
+                                startTime={listeningMockStartAt}
+                            />
+                        ) : null
+                    }
                     listeningVolume={{
                         sliderValue: audioSliderValue,
                         muted: isAudioMuted,
@@ -789,7 +784,6 @@ const TestListeningPage = ({
 
             {isMockExam ? (
                 <div className="mock-listening-intro">
-                    <h2>Listening Part {activePart.part}</h2>
                     <p>
                         Listen to the audio and answer questions{' '}
                         {allQuestionNumbers.length ? `${allQuestionNumbers[0]} - ${allQuestionNumbers[allQuestionNumbers.length - 1]}` : '1 - 40'}.

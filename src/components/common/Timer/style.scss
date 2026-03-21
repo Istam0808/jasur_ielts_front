@@ -3,7 +3,7 @@
 @use 'sass:color';
 @use 'sass:math';
 
-// Простой текстовый таймер без декоративного оформления
+// По умолчанию — «N minutes left» (как listening); при hover/focus — «MM:SS minutes left»
 
 .timer-text {
     display: inline-flex;
@@ -14,4 +14,34 @@
     font-weight: $font-weight-semibold;
     color: $text-primary;
     letter-spacing: 0.05em;
+    outline: none;
+    cursor: default;
+    position: relative;
+    white-space: nowrap;
+
+    &:focus-visible {
+        outline: 2px solid $primary-color;
+        outline-offset: 2px;
+        border-radius: $border-radius-xs;
+    }
+
+    &__compact {
+        display: inline;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__detailed {
+        display: none;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &:hover &__compact,
+    &:focus-within &__compact {
+        display: none;
+    }
+
+    &:hover &__detailed,
+    &:focus-within &__detailed {
+        display: inline;
+    }
 }
