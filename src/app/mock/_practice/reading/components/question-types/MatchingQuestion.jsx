@@ -6,6 +6,33 @@ import styles from '../../styles/MatchingQuestion.module.scss';
 import SelectOption from '@/components/common/input-types/SelectOption';
 import CorrectAnswerInfo from '@/components/common/CorrectAnswerInfo';
 
+const splitOptionLabelAndText = (value) => {
+    const source = String(value || '').trim();
+    if (!source) return { label: '', text: '' };
+    const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+    if (!match) return { label: '', text: source };
+    return {
+        label: String(match[1]).toUpperCase(),
+        text: String(match[2] || '').trim()
+    };
+};
+
+const getOptionValue = (option, index = 0) => {
+    if (option && typeof option === 'object') {
+        return String(option.value ?? option.label ?? option.answer ?? String.fromCharCode(65 + index)).trim();
+    }
+    const parsed = splitOptionLabelAndText(option);
+    return String(parsed.label || '').trim();
+};
+
+const getOptionText = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.text ?? option.answer ?? option.label ?? option.value ?? '').trim();
+    }
+    const parsed = splitOptionLabelAndText(option);
+    return parsed.text || String(option || '').trim();
+};
+
 const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, readingId, reviewMap, difficulty }) => {
     const { t } = useTranslation('reading');
 
@@ -242,38 +269,27 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
             const options = question.options || [];
             const upperLetter = String(letter).toUpperCase();
             const option = options.find((opt) => {
-                const text = String(opt).trim();
-                const upper = text.toUpperCase();
-                // Pattern 1: "Paragraph A"
-                if (/^PARAGRAPH\s+[A-Z]$/.test(upper)) {
-                    return upper.endsWith(` ${upperLetter}`);
-                }
-                // Pattern 2: "A. Something"
-                if (/^[A-Z]\./.test(text)) {
-                    return text.startsWith(`${upperLetter}.`);
-                }
-                // Pattern 3: just the letter
-                if (/^[A-Z]$/.test(upper)) {
-                    return upper === upperLetter;
-                }
-                // Fallback: ends with space + letter
-                return upper.endsWith(` ${upperLetter}`);
+                const value = getOptionValue(opt);
+                return value.toUpperCase() === upperLetter;
             });
             // Sensible fallback if nothing matched
-            return option || `Paragraph ${letter}`;
+            return option ? getOptionText(option) : `Paragraph ${letter}`;
         } else if (questionType === 'matching_features') {
             // For matching_features, find the item that starts with the letter
             const items = question.items || question.options || [];
             const item = items.find(item => {
-                const itemValue = typeof item === 'object' ? item.item : item;
-                return itemValue.startsWith(`${letter}.`);
+                const itemValue = getOptionValue(item);
+                return itemValue.toUpperCase() === String(letter).toUpperCase();
             });
-            return item ? (typeof item === 'object' ? item.item : item) : letter;
+            return item ? getOptionText(item) : letter;
         } else if (questionType === 'sentence_completion') {
             // For sentence_completion, find the ending that starts with the letter
             const endings = question.endings || [];
-            const ending = endings.find(ending => ending.startsWith(`${letter}.`));
-            return ending || letter;
+            const ending = endings.find((ending) => {
+                const value = getOptionValue(ending);
+                return value.toUpperCase() === String(letter).toUpperCase();
+            });
+            return ending ? getOptionText(ending) : letter;
         }
         
         return letter;
@@ -316,9 +332,9 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
                                 <div className={styles.answerSelector}>
                                     <SelectOption
                                       options={options.map((o) => ({ 
-                                        value: o, 
-                                        label: o,
-                                        disabled: o.startsWith('EXAMPLE')
+                                        value: getOptionValue(o), 
+                                        label: getOptionText(o),
+                                        disabled: String(getOptionText(o)).startsWith('EXAMPLE')
                                       }))}
                                       value={selectedOption || null}
                                       onChange={(val) => handleAnswerChange(infoValue, val || '')}
@@ -362,13 +378,12 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
 
                             // Create options for the dropdown
                             const options = items.map((item, itemIdx) => {
-                                const itemValue = typeof item === 'object' ? item.item : item;
-                                // Extract the letter from the item (e.g., "A. the Ancient Greeks" -> "A")
-                                const itemLetter = itemValue.charAt(0);
+                                const itemLetter = getOptionValue(item, itemIdx);
+                                const itemText = getOptionText(item);
                                 return {
                                     value: itemLetter,
-                                    label: itemValue,
-                                    disabled: itemValue.startsWith('EXAMPLE')
+                                    label: itemText || itemLetter,
+                                    disabled: itemText.startsWith('EXAMPLE')
                                 };
                             });
 
@@ -427,8 +442,7 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
                     <div className={styles.endingsList}>
                         {endings.map((ending, idx) => (
                             <div key={idx} className={styles.endingItem}>
-                                <span className={styles.endingId}>{ending.slice(0, ending.indexOf(".")+1)}</span>
-                                <span className={styles.endingText}>{ending.slice(ending.indexOf(".")+1)}</span>
+                                <span className={styles.endingText}>{getOptionText(ending)}</span>
                             </div>
                         ))}
                     </div>
@@ -462,9 +476,9 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
                                 <div className={styles.answerSelector}>
                                     <SelectOption
                                       options={endings.map((ending) => ({ 
-                                        value: ending.charAt(0), 
-                                        label: ending,
-                                        disabled: ending.startsWith('EXAMPLE')
+                                        value: getOptionValue(ending), 
+                                        label: getOptionText(ending),
+                                        disabled: getOptionText(ending).startsWith('EXAMPLE')
                                       }))}
                                       value={selectedEnding || null}
                                       onChange={(val) => handleAnswerChange(sentenceValue, val || '')}

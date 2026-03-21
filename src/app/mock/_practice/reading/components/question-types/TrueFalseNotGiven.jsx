@@ -65,7 +65,7 @@ const TrueFalseNotGiven = ({ question, answer, onAnswerChange, isReviewMode, rea
             return ['YES', 'NO', 'NOT GIVEN'];
         }
         return question.options && question.options.length
-            ? question.options.map((o) => (typeof o === 'object' ? o.answer : o))
+            ? question.options.map((o) => (typeof o === 'object' ? (o.value || o.text || o.answer) : o))
             : ['TRUE', 'FALSE', 'NOT GIVEN'];
     }, [question.type, question.options]);
 

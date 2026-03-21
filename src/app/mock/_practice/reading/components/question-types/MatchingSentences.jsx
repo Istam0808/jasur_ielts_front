@@ -3,6 +3,20 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from '../../styles/MatchingSentences.module.scss';
 
+const getOptionValue = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.value || option.label || '').trim();
+    }
+    return String(option || '').trim();
+};
+
+const getOptionText = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.text || option.label || option.value || '').trim();
+    }
+    return String(option || '').trim();
+};
+
 const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) => {
     const { t } = useTranslation('reading');
 
@@ -16,7 +30,10 @@ const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) =
 
     const usedOptions = useMemo(() => new Set(Object.values(userAnswers).filter(Boolean)), [userAnswers]);
     const availableOptions = useMemo(
-        () => options.filter((opt) => opt && !usedOptions.has(opt)),
+        () => options.filter((opt) => {
+            const value = getOptionValue(opt);
+            return value && !usedOptions.has(value);
+        }),
         [options, usedOptions]
     );
 
@@ -113,7 +130,9 @@ const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) =
                                 {selected ? (
                                     <div className={styles.selected}>
                                         <span className={styles.selectedNumber}>{item.order ?? ''}</span>
-                                        <span className={styles.selectedText}>{selected}</span>
+                                        <span className={styles.selectedText}>
+                                            {getOptionText(options.find((opt) => getOptionValue(opt) === selected) || selected)}
+                                        </span>
                                         {!isReviewMode && (
                                             <button
                                                 type="button"
@@ -168,16 +187,16 @@ const MatchingSentences = ({ question, answer, onAnswerChange, isReviewMode }) =
                     ) : (
                         availableOptions.map((opt) => (
                             <div
-                                key={opt}
-                                className={`${styles.optionCard} ${pickedOption === opt ? styles.picked : ''}`}
+                                key={getOptionValue(opt)}
+                                className={`${styles.optionCard} ${pickedOption === getOptionValue(opt) ? styles.picked : ''}`}
                                 draggable={!isReviewMode}
-                                onDragStart={(e) => handleDragStart(e, opt)}
-                                onClick={() => !isReviewMode && setPickedOption(opt)}
+                                onDragStart={(e) => handleDragStart(e, getOptionValue(opt))}
+                                onClick={() => !isReviewMode && setPickedOption(getOptionValue(opt))}
                                 role="button"
                                 tabIndex={isReviewMode ? -1 : 0}
                                 aria-disabled={isReviewMode}
                             >
-                                {opt}
+                                {getOptionText(opt)}
                             </div>
                         ))
                     )}

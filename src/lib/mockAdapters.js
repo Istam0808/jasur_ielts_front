@@ -5,18 +5,57 @@ function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
-function toOptionLabel(option, index) {
+function splitOptionLabelAndText(raw) {
+  const source = String(raw || "").trim();
+  if (!source) return { label: "", text: "" };
+
+  const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+  if (!match) {
+    return { label: "", text: source };
+  }
+
+  return {
+    label: String(match[1]).toUpperCase(),
+    text: String(match[2] || "").trim(),
+  };
+}
+
+function toOptionData(option, index) {
+  const fallbackLabel = String.fromCharCode(65 + index);
+
   if (option && typeof option === "object") {
-    const label = option.label ? String(option.label).toUpperCase() : String.fromCharCode(65 + index);
-    const text = option.text ? String(option.text) : "";
-    return text ? `${label}) ${text}` : label;
+    const rawLabel = option.label ?? option.value ?? fallbackLabel;
+    const label = String(rawLabel || fallbackLabel).trim().toUpperCase() || fallbackLabel;
+    const rawText =
+      option.text ??
+      option.option_text ??
+      option.answer ??
+      option.content ??
+      "";
+    const text = String(rawText || "").trim();
+
+    return {
+      value: label,
+      label,
+      text: text || label,
+    };
   }
 
   if (typeof option === "string") {
-    return option;
+    const { label, text } = splitOptionLabelAndText(option);
+    const normalizedLabel = (label || fallbackLabel).toUpperCase();
+    return {
+      value: normalizedLabel,
+      label: normalizedLabel,
+      text: text || String(option).trim() || normalizedLabel,
+    };
   }
 
-  return `${String.fromCharCode(65 + index)}) Option ${index + 1}`;
+  return {
+    value: fallbackLabel,
+    label: fallbackLabel,
+    text: `Option ${index + 1}`,
+  };
 }
 
 function isPlaceholderQuestionText(str) {
@@ -240,7 +279,7 @@ export function adaptListeningMockToUi(mockDetail) {
           number: sectionStart === sectionEnd ? sectionStart : `${sectionStart}-${sectionEnd}`,
           type: "multiple_choice_two",
           text: prompt,
-          options: asArray(section?.list_selections).map(toOptionLabel),
+          options: asArray(section?.list_selections).map(toOptionData),
         }];
       } else {
         questions = asArray(section?.questions).map((question) => {
@@ -259,7 +298,7 @@ export function adaptListeningMockToUi(mockDetail) {
           };
 
           if (type === "multiple_choice" || type === "multiple_choice_two") {
-            base.options = asArray(question?.options).map(toOptionLabel);
+            base.options = asArray(question?.options).map(toOptionData);
           }
 
           if (type === "matching") {
@@ -290,7 +329,7 @@ export function adaptListeningMockToUi(mockDetail) {
         questionRange: `${start}-${end}`,
         instruction: section?.instructions || "Answer the questions below.",
         context: section?.title || `Part ${partIndex + 1}`,
-        options_box: asArray(section?.options).map(toOptionLabel),
+        options_box: asArray(section?.options).map(toOptionData),
         rawHtmlContent,
         questions,
       };
@@ -345,13 +384,9 @@ export function adaptReadingMockToUi(mockDetail) {
       const sourceQuestions = asArray(section?.questions);
 
       if (type === "multiple_choice_multiple") {
-        const selections = asArray(section?.list_selections).map((selection, index) => {
-          const label = selection?.label != null
-            ? String(selection.label).trim().toUpperCase()
-            : String.fromCharCode(65 + index);
-          const text = selection?.text != null ? String(selection.text).trim() : "";
-          return text ? `${label}. ${text}` : `${label}.`;
-        });
+        const selections = asArray(section?.list_selections).map((selection, index) =>
+          toOptionData(selection, index)
+        );
         const sectionQuestionText = section?.multiple_choice_multiple_answers?.question_text;
         const prompt = (typeof sectionQuestionText === "string" && sectionQuestionText.trim())
           ? sectionQuestionText.trim()
@@ -375,7 +410,7 @@ export function adaptReadingMockToUi(mockDetail) {
           question: question?.question_text || question?.text || "",
           statement: question?.question_text || question?.text || "",
           options: asArray(question?.options).length
-            ? asArray(question.options).map(toOptionLabel)
+            ? asArray(question.options).map(toOptionData)
             : type.includes("true_false")
               ? ["TRUE", "FALSE", "NOT GIVEN"]
               : [],
@@ -384,9 +419,11 @@ export function adaptReadingMockToUi(mockDetail) {
 
       if (type === "matching_headings") {
         const selectionOptions = asArray(section?.list_selections).map(toReadingSelection);
-        const headings = selectionOptions.map((opt) => {
-          return opt.text ? `${opt.label}. ${opt.text}` : opt.label;
-        });
+        const headings = selectionOptions.map((opt) => ({
+          value: opt.value,
+          label: opt.label,
+          text: opt.text || opt.label,
+        }));
         const sortedQuestions = sourceQuestions
           .slice()
           .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
@@ -439,7 +476,7 @@ export function adaptReadingMockToUi(mockDetail) {
           instruction: section?.instructions || "Match information.",
           information: sourceQuestions.map((q, idx) => `${idx + 1}. ${q?.question_text || `Information ${idx + 1}`}`),
           options: sourceQuestions[0]?.options?.length
-            ? sourceQuestions[0].options.map(toOptionLabel)
+            ? sourceQuestions[0].options.map(toOptionData)
             : [],
         }];
       }
@@ -451,7 +488,7 @@ export function adaptReadingMockToUi(mockDetail) {
           instruction: section?.instructions || "Match features.",
           features: sourceQuestions.map((q, idx) => `${idx + 1}. ${q?.question_text || `Feature ${idx + 1}`}`),
           items: sourceQuestions[0]?.options?.length
-            ? sourceQuestions[0].options.map(toOptionLabel)
+            ? sourceQuestions[0].options.map(toOptionData)
             : [],
         }];
       }
@@ -467,12 +504,7 @@ export function adaptReadingMockToUi(mockDetail) {
           }));
 
         const options = asArray(section?.list_selections)
-          .map((selection) => {
-            const label = selection?.label != null ? String(selection.label).trim() : "";
-            const text = selection?.text != null ? String(selection.text).trim() : "";
-            if (!label && !text) return "";
-            return `${label} ${text}`.trim();
-          })
+          .map((selection, index) => toOptionData(selection, index))
           .filter(Boolean);
 
         const numericOrders = items
@@ -498,7 +530,7 @@ export function adaptReadingMockToUi(mockDetail) {
           instruction: section?.instructions || "Complete the sentences.",
           sentences: sourceQuestions.map((q, idx) => `${idx + 1}. ${q?.question_text || ""}`),
           endings: sourceQuestions[0]?.options?.length
-            ? sourceQuestions[0].options.map(toOptionLabel)
+            ? sourceQuestions[0].options.map(toOptionData)
             : [],
         }];
       }

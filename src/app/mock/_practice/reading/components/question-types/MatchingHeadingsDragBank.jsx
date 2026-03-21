@@ -69,7 +69,9 @@ const MatchingHeadingsDragBank = ({
                                 disabled={isReviewMode}
                                 aria-pressed={isPicked}
                             >
-                                <span className="inline-matching-option-text">{opt.text || opt.label || opt.value}</span>
+                                <span className="inline-matching-option-text">
+                                    {opt.text || t('matching.option', 'Option')}
+                                </span>
                             </button>
                         );
                     })

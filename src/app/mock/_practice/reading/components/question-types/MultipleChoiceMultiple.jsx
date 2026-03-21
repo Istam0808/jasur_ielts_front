@@ -5,6 +5,39 @@ import { useMemo } from 'react';
 import Checkbox from '@/components/common/input-types/Checkbox';
 import { useTranslation } from 'react-i18next';
 
+const splitOptionLabelAndText = (value) => {
+    const source = String(value || '').trim();
+    if (!source) return { label: '', text: '' };
+    const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+    if (!match) return { label: '', text: source };
+    return {
+        label: String(match[1]).toUpperCase(),
+        text: String(match[2] || '').trim()
+    };
+};
+
+const getOptionValue = (option, index) => {
+    if (option && typeof option === 'object') {
+        return String(option.value ?? option.label ?? option.answer ?? String.fromCharCode(65 + index)).trim().toUpperCase();
+    }
+    if (typeof option === 'string') {
+        const parsed = splitOptionLabelAndText(option);
+        return (parsed.label || String.fromCharCode(65 + index)).toUpperCase();
+    }
+    return String.fromCharCode(65 + index);
+};
+
+const getOptionText = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.text ?? option.answer ?? option.label ?? option.value ?? '').trim();
+    }
+    if (typeof option === 'string') {
+        const parsed = splitOptionLabelAndText(option);
+        return parsed.text || option;
+    }
+    return '';
+};
+
 const parseInstructionSelectionCount = (instruction) => {
     if (!instruction) return null;
     const match = instruction.match(/(?:Choose\s+)?(\w+)\s+(?:letters?|answers?|options?)/i);
@@ -156,11 +189,8 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
             isCorrectOption = correctAnswerLetters.includes(optionLetter);
         } else {
             // For basic readings, check if this option is marked as correct
-            const optionIndex = optionLetter.charCodeAt(0) - 65;
-            if (optionIndex >= 0 && optionIndex < question.options.length) {
-                const option = question.options[optionIndex];
-                isCorrectOption = typeof option === 'object' ? option.correct : false;
-            }
+            const matchedOption = question.options.find((opt, idx) => getOptionValue(opt, idx) === optionLetter);
+            isCorrectOption = matchedOption ? (typeof matchedOption === 'object' ? matchedOption.correct : false) : false;
         }
         
         // Determine the status based on selection and correctness
@@ -210,9 +240,9 @@ const MultipleChoiceMultiple = ({ question, answer, onAnswerChange, isReviewMode
                 <Checkbox
                   name={`mcm-${question.id}`}
                   options={question.options.map((opt, idx) => {
-                    const optionValue = typeof opt === 'object' ? opt.answer : opt;
-                    const optionLetter = String.fromCharCode(65 + idx);
-                    return { value: optionLetter, label: `${optionValue}` };
+                    const optionLetter = getOptionValue(opt, idx);
+                    const optionText = getOptionText(opt);
+                    return { value: optionLetter, label: optionText || optionLetter };
                   })}
                   value={selectedAnswers}
                   onChange={(vals) => {

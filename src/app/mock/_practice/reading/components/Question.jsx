@@ -18,6 +18,39 @@ import MatchingSentences from './question-types/MatchingSentences';
 import CompletionQuestion from './question-types/CompletionQuestion';
 import AdvancedShortAnswer from './question-types/AdvancedShortAnswer';
 
+const splitOptionLabelAndText = (value) => {
+    const source = String(value || '').trim();
+    if (!source) return { label: '', text: '' };
+    const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+    if (!match) return { label: '', text: source };
+    return {
+        label: String(match[1]).toUpperCase(),
+        text: String(match[2] || '').trim()
+    };
+};
+
+const getOptionValue = (option, index) => {
+    if (option && typeof option === 'object') {
+        return String(option.value ?? option.label ?? option.answer ?? String.fromCharCode(65 + index)).trim();
+    }
+    if (typeof option === 'string') {
+        const parsed = splitOptionLabelAndText(option);
+        return parsed.label || String.fromCharCode(65 + index);
+    }
+    return String.fromCharCode(65 + index);
+};
+
+const getOptionText = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.text ?? option.answer ?? option.label ?? option.value ?? '').trim();
+    }
+    if (typeof option === 'string') {
+        const parsed = splitOptionLabelAndText(option);
+        return parsed.text || option;
+    }
+    return '';
+};
+
 // Basic Question component for simple question types (A1, A2, B1)
 const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, reviewMap, globalNumber = null }) => {
     const { t } = useTranslation('reading');
@@ -33,16 +66,18 @@ const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isRevie
             const key = globalNumber != null ? String(globalNumber) : String(question.id);
             const correctLetter = reviewMap[key];
             if (!correctLetter) return '';
-            const correctOption = question.options.find(option => {
-                const optionValue = typeof option === 'object' ? option.answer : option;
-                return typeof optionValue === 'string' && optionValue.startsWith(correctLetter + '.');
+            const correctOption = question.options.find((option, index) => {
+                const optionValue = getOptionValue(option, index);
+                return String(optionValue).toUpperCase() === String(correctLetter).toUpperCase();
             });
-            return correctOption ? (typeof correctOption === 'object' ? correctOption.answer : correctOption) : '';
+            return correctOption ? getOptionValue(correctOption, question.options.indexOf(correctOption)) : '';
         }
         
         // For basic readings (A1, A2, B1), try to find embedded correct answer
         const correctOption = question.options.find(opt => opt.correct);
-        return correctOption ? (correctOption.answer || correctOption.text || '') : '';
+        if (!correctOption) return '';
+        const fallbackIndex = question.options.indexOf(correctOption);
+        return getOptionValue(correctOption, fallbackIndex);
     }, [question.options, difficulty, isReviewMode, question.id, reviewMap, globalNumber]);
 
     const isCorrect = useMemo(() => (optionAnswer) => {
@@ -67,8 +102,8 @@ const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isRevie
             if (!isReviewMode) return {};
             const map = new Map();
             const correctValue = getCorrectOption;
-            question.options.forEach((opt) => {
-                const optionValue = typeof opt === 'object' ? opt.answer : opt;
+            question.options.forEach((opt, index) => {
+                const optionValue = getOptionValue(opt, index);
                 const isSelected = answer === optionValue;
                 const isCorrectOption = !!correctValue && optionValue === correctValue;
                 const status = isSelected && isCorrectOption
@@ -87,9 +122,9 @@ const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isRevie
           <Radio
             name={`question-${question.id}`}
             inline={false}
-            options={question.options.map((opt) => ({
-              value: typeof opt === 'object' ? opt.answer : opt,
-              label: typeof opt === 'object' ? opt.answer : opt,
+            options={question.options.map((opt, index) => ({
+              value: getOptionValue(opt, index),
+              label: getOptionText(opt),
             }))}
             value={answer || null}
             onChange={(val) => {

@@ -2,6 +2,18 @@
 
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import Checkbox from '@/components/common/input-types/Checkbox';
+
+const splitOptionLabelAndText = (value) => {
+    const source = String(value || '').trim();
+    if (!source) return { label: '', text: '' };
+    const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+    if (!match) return { label: '', text: source };
+    return {
+        label: String(match[1]).toUpperCase(),
+        text: String(match[2] || '').trim()
+    };
+};
 
 const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
     const { t } = useTranslation('practice');
@@ -34,10 +46,24 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
     const optionItems = useMemo(
         () =>
             (question.options || []).map((option, index) => {
-                const optionText = String(option || '').trim();
-                const letterMatch = optionText.match(/^[A-Z]/);
-                const value = letterMatch?.[0] || String.fromCharCode(65 + index);
-                return { value, label: optionText || value };
+                if (option && typeof option === 'object') {
+                    const value = String(
+                        option.value ||
+                        option.label ||
+                        String.fromCharCode(65 + index)
+                    ).trim().toUpperCase();
+                    const text = String(
+                        option.text ||
+                        option.option_text ||
+                        option.answer ||
+                        ''
+                    ).trim();
+                    return { value, label: text || value };
+                }
+
+                const parsed = splitOptionLabelAndText(option);
+                const value = parsed.label || String.fromCharCode(65 + index);
+                return { value, label: parsed.text || String(option || '').trim() || value };
             }),
         [question.options]
     );
@@ -64,20 +90,22 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
         });
     };
 
-    const handleCheckboxToggle = (optionValue) => {
-        const upperValue = String(optionValue).trim().toUpperCase();
-        const isSelected = selectedLetters.includes(upperValue);
-        let nextSelected;
-
-        if (isSelected) {
-            nextSelected = selectedLetters.filter((value) => value !== upperValue);
-        } else {
-            if (selectedLetters.length >= totalQuestions) return;
-            nextSelected = [...selectedLetters, upperValue];
-        }
-
+    const sortByOptionOrder = (letters) => {
         const optionOrder = optionItems.map((item) => item.value);
-        nextSelected.sort((a, b) => optionOrder.indexOf(a) - optionOrder.indexOf(b));
+        const sorted = [...letters];
+        sorted.sort((a, b) => optionOrder.indexOf(a) - optionOrder.indexOf(b));
+        return sorted;
+    };
+
+    const handleCheckboxChange = (nextValues) => {
+        const normalized = Array.from(
+            new Set(
+                (nextValues || [])
+                    .map((value) => String(value).trim().toUpperCase())
+                    .filter((value) => optionItems.some((item) => item.value === value))
+            )
+        );
+        const nextSelected = sortByOptionOrder(normalized).slice(0, totalQuestions);
         applyRangeSelection(nextSelected);
     };
 
@@ -97,26 +125,12 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
                         {selectedLetters.length} / {totalQuestions} {t('selected', { defaultValue: 'selected' })}
                     </p>
                     <div className="options">
-                        {optionItems.map((item) => {
-                            const isChecked = selectedLetters.includes(item.value);
-                            const isDisabled = !isChecked && selectedLetters.length >= totalQuestions;
-
-                            return (
-                                <label
-                                    key={item.value}
-                                    className={`option-label ${isChecked ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => handleCheckboxToggle(item.value)}
-                                        className="checkbox-input"
-                                        disabled={isDisabled}
-                                    />
-                                    <span className="option-text selectable-content">{item.label}</span>
-                                </label>
-                            );
-                        })}
+                        <Checkbox
+                            name={`q-${startNum}-${endNum}`}
+                            options={optionItems}
+                            value={selectedLetters}
+                            onChange={handleCheckboxChange}
+                        />
                     </div>
                 </div>
             ) : (

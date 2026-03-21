@@ -165,7 +165,7 @@ const PassageWithDropzones = ({
                         {hasValue ? (
                             <span className="inline-drop-filled">
                                 <span className="inline-drop-filled-text">
-                                    {selectedOption?.text || selectedOption?.label || selectedValue}
+                                    {selectedOption?.text || 'Selected option'}
                                 </span>
                                 {!isReviewMode && (
                                     <button

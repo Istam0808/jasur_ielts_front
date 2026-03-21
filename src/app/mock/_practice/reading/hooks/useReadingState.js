@@ -215,11 +215,16 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
                 }));
 
             const options = (Array.isArray(section?.list_selections) ? section.list_selections : [])
-                .map((s) => {
-                    const label = (s?.label || '').toString().trim();
+                .map((s, index) => {
+                    const fallbackLabel = String.fromCharCode(65 + index);
+                    const label = (s?.label || fallbackLabel).toString().trim().toUpperCase();
                     const text = (s?.text || '').toString().trim();
-                    if (!label && !text) return '';
-                    return `${label} ${text}`.trim();
+                    if (!label && !text) return null;
+                    return {
+                        value: label,
+                        label,
+                        text: text || label
+                    };
                 })
                 .filter(Boolean);
 

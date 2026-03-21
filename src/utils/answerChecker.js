@@ -8,6 +8,39 @@ export function normalizeText(text) {
   return s.replace(/\s+/g, ' ');
 }
 
+function splitOptionLabelAndText(value) {
+  const source = String(value || '').trim();
+  if (!source) return { label: '', text: '' };
+  const match = source.match(/^([A-Za-z])[\)\].:\-]?\s+(.+)$/);
+  if (!match) return { label: '', text: source };
+  return {
+    label: String(match[1]).toUpperCase(),
+    text: String(match[2] || '').trim(),
+  };
+}
+
+function getOptionValue(option, index = 0) {
+  if (option && typeof option === 'object') {
+    return String(option.value ?? option.label ?? option.answer ?? String.fromCharCode(65 + index)).trim();
+  }
+  if (typeof option === 'string') {
+    const parsed = splitOptionLabelAndText(option);
+    return parsed.label || String.fromCharCode(65 + index);
+  }
+  return String.fromCharCode(65 + index);
+}
+
+function getOptionText(option) {
+  if (option && typeof option === 'object') {
+    return String(option.text ?? option.answer ?? option.label ?? option.value ?? '').trim();
+  }
+  if (typeof option === 'string') {
+    const parsed = splitOptionLabelAndText(option);
+    return parsed.text || option;
+  }
+  return '';
+}
+
 /**
  * Fuzzy match: exact match, or similarity above threshold. Thresholds: strict (1), medium (0.85), loose (0.7).
  */
@@ -39,7 +72,7 @@ function simpleSimilarity(a, b) {
 export function getCorrectAnswer(question, _readingId) {
   if (!question || !question.options) return '';
   const opt = question.options.find((o) => o && (o.correct === true || o.correct === 'true'));
-  return opt ? (opt.answer ?? opt.text ?? String(opt)) : '';
+  return opt ? getOptionText(opt) : '';
 }
 
 /**
@@ -56,12 +89,17 @@ export function getCorrectAnswerTextForScoring(question, _readingId) {
     case 'true_false_not_given':
     case 'yes_no_not_given': {
       const correct = options?.find((o) => o && (o.correct === true || o.correct === 'true'));
-      return correct ? (correct.answer ?? correct.text ?? String(correct)) : null;
+      if (!correct) return null;
+      const index = Array.isArray(options) ? options.indexOf(correct) : 0;
+      return getOptionValue(correct, index);
     }
 
     case 'multiple_choice_multiple': {
       const correctList = options?.filter((o) => o && (o.correct === true || o.correct === 'true'));
-      return correctList?.map((o) => o.answer ?? o.text ?? String(o)) ?? [];
+      return correctList?.map((o) => {
+        const index = Array.isArray(options) ? options.indexOf(o) : 0;
+        return getOptionValue(o, index);
+      }) ?? [];
     }
 
     case 'matching_headings':
@@ -157,9 +195,12 @@ export function checkAnswer(question, userAnswer, _readingId) {
   ) {
     const correct = options?.find((o) => o && (o.correct === true || o.correct === 'true'));
     if (!correct) return false;
-    const expected = correct.answer ?? correct.text ?? String(correct);
+    const correctIndex = Array.isArray(options) ? options.indexOf(correct) : 0;
+    const expected = getOptionValue(correct, correctIndex);
+    const expectedText = getOptionText(correct);
     const u = typeof userAnswer === 'string' ? userAnswer.trim() : String(userAnswer ?? '');
     if (u === expected) return true;
+    if (expectedText && normalizeText(u) === normalizeText(expectedText)) return true;
     const leading = u.match(/^[A-Z]\.?\s*/i)?.[0]?.trim() || u;
     return normalizeText(leading) === normalizeText(expected) || normalizeText(u) === normalizeText(expected);
   }

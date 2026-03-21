@@ -131,6 +131,19 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
             <div className="question-group">
                 {item.questions.map(q => {
                     if (!q.type) return null;
+                    let resolvedUserAnswer = userAnswers[q.number];
+
+                    if (typeof q.number === 'string' && q.number.includes('-')) {
+                        const [start, end] = q.number.split('-').map(Number);
+                        if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
+                            const rangeAnswers = {};
+                            for (let i = start; i <= end; i += 1) {
+                                rangeAnswers[i] = userAnswers[i];
+                            }
+                            resolvedUserAnswer = rangeAnswers;
+                        }
+                    }
+
                     // For matching questions, we need to pass the individual question text.
                     const questionData = {
                         ...q,
@@ -140,7 +153,7 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
                         <Question
                             key={q.number}
                             question={questionData}
-                            userAnswer={userAnswers[q.number]}
+                            userAnswer={resolvedUserAnswer}
                             onAnswerChange={onAnswerChange}
                             optionsBox={item.options_box || item.options || optionsBox}
                         />

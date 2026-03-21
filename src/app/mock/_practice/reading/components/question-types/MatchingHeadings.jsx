@@ -6,6 +6,17 @@ import { useTranslation } from 'react-i18next';
 import SelectOption from '@/components/common/input-types/SelectOption';
 import CorrectAnswerInfo from '@/components/common/CorrectAnswerInfo';
 
+const splitOptionLabelAndText = (value) => {
+    const source = String(value || '').trim();
+    if (!source) return { label: '', text: '' };
+    const match = source.match(/^([A-Za-zivxlcdm]+)[\)\].:\-]?\s+(.+)$/i);
+    if (!match) return { label: '', text: source };
+    return {
+        label: String(match[1] || '').trim(),
+        text: String(match[2] || '').trim()
+    };
+};
+
 const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, readingId, reviewMap }) => {
     const { t } = useTranslation('reading');
     
@@ -17,21 +28,38 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
     const headings = useMemo(() => {
         // Корректный массив строк в поле headings
         if (Array.isArray(question?.headings) && question.headings.length > 0) {
-            return question.headings;
+            return question.headings.map((heading, idx) => {
+                if (heading && typeof heading === 'object') {
+                    return {
+                        value: String(heading.value ?? heading.label ?? idx + 1).trim(),
+                        text: String(heading.text ?? heading.label ?? heading.value ?? '').trim()
+                    };
+                }
+
+                const parsed = splitOptionLabelAndText(heading);
+                return {
+                    value: parsed.label || String(idx + 1),
+                    text: parsed.text || String(heading || '')
+                };
+            });
         }
 
         // Пытаемся собрать заголовки из options, если бэкенд кладёт их туда
         if (Array.isArray(question?.options) && question.options.length > 0) {
             return question.options
-                .map((opt) => {
-                    if (typeof opt === 'string') return opt;
-                    return (
-                        opt.heading || // { heading: "iv. Some text" }
-                        opt.text ||    // { text: "iv. Some text" }
-                        opt.label ||   // { label: "iv. Some text" }
-                        opt.id ||      // { id: "iv. Some text" }
-                        null
-                    );
+                .map((opt, idx) => {
+                    if (typeof opt === 'string') {
+                        const parsed = splitOptionLabelAndText(opt);
+                        return {
+                            value: parsed.label || String(idx + 1),
+                            text: parsed.text || opt
+                        };
+                    }
+
+                    return {
+                        value: String(opt.value ?? opt.label ?? opt.id ?? idx + 1).trim(),
+                        text: String(opt.text ?? opt.heading ?? opt.label ?? opt.id ?? '').trim()
+                    };
                 })
                 .filter(Boolean);
         }
@@ -112,10 +140,10 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
 
         // Найти заголовок, начинающийся с идентификатора (A., iii. и т.п.)
         const heading = headings.find(
-            (h) => typeof h === 'string' && h.startsWith(`${headingId}.`)
+            (h) => String(h?.value || '').toLowerCase() === String(headingId || '').toLowerCase()
         );
         if (heading) {
-            return heading;
+            return heading.text;
         }
         return headingId;
     };
@@ -136,15 +164,8 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
                     ) : (
                         headings.map((heading, idx) => (
                             <div key={idx} className="heading-item">
-                                <span className="heading-id">
-                                    {typeof heading === 'string'
-                                        ? `${heading.split('.')[0]}.`
-                                        : ''}
-                                </span>
                                 <span className="heading-text">
-                                    {typeof heading === 'string'
-                                        ? heading.split('.').slice(1).join('.').trim()
-                                        : String(heading)}
+                                    {heading.text}
                                 </span>
                             </div>
                         ))
@@ -179,12 +200,12 @@ const MatchingHeadings = ({ question, answer, onAnswerChange, isReviewMode, read
                             <div className="heading-selector">
                                 <SelectOption
                                   options={headings.map((h) => {
-                                      const raw = typeof h === 'string' ? h : String(h);
-                                      const id = raw.split('.')[0];
+                                      const value = String(h?.value || '').trim();
+                                      const text = String(h?.text || '').trim();
                                       return {
-                                          value: id,
-                                          label: raw,
-                                          disabled: raw.startsWith('EXAMPLE')
+                                          value,
+                                          label: text || value,
+                                          disabled: text.startsWith('EXAMPLE')
                                       };
                                   })}
                                   value={selectedHeading || null}

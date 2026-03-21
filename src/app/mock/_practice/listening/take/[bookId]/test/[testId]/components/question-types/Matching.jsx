@@ -3,6 +3,20 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+const toOptionValue = (option, index) => {
+    if (option && typeof option === 'object') {
+        return String(option.value || option.label || String.fromCharCode(65 + index)).trim();
+    }
+    return String(option || '').trim();
+};
+
+const toOptionText = (option) => {
+    if (option && typeof option === 'object') {
+        return String(option.text || option.option_text || option.answer || option.value || '').trim();
+    }
+    return String(option || '').trim();
+};
+
 const Matching = ({ question, userAnswer, onAnswerChange, optionsBox }) => {
     const { t } = useTranslation('practice');
 
@@ -89,8 +103,8 @@ const Matching = ({ question, userAnswer, onAnswerChange, optionsBox }) => {
                                     >
                                         <option value="">{t('selectOption')}</option>
                                         {optionsBox.map((option, optIndex) => (
-                                            <option key={optIndex} value={option}>
-                                                {option}
+                                            <option key={optIndex} value={toOptionValue(option, optIndex)}>
+                                                {toOptionText(option)}
                                             </option>
                                         ))}
                                     </select>
