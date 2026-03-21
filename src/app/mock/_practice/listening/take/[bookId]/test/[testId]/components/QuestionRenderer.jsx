@@ -81,6 +81,50 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
 
     // Case 2: Item has a list of individual questions (like a matching group). Render them.
     if (item.questions && Array.isArray(item.questions)) {
+        // Normalize legacy/misaligned payloads for "choose N letters" blocks:
+        // if the block is delivered as separate multiple_choice_two questions (18, 19, 20),
+        // render it as a single range block so checkbox UI is used.
+        const rangeCandidates = item.questions.filter((q) => q?.type === 'multiple_choice_two');
+        const numericRange = rangeCandidates
+            .map((q) => Number(q?.number))
+            .filter((n) => Number.isFinite(n))
+            .sort((a, b) => a - b);
+        const isConsecutiveRange = numericRange.length > 1 && numericRange.every((num, idx) => {
+            if (idx === 0) return true;
+            return num === numericRange[idx - 1] + 1;
+        });
+        const hasRangePrompt = typeof item?.text === 'string' && item.text.trim() && item.text.trim() !== '.';
+
+        if (isConsecutiveRange && rangeCandidates.length === item.questions.length && hasRangePrompt) {
+            const start = numericRange[0];
+            const end = numericRange[numericRange.length - 1];
+            const blockOptions =
+                (Array.isArray(rangeCandidates[0]?.options) && rangeCandidates[0].options.length
+                    ? rangeCandidates[0].options
+                    : (item.options_box || item.options || []));
+            const blockAnswers = {};
+            for (let i = start; i <= end; i += 1) {
+                blockAnswers[i] = userAnswers[i];
+            }
+
+            return (
+                <div className="question-group">
+                    <Question
+                        key={`${start}-${end}`}
+                        question={{
+                            number: `${start}-${end}`,
+                            type: 'multiple_choice_two',
+                            text: item.text,
+                            options: blockOptions
+                        }}
+                        userAnswer={blockAnswers}
+                        onAnswerChange={onAnswerChange}
+                        optionsBox={item.options_box || item.options || optionsBox}
+                    />
+                </div>
+            );
+        }
+
         // This is now inside a section that has already rendered the instruction/options.
         // We just need to render the questions themselves.
         return (
