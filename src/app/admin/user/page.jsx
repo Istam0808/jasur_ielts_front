@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiActivity, FiCpu, FiLogOut, FiSettings } from "react-icons/fi";
+import { buildBackendUrl } from "@/lib/backend";
 import "../styles/style_admin.scss";
 
 // --- Фейковые данные для мока админки ---
@@ -166,6 +167,34 @@ const NAV_RESULTS = "results";
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
 const ADMIN_THEME_KEY = "adminTheme";
+const ADMIN_ACCESS_TOKEN_KEY = "adminAccessToken";
+const ADMIN_SESSION_ID_KEY = "adminSessionId";
+
+async function logoutCenterAdmin({ token, sessionId }) {
+  const response = await fetch(buildBackendUrl("/api/v1/auth/center-admin/logout/"), {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(sessionId ? { "X-Session-Id": sessionId } : {}),
+    },
+  });
+
+  if (response.ok || response.status === 401) {
+    return { ok: true };
+  }
+
+  let message = "";
+  try {
+    const data = await response.json();
+    message =
+      (typeof data?.detail === "string" && data.detail) ||
+      (typeof data?.message === "string" && data.message) ||
+      "";
+  } catch (_) {}
+
+  return { ok: false, message: message || "Не удалось завершить сессию на сервере" };
+}
 
 function roundToNearestHalf(value) {
   return Math.round(value * 2) / 2;
@@ -186,6 +215,8 @@ export default function AdminUserPage() {
   const [theme, setTheme] = useState(THEME_LIGHT);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [exitConfirmModalOpen, setExitConfirmModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const [machines, setMachines] = useState(FAKE_MACHINES);
   const [lastRefreshSeconds, setLastRefreshSeconds] = useState(0);
   const [selectedSessionId, setSelectedSessionId] = useState("S-1002");
@@ -230,7 +261,8 @@ export default function AdminUserPage() {
     if (typeof window === "undefined") return;
 
     queueMicrotask(() => {
-      const ok = sessionStorage.getItem("adminAuth") === "true";
+      const token = localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY);
+      const ok = typeof token === "string" && token.trim().length > 0;
       setIsAuth(ok);
       setAuthChecked(true);
       if (!ok) {
@@ -353,12 +385,27 @@ export default function AdminUserPage() {
     }
   }
 
-  function handleLogout() {
-    closeExitConfirmModal();
-    if (typeof window !== "undefined") {
-      sessionStorage.removeItem("adminAuth");
+  async function handleLogout() {
+    if (typeof window === "undefined") return;
+    setLogoutError("");
+    setIsLoggingOut(true);
+    try {
+      const token = localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY) || "";
+      const sessionId = localStorage.getItem(ADMIN_SESSION_ID_KEY) || "";
+      const result = await logoutCenterAdmin({ token, sessionId });
+      if (!result.ok) {
+        setLogoutError(result.message || "Не удалось выполнить выход");
+        return;
+      }
+      closeExitConfirmModal();
+      localStorage.removeItem(ADMIN_ACCESS_TOKEN_KEY);
+      localStorage.removeItem(ADMIN_SESSION_ID_KEY);
+      router.replace("/admin");
+    } catch (_) {
+      setLogoutError("Ошибка сети при выходе. Попробуйте ещё раз.");
+    } finally {
+      setIsLoggingOut(false);
     }
-    router.replace("/admin");
   }
 
   function handleSessionRowClick(sessionId) {
@@ -450,20 +497,27 @@ export default function AdminUserPage() {
             <p className="admin-dashboard__modal-text">
               Вы уверены, что хотите выйти из аккаунта администратора?
             </p>
+            {logoutError && (
+              <p className="admin-login__error" role="alert">
+                {logoutError}
+              </p>
+            )}
             <div className="admin-dashboard__modal-actions">
               <button
                 type="button"
                 className="admin-dashboard__btn-primary admin-dashboard__modal-confirm-btn"
                 onClick={handleLogout}
                 aria-label="Да, выйти из аккаунта"
+                disabled={isLoggingOut}
               >
-                Выйти
+                {isLoggingOut ? "Выходим…" : "Выйти"}
               </button>
               <button
                 type="button"
                 className="admin-dashboard__modal-close"
                 onClick={closeExitConfirmModal}
                 aria-label="Отмена выхода"
+                disabled={isLoggingOut}
               >
                 Отмена
               </button>
