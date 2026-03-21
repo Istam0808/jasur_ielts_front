@@ -170,7 +170,7 @@ const DragAndDrop = ({ question, userAnswer, onAnswerChange, optionsBox }) => {
                                         </span>
                                     ) : (
                                         <span className="drag-drop-target-placeholder">
-                                            {pickedValue ? t("matching.clickToPlace", { ns: "reading", defaultValue: "Click to place" }) : "__________"}
+                                            {pickedValue ? t("matching.clickToPlace", { ns: "reading", defaultValue: "Click to place" }) : item.number}
                                         </span>
                                     )}
                                 </button>
