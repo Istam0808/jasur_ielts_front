@@ -3,7 +3,8 @@
   "listening_p1": {
     "id": 2,
     "part": 1,
-    "audio_file": "https://jasur-ielts-backend.onrender.com/media/listening_parts/pack4-t1.mp3",
+    "audio_file": null,
+    "audio_link": "https://pub-ba6b92e0eda64f32afb79c81ba6bf138.r2.dev/mock3/pack4-t1.mp3",
     "sections": [
       {
         "id": 2,
@@ -87,6 +88,7 @@
     "id": 3,
     "part": 2,
     "audio_file": null,
+    "audio_link": null,
     "sections": [
       {
         "id": 3,
@@ -352,6 +354,7 @@
     "id": 4,
     "part": 3,
     "audio_file": null,
+    "audio_link": null,
     "sections": [
       {
         "id": 6,
@@ -581,6 +584,7 @@
     "id": 5,
     "part": 4,
     "audio_file": null,
+    "audio_link": null,
     "sections": [
       {
         "id": 8,
@@ -1165,7 +1169,7 @@
               {
                 "id": 14,
                 "label": "B",
-                "text": "Human energy may have been used to assist sailing canoes",
+                "text": "New research methods had to be developed for use in canoes",
                 "order": 2
               },
               {
@@ -1177,7 +1181,7 @@
               {
                 "id": 16,
                 "label": "D",
-                "text": "Canoes primarily relied on sails but could be paddled for long distances",
+                "text": "Human energy may have been used to assist sailing canoes",
                 "order": 4
               }
             ]

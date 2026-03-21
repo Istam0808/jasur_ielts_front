@@ -379,7 +379,7 @@ const TestListeningPage = ({
 
     const activePartAudioUrl = useMemo(() => {
         const part = testParts[currentPartIndex];
-        const rawUrl = part?.audioUrl ?? part?.audio_file ?? '';
+        const rawUrl = part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '';
         if (typeof rawUrl !== 'string') {
             return '';
         }
@@ -388,7 +388,7 @@ const TestListeningPage = ({
 
     const hasNoAudioInAnyPart = useMemo(() => {
         if (!testParts.length) return false;
-        return testParts.every((part) => !(part?.audioUrl ?? part?.audio_file ?? '').trim());
+        return testParts.every((part) => !(part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '').trim());
     }, [testParts]);
 
     useEffect(() => {
