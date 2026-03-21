@@ -12,7 +12,7 @@ import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation } 
 import TestProgress from './TestProgress';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
-import { validateListeningMockAnswers } from '@/lib/mockApi';
+import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import HighlightText from '@/components/common/HighlightText';
@@ -27,6 +27,34 @@ const resolvePartAudioUrl = (part) => {
     const rawUrl = part?.audioUrl ?? part?.audio_file ?? part?.audio_link ?? '';
     if (typeof rawUrl !== 'string') return '';
     return rawUrl.trim();
+};
+
+const AUTOSAVE_DELAY_MS = 700;
+
+const normalizeListeningAnswerValue = (value) => {
+    if (value === null || value === undefined) return null;
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        return trimmed === '' ? null : trimmed;
+    }
+
+    if (Array.isArray(value)) {
+        const firstFilled = value.find((item) => item !== null && item !== undefined && String(item).trim() !== '');
+        if (firstFilled === undefined) return null;
+        return String(firstFilled).trim();
+    }
+
+    if (typeof value === 'object') {
+        const firstFilled = Object.values(value).find(
+            (item) => item !== null && item !== undefined && String(item).trim() !== ''
+        );
+        if (firstFilled === undefined) return null;
+        return String(firstFilled).trim();
+    }
+
+    const normalized = String(value).trim();
+    return normalized === '' ? null : normalized;
 };
 
 const TestListeningPage = ({
@@ -59,12 +87,24 @@ const TestListeningPage = ({
     const pendingScrollRef = useRef(null);
 
     const [audioError, setAudioError] = useState(null);
+    const autoSaveTimeoutRef = useRef(null);
+    const lastSavedPayloadRef = useRef('');
+    const sessionMismatchNotifiedRef = useRef(false);
 
     // Listening audio volume control (syncs with <audio ref={audioRef} />)
     const [audioVolume, setAudioVolume] = useState(1); // 0..1, keeps last non-zero volume
     const [isAudioMuted, setIsAudioMuted] = useState(false);
     const audioSliderValue = isAudioMuted ? 0 : audioVolume;
     const audioVolumePercent = Math.round(audioSliderValue * 100);
+
+    const notifyMockSessionMismatch = useCallback(() => {
+        if (sessionMismatchNotifiedRef.current) return;
+        sessionMismatchNotifiedRef.current = true;
+
+        if (typeof window !== 'undefined') {
+            window.alert('Сессия больше не связана с этим mock тестом. Перезайдите и начните mock заново, чтобы ответы снова сохранялись.');
+        }
+    }, []);
 
     // Make sure translations are loaded
     useEffect(() => {
@@ -232,6 +272,24 @@ const TestListeningPage = ({
         });
     }, [testParts, extractQuestionNumbers, userAnswers]);
 
+    const listeningSavedAnswersPayload = useMemo(() => {
+        const answers = {};
+
+        testParts.forEach((part, partIndex) => {
+            const partKey = `p${partIndex + 1}`;
+            const questionNumbers = extractQuestionNumbers(part);
+            const partAnswers = {};
+
+            questionNumbers.forEach((questionNumber) => {
+                partAnswers[String(questionNumber)] = normalizeListeningAnswerValue(userAnswers[questionNumber]);
+            });
+
+            answers[partKey] = partAnswers;
+        });
+
+        return { answers };
+    }, [testParts, extractQuestionNumbers, userAnswers]);
+
     const activeAttemptedQuestionNumbers = useMemo(() => {
         const isAnsweredValue = (value) => {
             if (value === null || value === undefined || value === '') return false;
@@ -286,6 +344,49 @@ const TestListeningPage = ({
             setCurrentQuestionNumber(activePartQuestionNumbers[0]);
         }
     }, [currentPartIndex, activePartQuestionNumbers, currentQuestionNumber]);
+
+    useEffect(() => {
+        if (!isMockExam || !mockId || !testParts.length) return;
+        if (!Object.keys(userAnswers).length) return;
+
+        const session = getMockSession();
+        const token = session?.accessToken;
+        const sessionId = session?.sessionId;
+
+        if (!token || !sessionId) return;
+
+        const payloadKey = JSON.stringify(listeningSavedAnswersPayload);
+        if (payloadKey === lastSavedPayloadRef.current) return;
+
+        if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
+        }
+
+        autoSaveTimeoutRef.current = setTimeout(async () => {
+            try {
+                await saveMockSectionAnswers(
+                    mockId,
+                    'listening',
+                    listeningSavedAnswersPayload,
+                    { token, sessionId }
+                );
+                lastSavedPayloadRef.current = payloadKey;
+            } catch (error) {
+                if (isMockSessionMismatchError(error)) {
+                    notifyMockSessionMismatch();
+                    return;
+                }
+                console.warn('Listening autosave failed:', error);
+            }
+        }, AUTOSAVE_DELAY_MS);
+
+        return () => {
+            if (autoSaveTimeoutRef.current) {
+                clearTimeout(autoSaveTimeoutRef.current);
+                autoSaveTimeoutRef.current = null;
+            }
+        };
+    }, [isMockExam, listeningSavedAnswersPayload, mockId, notifyMockSessionMismatch, testParts.length, userAnswers]);
 
     const scrollToQuestion = useCallback((questionNumber) => {
         setCurrentQuestionNumber(questionNumber);
@@ -485,18 +586,15 @@ const TestListeningPage = ({
         setIsTestSubmitted(true);
 
         try {
-            if (mockId) {
-                // В mock-режиме прогоняем валидацию ответов (для возможных сайд-эффектов),
-                // но результаты пользователям больше не показываем.
-                await validateListeningMockAnswers(mockId, userAnswers);
-            }
+            // Submit больше не вызывает legacy validate endpoint.
+            // Все ответы отправляются через autosave на saved-answers/listening.
         } catch (error) {
-            console.error('Listening submission validation failed:', { isTimeUp, error });
+            console.warn('Listening submission validation skipped:', { isTimeUp, error });
         } finally {
             const target = nextHref || '/mock/listening';
             router.push(target);
         }
-    }, [isTestSubmitted, mockId, userAnswers, nextHref, router]);
+    }, [isTestSubmitted, nextHref, router]);
 
     // Handle timer expiration
     const handleTimeUp = useCallback(() => {

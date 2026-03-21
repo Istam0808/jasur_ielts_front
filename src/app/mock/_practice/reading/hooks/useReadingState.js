@@ -6,12 +6,183 @@ import { useLoading } from '@/components/common/LoadingContext';
 import { checkAnswer, getCorrectAnswerTextForScoring, checkAnswerVariants, normalizeText } from '@/utils/answerChecker';
 import { getQuestionAnswerCount, getProvidedAnswerCount } from '../helpers/questionUtils';
 import { groupQuestionsByType } from '../helpers/QuestionGrouping';
-import { validateReadingMockAnswers } from '@/lib/mockApi';
+import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
+import { getMockSession } from '@/lib/mockSession';
 
 // Constants
 const HIGHLIGHT_DURATION = 2000;
 const LOADING_DELAY = 300;
 const SCROLL_DELAY = 200;
+const AUTOSAVE_DELAY_MS = 700;
+
+const EMPTY_VALUE = null;
+
+const normalizeSlotValue = (value) => {
+    if (value === null || value === undefined) return EMPTY_VALUE;
+    const normalized = String(value).trim();
+    return normalized === '' ? EMPTY_VALUE : normalized;
+};
+
+const getBlankByIndexFromSummary = (summaryText, answerIndex) => {
+    if (typeof summaryText !== 'string') return null;
+    const matches = summaryText.match(/___(\d+)___/g) || [];
+    const target = matches[answerIndex];
+    if (!target) return null;
+    const id = target.match(/(\d+)/)?.[1];
+    return id || null;
+};
+
+const getBlankByIndexFromFlowChart = (flowChart, answerIndex) => {
+    if (!flowChart) return null;
+
+    if (typeof flowChart === 'object' && flowChart.type === 'vertical' && Array.isArray(flowChart.steps)) {
+        const blanks = [];
+        flowChart.steps.forEach((step) => {
+            if (step?.blank != null) blanks.push(String(step.blank));
+            if (step?.blank2 != null) blanks.push(String(step.blank2));
+        });
+        return blanks[answerIndex] || null;
+    }
+
+    if (typeof flowChart === 'string') {
+        const matches = flowChart.match(/___(\d+)___/g) || [];
+        const target = matches[answerIndex];
+        if (!target) return null;
+        return target.match(/(\d+)/)?.[1] || null;
+    }
+
+    return null;
+};
+
+const getBlankByIndexFromTable = (table, answerIndex) => {
+    if (!table?.rows || !table?.headers) return null;
+    let currentIndex = 0;
+    for (const row of table.rows) {
+        for (const header of table.headers) {
+            const cellValue = row?.[header];
+            const match = typeof cellValue === 'string' ? cellValue.match(/___(\d+)___/) : null;
+            if (!match) continue;
+            if (currentIndex === answerIndex) return match[1];
+            currentIndex += 1;
+        }
+    }
+    return null;
+};
+
+const getBlankByIndexFromNotes = (notes, answerIndex) => {
+    if (!Array.isArray(notes)) return null;
+    let currentIndex = 0;
+    for (const note of notes) {
+        const matches = (typeof note === 'string' ? note.match(/(?:___(\d+)___|(\d+)\.{2,})/g) : null) || [];
+        for (const match of matches) {
+            if (currentIndex === answerIndex) {
+                return match.match(/(\d+)/)?.[1] || null;
+            }
+            currentIndex += 1;
+        }
+    }
+    return null;
+};
+
+const getReadingSlotValue = (question, userAnswer, answerIndex) => {
+    if (!question) return EMPTY_VALUE;
+
+    switch (question.type) {
+        case 'multiple_choice':
+        case 'true_false':
+        case 'true_false_not_given':
+        case 'yes_no_not_given':
+            return normalizeSlotValue(userAnswer);
+
+        case 'multiple_choice_multiple':
+            if (!Array.isArray(userAnswer)) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[answerIndex]);
+
+        case 'matching_headings': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const section = question.sections?.[answerIndex];
+            const key = typeof section === 'object' ? section?.section : section;
+            if (!key) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[key]);
+        }
+
+        case 'matching_information': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const item = question.information?.[answerIndex];
+            const key = typeof item === 'object' ? item?.info : item;
+            if (!key) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[key]);
+        }
+
+        case 'matching_features': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const feature = question.features?.[answerIndex];
+            if (!feature) return EMPTY_VALUE;
+            const raw = typeof feature === 'string' ? feature : String(feature);
+            const key = raw.includes('.') ? raw.slice(0, raw.indexOf('.')) : raw;
+            return normalizeSlotValue(userAnswer[key]);
+        }
+
+        case 'matching_sentences': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const item = question.items?.[answerIndex];
+            const key = item?.id != null ? String(item.id) : null;
+            if (!key) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[key]);
+        }
+
+        case 'short_answer': {
+            if (question.instruction && Array.isArray(question.questions)) {
+                if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+                const key = question.questions[answerIndex];
+                return key ? normalizeSlotValue(userAnswer[key]) : EMPTY_VALUE;
+            }
+            return normalizeSlotValue(userAnswer);
+        }
+
+        case 'sentence_completion': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const sentence = question.sentences?.[answerIndex];
+            const key = typeof sentence === 'object' ? sentence?.beginning : sentence;
+            if (!key) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[key]);
+        }
+
+        case 'summary_completion': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const blankId = getBlankByIndexFromSummary(question.summary, answerIndex);
+            return blankId ? normalizeSlotValue(userAnswer[blankId]) : EMPTY_VALUE;
+        }
+
+        case 'flow_chart_completion': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const blankId = getBlankByIndexFromFlowChart(question.flow_chart, answerIndex);
+            return blankId ? normalizeSlotValue(userAnswer[blankId]) : EMPTY_VALUE;
+        }
+
+        case 'table_completion': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const blankId = getBlankByIndexFromTable(question.table, answerIndex);
+            return blankId ? normalizeSlotValue(userAnswer[blankId]) : EMPTY_VALUE;
+        }
+
+        case 'diagram_labelling': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const label = question.labels?.[answerIndex];
+            const key = label?.position;
+            return key ? normalizeSlotValue(userAnswer[key]) : EMPTY_VALUE;
+        }
+
+        case 'note_completion': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const blankId = getBlankByIndexFromNotes(question.notes, answerIndex);
+            return blankId ? normalizeSlotValue(userAnswer[blankId]) : EMPTY_VALUE;
+        }
+
+        default:
+            return normalizeSlotValue(userAnswer);
+    }
+};
 
 // Storage utility functions
 const storageUtils = {
@@ -145,6 +316,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     // Refs
     const startTimeRef = useRef(externalStartTime || Date.now());
     const timeoutRefs = useRef(new Set());
+    const sessionMismatchNotifiedRef = useRef(false);
 
     // Core state
     const [readingData, setReadingData] = useState(null);
@@ -173,6 +345,8 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
     const [inlinePassagePick, setInlinePassagePick] = useState(null);
+    const autosaveTimeoutRef = useRef(null);
+    const lastSavedPayloadRef = useRef('');
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -191,6 +365,15 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         }, delay);
         timeoutRefs.current.add(timeoutId);
         return timeoutId;
+    }, []);
+
+    const notifyMockSessionMismatch = useCallback(() => {
+        if (sessionMismatchNotifiedRef.current) return;
+        sessionMismatchNotifiedRef.current = true;
+
+        if (typeof window !== 'undefined') {
+            window.alert('Сессия больше не связана с этим mock тестом. Перезайдите и запустите тест заново, чтобы продолжить сохранение ответов.');
+        }
     }, []);
 
     // Detect multi-passage format
@@ -606,12 +789,21 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
             const isBackendMockReading = readingData?.source === 'backend-mock';
             const readingIdStr = String(id);
 
-            if ((isAdvancedReading || isBackendMockReading) && readingData?.id) {
-                let payload = null;
+            if (isBackendMockReading) {
+                const calculatedResults = calculateResults();
+                setResults(calculatedResults);
+                setShowResults(true);
 
-                if (isBackendMockReading) {
-                    payload = await validateReadingMockAnswers(readingData.mockId || readingData.id, userAnswers);
-                } else {
+                if (calculatedResults) {
+                    await markCompletion(
+                        readingIdStr,
+                        calculatedResults.percentageCorrect,
+                        calculatedResults.totalQuestions
+                    );
+                }
+            } else if (isAdvancedReading && readingData?.id) {
+                let payload = null;
+                try {
                     // Legacy validation route for non-mock advanced readings.
                     const res = await fetch(`/api/practice/reading/validate`, {
                         method: 'POST',
@@ -622,6 +814,8 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
                     if (!res.ok) throw new Error('Failed to validate answers');
                     payload = await res.json();
+                } catch (validationError) {
+                    throw validationError;
                 }
 
                 // Compute local stats
@@ -1051,6 +1245,83 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         });
     }, []);
 
+    const readingSavedAnswersPayload = useMemo(() => {
+        const answersBySection = {};
+
+        const passages = Array.isArray(readingData?.passages) ? readingData.passages : [];
+        const questionToSectionMap = new Map();
+
+        passages.forEach((passage, index) => {
+            const sectionKey = `p${index + 1}`;
+            answersBySection[sectionKey] = {};
+            (passage?.questions || []).forEach((question) => {
+                if (question?.id != null) {
+                    questionToSectionMap.set(question.id, sectionKey);
+                }
+            });
+        });
+
+        const slots = Array.isArray(allAnswersData?.individualAnswerSlots)
+            ? allAnswersData.individualAnswerSlots
+            : [];
+
+        slots.forEach((slot) => {
+            const question = allQuestions.find((item) => item.id === slot.questionId);
+            if (!question) return;
+            const sectionKey = questionToSectionMap.get(question.id);
+            if (!sectionKey) return;
+
+            const userAnswer = userAnswers[question.id];
+            const value = getReadingSlotValue(question, userAnswer, slot.answerIndex);
+            answersBySection[sectionKey][String(slot.sequentialNumber)] = value;
+        });
+
+        return { answers: answersBySection };
+    }, [allAnswersData, allQuestions, readingData?.passages, userAnswers]);
+
+    useEffect(() => {
+        const isBackendMockReading = readingData?.source === 'backend-mock';
+        if (!isBackendMockReading || !readingData?.mockId) return;
+        if (!Object.keys(userAnswers).length) return;
+
+        const session = getMockSession();
+        const token = session?.accessToken;
+        const sessionId = session?.sessionId;
+        if (!token || !sessionId) return;
+
+        const payloadKey = JSON.stringify(readingSavedAnswersPayload);
+        if (payloadKey === lastSavedPayloadRef.current) return;
+
+        if (autosaveTimeoutRef.current) {
+            clearTimeout(autosaveTimeoutRef.current);
+        }
+
+        autosaveTimeoutRef.current = setTimeout(async () => {
+            try {
+                await saveMockSectionAnswers(
+                    readingData.mockId,
+                    'reading',
+                    readingSavedAnswersPayload,
+                    { token, sessionId }
+                );
+                lastSavedPayloadRef.current = payloadKey;
+            } catch (error) {
+                if (isMockSessionMismatchError(error)) {
+                    notifyMockSessionMismatch();
+                    return;
+                }
+                console.warn('Reading autosave failed:', error);
+            }
+        }, AUTOSAVE_DELAY_MS);
+
+        return () => {
+            if (autosaveTimeoutRef.current) {
+                clearTimeout(autosaveTimeoutRef.current);
+                autosaveTimeoutRef.current = null;
+            }
+        };
+    }, [notifyMockSessionMismatch, readingData?.mockId, readingData?.source, readingSavedAnswersPayload, userAnswers]);
+
     // Horizontal scroll handler
     const handleScrollDots = useCallback((direction) => {
         const container = document.querySelector('.question-dots');
@@ -1112,10 +1383,8 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
         // Submit state
         canSubmit: selectedQuestionTypes.length === 0
-            ? (allAnswersData.totalAnswers > 0 &&
-                answerCounts.totalAnsweredCount >= allAnswersData.totalAnswers)
-            : (answerCounts.filteredGlobalTotalQuestions > 0 &&
-                answerCounts.filteredGlobalAnsweredCount >= answerCounts.filteredGlobalTotalQuestions),
+            ? allAnswersData.totalAnswers > 0
+            : answerCounts.filteredGlobalTotalQuestions > 0,
         submitAnsweredCount: selectedQuestionTypes.length === 0
             ? answerCounts.totalAnsweredCount
             : answerCounts.filteredGlobalAnsweredCount,

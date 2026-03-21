@@ -54,7 +54,12 @@ async function parseResponseBody(response) {
 
 function deriveErrorMessage(status, payload, fallback) {
   if (status === 401) return "Неверный логин или пароль.";
-  if (status === 403) return "Отсутствуют обязательные Safe Exam Browser заголовки.";
+  if (status === 403) {
+    if (payload && typeof payload === "object" && typeof payload.detail === "string") {
+      return payload.detail;
+    }
+    return "Отсутствуют обязательные Safe Exam Browser заголовки.";
+  }
   if (status === 409) return "Пользователь уже вошел в систему.";
   if (payload && typeof payload === "object") {
     if (typeof payload.detail === "string") return payload.detail;
@@ -64,10 +69,11 @@ function deriveErrorMessage(status, payload, fallback) {
   return fallback;
 }
 
-async function request(pathname, { method = "GET", body, token } = {}) {
+async function request(pathname, { method = "GET", body, token, headers: extraHeaders } = {}) {
   const headers = {
     Accept: "application/json",
     ...buildSebHeaders(),
+    ...(extraHeaders && typeof extraHeaders === "object" ? extraHeaders : {}),
   };
 
   if (body !== undefined) {
@@ -171,12 +177,72 @@ export async function validateReadingMockAnswers(mockId, userAnswers) {
   });
 }
 
-export async function validateListeningMockAnswers(mockId, userAnswers, token) {
+export async function validateListeningMockAnswers(
+  mockId,
+  userAnswers,
+  { token, sessionId } = {}
+) {
+  const customHeaders = {};
+  if (sessionId) {
+    customHeaders["X-Session-Id"] = String(sessionId).trim();
+  }
+
   return request(`/api/v1/mocks/${mockId}/validate_listening/`, {
     method: "POST",
     body: { answers: userAnswers },
     token,
+    headers: customHeaders,
   });
+}
+
+export async function saveMockSectionAnswers(
+  mockId,
+  section,
+  answersPayload,
+  { token, sessionId } = {}
+) {
+  const allowedSections = new Set(["reading", "listening", "writing"]);
+  const normalizedSection = String(section || "").trim().toLowerCase();
+  if (!normalizedSection || !allowedSections.has(normalizedSection)) {
+    throw new Error(
+      "Section must be one of: reading, listening, writing."
+    );
+  }
+
+  const normalizedToken = typeof token === "string" ? token.trim() : "";
+  const normalizedSessionId =
+    typeof sessionId === "string" ? sessionId.trim() : String(sessionId || "").trim();
+
+  if (!normalizedToken) {
+    throw new Error("Access token is required for mock saved answers.");
+  }
+  if (!normalizedSessionId) {
+    throw new Error("X-Session-Id is required for mock saved answers.");
+  }
+
+  const customHeaders = {};
+  customHeaders["X-Session-Id"] = normalizedSessionId;
+
+  return request(`/api/v1/mocks/${mockId}/saved-answers/${normalizedSection}/`, {
+    method: "POST",
+    body: answersPayload,
+    token: normalizedToken,
+    headers: customHeaders,
+  });
+}
+
+export function isMockSessionMismatchError(error) {
+  if (!(error instanceof BackendApiError)) return false;
+  if (Number(error.status) !== 403) return false;
+
+  const detail = error?.payload?.detail;
+  if (typeof detail !== "string") return false;
+
+  const normalizedDetail = detail.toLowerCase();
+  return (
+    normalizedDetail.includes("x-session-id does not match") ||
+    normalizedDetail.includes("session is not associated")
+  );
 }
 
 export { BackendApiError };

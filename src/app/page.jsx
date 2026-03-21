@@ -2,12 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BackendApiError, getMocksList, loginAgent, logoutAgent } from "@/lib/mockApi";
-import {
-  clearMockSession,
-  getMockSession,
-  saveMockSession,
-} from "@/lib/mockSession";
+import { BackendApiError, getMocksList, loginAgent } from "@/lib/mockApi";
+import { getMockSession, saveMockSession } from "@/lib/mockSession";
 import "./student-login.scss";
 
 export default function StudentLoginPage() {
@@ -81,7 +77,7 @@ export default function StudentLoginPage() {
       if (err instanceof BackendApiError) {
         const msg =
           err.status === 409
-            ? "Пользователь уже вошёл в систему. Сначала нажмите «Выйти» на странице с mock тестами, затем войдите снова."
+            ? "Пользователь уже вошёл в систему. Дождитесь завершения другой сессии или обратитесь к администратору."
             : err.message;
         setError(msg);
       } else {
@@ -90,29 +86,6 @@ export default function StudentLoginPage() {
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  async function handleLogout() {
-    // Всегда берём токен из storage, чтобы гарантированно отправить logout на бэкенд
-    const storedSession = getMockSession();
-    const token = storedSession?.accessToken;
-
-    if (token) {
-      try {
-        await logoutAgent(token);
-      } catch (err) {
-        // Локально всё равно выходим; пользователь видит форму входа
-        console.warn("Logout на сервере не выполнен:", err);
-      }
-    }
-
-    clearMockSession();
-    setSession(null);
-    setMocks([]);
-    setFullName("");
-    setLogin("");
-    setPassword("");
-    setError("");
   }
 
   function handleStartMock(mockId) {
@@ -223,13 +196,6 @@ export default function StudentLoginPage() {
                   Пользователь: <strong>{session.username || "agent"}</strong>
                 </p>
               </div>
-              <button
-                type="button"
-                className="student-login__logout-btn"
-                onClick={handleLogout}
-              >
-                Выйти
-              </button>
             </div>
 
             {error && (
@@ -245,13 +211,6 @@ export default function StudentLoginPage() {
             {!isLoadingMocks && !error && mocks.length === 0 ? (
               <div className="student-login__empty">
                 <p className="student-login__status">Доступных mock тестов пока нет.</p>
-                <button
-                  type="button"
-                  className="student-login__logout-btn"
-                  onClick={handleLogout}
-                >
-                  Выйти
-                </button>
               </div>
             ) : null}
 

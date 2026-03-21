@@ -13,6 +13,8 @@ import { TestNavbar } from '@/components/common';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
+import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
+import { getMockSession } from '@/lib/mockSession';
 
 // Custom hooks
 import { useWordCount } from '@/hooks/useWordCount';
@@ -42,6 +44,7 @@ const MAX_WORD_LIMIT = TASK_1_MAX_WORDS;
 const MIN_WORD_REQUIREMENT = TASK_1_MIN_WORDS;
 const WRITING_TASK_2_MIN_WORDS = 250;
 const WRITING_TASK_2_RECOMMENDED_MINUTES = 40;
+const AUTOSAVE_DELAY_MS = 700;
 
 const extractPromptText = (fullText) => {
     if (!fullText) return '';
@@ -101,6 +104,9 @@ function WritingPageContent({
     const [error, setError] = useState(null);
     const [showSkipModal, setShowSkipModal] = useState(false);
     const [isTitleTruncated, setIsTitleTruncated] = useState(false);
+    const autosaveTimeoutRef = useRef(null);
+    const lastSavedPayloadRef = useRef('');
+    const sessionMismatchNotifiedRef = useRef(false);
 
     const titleRef = useRef(null);
 
@@ -154,6 +160,32 @@ function WritingPageContent({
         if (!partsPayload.length) return userResponse;
         return partsPayload.join('\n\n');
     }, [writingTasks, responsesByPart, userResponse]);
+
+    const writingSavedAnswersPayload = useMemo(() => {
+        const answers = {};
+
+        writingTasks.forEach((task, index) => {
+            const taskNumber = Number(task?.taskNumber) || Number(task?.part) || index + 1;
+            if (taskNumber !== 1 && taskNumber !== 2) return;
+
+            const rawText = responsesByPart[index];
+            const normalizedText = typeof rawText === 'string' ? rawText.trim() : '';
+            if (normalizedText) {
+                answers[`t${taskNumber}`] = normalizedText;
+            }
+        });
+
+        return { answers };
+    }, [writingTasks, responsesByPart]);
+
+    const notifyMockSessionMismatch = useCallback(() => {
+        if (sessionMismatchNotifiedRef.current) return;
+        sessionMismatchNotifiedRef.current = true;
+
+        if (typeof window !== 'undefined') {
+            window.alert('Сессия больше не связана с этим mock тестом. Перезайдите и начните mock заново, чтобы ответы снова сохранялись.');
+        }
+    }, []);
 
     // Custom hooks
     const { wordCount } = useWordCount(userResponse, { maxWords: MAX_WORD_LIMIT, minWords: minWordRequirement });
@@ -285,6 +317,49 @@ function WritingPageContent({
         const currentMinWords = Number(activeTask?.minWords) || MIN_WORD_REQUIREMENT;
         setMinWordRequirement(currentMinWords);
     }, [activeTask]);
+
+    useEffect(() => {
+        if (!useUnifiedMockHeader) return;
+        if (!Object.keys(responsesByPart).length) return;
+
+        const mockId = Number(id);
+        if (!Number.isFinite(mockId) || mockId <= 0) return;
+
+        const session = getMockSession();
+        const token = session?.accessToken;
+        const sessionId = session?.sessionId;
+        if (!token || !sessionId) return;
+
+        const payloadKey = JSON.stringify(writingSavedAnswersPayload);
+        if (payloadKey === lastSavedPayloadRef.current) return;
+
+        if (autosaveTimeoutRef.current) {
+            clearTimeout(autosaveTimeoutRef.current);
+        }
+
+        autosaveTimeoutRef.current = setTimeout(async () => {
+            try {
+                await saveMockSectionAnswers(mockId, 'writing', writingSavedAnswersPayload, {
+                    token,
+                    sessionId
+                });
+                lastSavedPayloadRef.current = payloadKey;
+            } catch (saveError) {
+                if (isMockSessionMismatchError(saveError)) {
+                    notifyMockSessionMismatch();
+                    return;
+                }
+                console.warn('Writing autosave failed:', saveError);
+            }
+        }, AUTOSAVE_DELAY_MS);
+
+        return () => {
+            if (autosaveTimeoutRef.current) {
+                clearTimeout(autosaveTimeoutRef.current);
+                autosaveTimeoutRef.current = null;
+            }
+        };
+    }, [id, notifyMockSessionMismatch, responsesByPart, useUnifiedMockHeader, writingSavedAnswersPayload]);
 
     // Load data on mount and when exercise identity changes (not when object reference changes)
     useEffect(() => {
