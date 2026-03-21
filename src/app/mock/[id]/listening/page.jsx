@@ -1,20 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Spinner from "@/components/common/spinner";
 import TestListeningPage from "@/app/mock/_components/TestListeningPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptListeningMockToUi } from "@/lib/mockAdapters";
 import { getMockAccessToken, getMockPayload, setMockPayload } from "@/lib/mockSession";
+import MockPreloadScreen from "@/components/MockPreloadScreen";
+import { useMockPreloader } from "@/hooks/useMockPreloader";
 
 export default function MockListeningByIdPage() {
   const params = useParams();
   const router = useRouter();
   const mockId = params?.id;
-  const [payload, setPayload] = useState(null);
+  const [mockDetail, setMockDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { percent, status, errors, cachedData } = useMockPreloader(mockDetail);
+
+  const preparedPayload = useMemo(() => {
+    if (!cachedData) return null;
+    return adaptListeningMockToUi(cachedData);
+  }, [cachedData]);
 
   useEffect(() => {
     if (!mockId) return;
@@ -30,14 +38,14 @@ export default function MockListeningByIdPage() {
       setError("");
       const cached = getMockPayload(mockId);
       if (cached) {
-        setPayload(adaptListeningMockToUi(cached));
+        setMockDetail(cached);
         setLoading(false);
         return;
       }
       try {
         const detail = await getMockById(mockId, token);
         setMockPayload(mockId, detail);
-        setPayload(adaptListeningMockToUi(detail));
+        setMockDetail(detail);
       } catch (err) {
         setError(err?.message || "Не удалось загрузить listening mock.");
       } finally {
@@ -48,7 +56,13 @@ export default function MockListeningByIdPage() {
     load();
   }, [mockId, router]);
 
-  if (loading) {
+  useEffect(() => {
+    if (status === "done" && errors.length > 0) {
+      console.warn("[mock-preloader] some assets failed to preload:", errors);
+    }
+  }, [errors, status]);
+
+  if (loading && !mockDetail) {
     return (
       <div style={{ minHeight: "55vh", display: "grid", placeItems: "center" }}>
         <Spinner />
@@ -56,7 +70,7 @@ export default function MockListeningByIdPage() {
     );
   }
 
-  if (error || !payload) {
+  if (error || !mockDetail) {
     return (
       <div style={{ minHeight: "55vh", display: "grid", placeItems: "center", padding: "1rem" }}>
         <p>{error || "Не удалось запустить mock."}</p>
@@ -64,13 +78,25 @@ export default function MockListeningByIdPage() {
     );
   }
 
+  if (status !== "done") {
+    return <MockPreloadScreen percent={percent} status={status} />;
+  }
+
+  if (!preparedPayload) {
+    return (
+      <div style={{ minHeight: "55vh", display: "grid", placeItems: "center", padding: "1rem" }}>
+        <p>Не удалось подготовить mock для старта.</p>
+      </div>
+    );
+  }
+
   return (
     <TestListeningPage
-      bookData={payload.bookData}
-      answersData={payload.answersData}
-      bookId={payload.bookId}
-      testId={payload.testId}
-      testTitle={payload.testTitle}
+      bookData={preparedPayload.bookData}
+      answersData={preparedPayload.answersData}
+      bookId={preparedPayload.bookId}
+      testId={preparedPayload.testId}
+      testTitle={preparedPayload.testTitle}
       nextHref={`/mock/${mockId}/reading`}
       isMockExam={true}
       useUnifiedMockHeader={true}
