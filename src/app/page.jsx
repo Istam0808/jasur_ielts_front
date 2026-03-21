@@ -12,6 +12,7 @@ import "./student-login.scss";
 
 export default function StudentLoginPage() {
   const router = useRouter();
+  const [fullName, setFullName] = useState("");
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -54,14 +55,14 @@ export default function StudentLoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    if (!login.trim() || !password) {
-      setError("Введите логин и пароль.");
+    if (!fullName.trim() || !login.trim() || !password) {
+      setError("Введите полное имя, логин и пароль.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const auth = await loginAgent(login.trim(), password);
+      const auth = await loginAgent(login.trim(), password, fullName.trim());
       if (!auth.accessToken) {
         setError("Backend не вернул access token.");
         return;
@@ -108,6 +109,7 @@ export default function StudentLoginPage() {
     clearMockSession();
     setSession(null);
     setMocks([]);
+    setFullName("");
     setLogin("");
     setPassword("");
     setError("");
@@ -140,6 +142,25 @@ export default function StudentLoginPage() {
               autoComplete="on"
             >
               <div className="student-login__field">
+                <label className="student-login__label" htmlFor="student-full-name">
+                  Полное имя
+                </label>
+                <input
+                  id="student-full-name"
+                  type="text"
+                  className="student-login__input"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Фамилия и имя"
+                  autoComplete="name"
+                  autoFocus
+                  aria-required="true"
+                  aria-invalid={!!error}
+                  aria-describedby={error ? "student-login-error" : undefined}
+                />
+              </div>
+
+              <div className="student-login__field">
                 <label className="student-login__label" htmlFor="student-login">
                   Логин
                 </label>
@@ -151,7 +172,6 @@ export default function StudentLoginPage() {
                   onChange={(e) => setLogin(e.target.value)}
                   placeholder="Введите логин"
                   autoComplete="username"
-                  autoFocus
                   aria-required="true"
                   aria-invalid={!!error}
                   aria-describedby={error ? "student-login-error" : undefined}

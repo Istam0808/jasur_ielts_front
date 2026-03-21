@@ -98,10 +98,10 @@ async function request(pathname, { method = "GET", body, token } = {}) {
   return payload;
 }
 
-export async function loginAgent(username, password) {
+export async function loginAgent(username, password, fullName) {
   const payload = await request("/api/v1/auth/login", {
     method: "POST",
-    body: { username, password },
+    body: { username, password, full_name: fullName },
   });
 
   return {
