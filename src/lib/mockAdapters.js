@@ -251,8 +251,43 @@ export function adaptListeningMockToUi(mockDetail) {
       const isMultipleChoiceMultipleAnswers = sectionTypeRaw
         .toLowerCase()
         .includes("multiple_choice_multiple_answers");
+      const isDragAndDropSection = sectionTypeRaw
+        .toLowerCase()
+        .includes("drag_and_drop");
 
-      if (isMultipleChoiceMultipleAnswers) {
+      if (isDragAndDropSection) {
+        const sourceQuestions = asArray(section?.questions)
+          .slice()
+          .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+
+        const numberedQuestions = sourceQuestions.map((question) => {
+          const number = questionNumber;
+          questionNumber += 1;
+
+          const rawAnswer =
+            question?.correct_answer ||
+            question?.answer ||
+            question?.correct ||
+            "";
+          answersByQuestionNumber[number] = String(rawAnswer || "");
+
+          return {
+            number,
+            text: question?.question_text || `Question ${number}`,
+          };
+        });
+
+        const sectionStart = numberedQuestions[0]?.number ?? startNumber;
+        const sectionEnd = numberedQuestions[numberedQuestions.length - 1]?.number ?? sectionStart;
+
+        questions = [{
+          number: sectionStart === sectionEnd ? sectionStart : `${sectionStart}-${sectionEnd}`,
+          type: "drag_and_drop",
+          text: section?.instructions || "",
+          options: asArray(section?.list_selections).map(toOptionData),
+          individualQuestions: numberedQuestions,
+        }];
+      } else if (isMultipleChoiceMultipleAnswers) {
         const sourceQuestions = asArray(section?.questions);
         const numberedQuestions = sourceQuestions.map((question) => {
           const number = questionNumber;

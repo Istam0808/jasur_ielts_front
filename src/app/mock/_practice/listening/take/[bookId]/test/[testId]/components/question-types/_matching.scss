@@ -24,9 +24,9 @@
         background-color: $background-light;
         color: $text-primary;
         font-size: 1rem;
-        appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
+        appearance: none;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
         background-position: right 0.5rem center;
         background-repeat: no-repeat;
@@ -131,6 +131,179 @@
             &:hover svg {
                 opacity: 1;
             }
+        }
+    }
+}
+
+.question-drag-and-drop {
+    margin-top: $spacing-md;
+    max-width: 820px;
+
+    .drag-drop-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 580px) minmax(220px, 300px);
+        gap: $spacing-lg;
+        justify-content: start;
+    }
+
+    .drag-drop-left {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-md;
+        max-width: 580px;
+    }
+
+    .drag-drop-row {
+        display: grid;
+        grid-template-columns: minmax(140px, 230px) minmax(130px, 220px);
+        gap: $spacing-sm;
+        align-items: center;
+    }
+
+    .drag-drop-question-text {
+        margin: 0;
+        color: $text-primary;
+        font-size: $font-size-base;
+        line-height: 1.45;
+    }
+
+    .drag-drop-target {
+        min-height: 44px;
+        border: 1px dashed $neutral-300;
+        border-radius: $border-radius-sm;
+        background-color: $background-light;
+        padding: $spacing-xs $spacing-sm;
+        text-align: left;
+        cursor: pointer;
+        width: 100%;
+        transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+
+        &.empty {
+            color: $text-muted;
+        }
+
+        &.filled {
+            border-style: solid;
+            border-color: color.scale($success-color, $lightness: 30%);
+            background-color: color.scale($success-color, $lightness: 88%);
+        }
+
+        &:hover,
+        &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px color.scale($primary-color, $alpha: -85%);
+            outline: none;
+        }
+    }
+
+    .drag-drop-target-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-sm;
+    }
+
+    .drag-drop-target-label {
+        color: $text-primary;
+        font-size: $font-size-sm;
+        line-height: 1.4;
+    }
+
+    .drag-drop-clear {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: $border-radius-full;
+        border: 1px solid color.scale($danger-color, $lightness: 20%);
+        color: color.scale($danger-color, $lightness: -10%);
+        background-color: $background-light;
+        font-size: $font-size-xs;
+        line-height: 1;
+        flex-shrink: 0;
+
+        &:hover {
+            background-color: color.scale($danger-color, $lightness: 88%);
+        }
+    }
+
+    .drag-drop-target-placeholder {
+        color: $text-muted;
+        letter-spacing: 0.04em;
+        font-size: $font-size-sm;
+    }
+
+    .drag-drop-right {
+        border: 1px solid $border-light;
+        border-radius: $border-radius-sm;
+        background-color: $background-primary;
+        padding: $spacing-sm;
+        height: fit-content;
+    }
+
+    .drag-drop-options {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+    }
+
+    .drag-drop-option {
+        border: 1px solid $border-light;
+        border-radius: $border-radius-xs;
+        background-color: $background-light;
+        color: $text-primary;
+        cursor: grab;
+        text-align: left;
+        padding: $spacing-xs $spacing-sm;
+        transition: border-color $transition-fast, background-color $transition-fast, box-shadow $transition-fast;
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        align-items: start;
+        column-gap: $spacing-xs;
+
+        &:hover,
+        &:focus {
+            border-color: $primary-color;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            outline: none;
+        }
+
+        &.picked {
+            border-color: $primary-color;
+            background-color: color.scale($primary-color, $lightness: 90%);
+        }
+    }
+
+    .drag-drop-option-label {
+        font-weight: $font-weight-semibold;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+    }
+
+    .drag-drop-option-text {
+        color: $text-primary;
+        font-size: $font-size-sm;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .drag-drop-empty {
+        margin: 0;
+        color: $text-muted;
+        font-size: $font-size-sm;
+        font-style: italic;
+    }
+}
+
+@include respond-down('md') {
+    .question-drag-and-drop {
+        .drag-drop-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .drag-drop-row {
+            grid-template-columns: 1fr;
         }
     }
 }

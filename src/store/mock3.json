@@ -497,7 +497,7 @@
       {
         "id": 7,
         "order": 2,
-        "section_type": "move_into_garden",
+        "section_type": "drag_and_drop",
         "instructions": ".",
         "title": null,
         "list_selections": [
@@ -915,7 +915,7 @@
           {
             "id": 12,
             "label": "D",
-            "text": "D Society could not function effectively without legal experts"
+            "text": "Society could not function effectively without legal experts"
           }
         ],
         "multiple_choice_multiple_answers": {

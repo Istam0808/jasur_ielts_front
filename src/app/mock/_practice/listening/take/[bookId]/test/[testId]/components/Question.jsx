@@ -8,6 +8,7 @@ import MultipleChoice from './question-types/MultipleChoice';
 import MultipleChoiceTwo from './question-types/MultipleChoiceTwo';
 import MapLabeling from './question-types/MapLabeling';
 import Matching from './question-types/Matching';
+import DragAndDrop from './question-types/DragAndDrop';
 import TrueFalse from './question-types/TrueFalse';
 
 const questionComponents = {
@@ -16,6 +17,7 @@ const questionComponents = {
     multiple_choice_two: MultipleChoiceTwo,
     map_labeling: MapLabeling,
     matching: Matching,
+    drag_and_drop: DragAndDrop,
     true_false: TrueFalse,
     trueFalse: TrueFalse, // Support both naming conventions
 };
