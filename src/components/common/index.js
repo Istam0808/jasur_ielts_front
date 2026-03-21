@@ -1,7 +1,6 @@
 export { default as LoadingBar } from './LoadingBar';
 export { default as Timer } from './Timer';
 export { default as Modal } from './Modal';
-export { default as NoteModal } from './NoteModal';
 export { default as TestNavbar } from './TestNavbar';
 export { default as TestFooter } from './TestFooter';
 export { default as spinner } from './spinner';
