@@ -17,6 +17,7 @@ import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
 import { getMockSession } from '@/lib/mockSession';
 import MockExamFooter from '@/components/mock/MockExamFooter';
+import HighlightText from '@/components/common/HighlightText';
 import { isSpecificSlotAnswered } from '../helpers/questionUtils';
 
 export default function NormalReadingMode({
@@ -57,7 +58,6 @@ export default function NormalReadingMode({
     columnWidth,
     onColumnResize,
     handleQuestionClick,
-    handleHighlightClick,
     adjustedTimeLimit,
     timerStartTime,
     finalTimerState,
@@ -511,13 +511,8 @@ export default function NormalReadingMode({
 
                     {/* Passage navigation moved below resizable content */}
 
-                    <div
-                        className="passage-content"
-                        onClick={handleHighlightClick}
-                        style={{ userSelect: 'text', cursor: 'text' }}
-                        data-passage-id={readingData?.isMultiPassage ? activePassageId : 1}
-                    >
-                        <h3 className="passage-title">{passageTitle}</h3>
+                    <HighlightText className="passage-content highlight-text-root">
+                        <h3 className="passage-title" data-highlight-ignore="true">{passageTitle}</h3>
                         {passageIsHtml && passageParagraphs?.length > 0 ? (
                             inlineMatchingQuestion ? (
                                 <PassageWithDropzones
@@ -543,7 +538,7 @@ export default function NormalReadingMode({
                                 </p>
                             ))
                         )}
-                    </div>
+                    </HighlightText>
                 </div>
 
                 {/* Questions Section */}

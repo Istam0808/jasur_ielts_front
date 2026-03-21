@@ -578,6 +578,25 @@
     }
 }
 
+// Shared highlight style used by HighlightText component
+.text-highlight {
+    color: #111827;
+    padding: 2px 4px;
+    border-radius: $border-radius-xs;
+    cursor: pointer;
+    box-shadow: $shadow-sm;
+    transition: all $transition-fast;
+    border: 1px solid $warning-color;
+    @include highlight-gradient;
+
+    &:hover {
+        box-shadow: $shadow-md;
+        transform: translateY(-1px);
+        border-color: color.scale($warning-color, $lightness: -20%);
+        @include highlight-hover-gradient;
+    }
+}
+
 // Text selection styling
 ::selection {
     background: rgba($primary-color, 0.2);

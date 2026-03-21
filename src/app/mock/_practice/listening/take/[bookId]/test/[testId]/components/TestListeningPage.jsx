@@ -15,6 +15,7 @@ import { useMockUi } from '@/components/common/MockUiContext';
 import { validateListeningMockAnswers } from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
 import MockExamFooter from '@/components/mock/MockExamFooter';
+import HighlightText from '@/components/common/HighlightText';
 import './testListeningPage.scss';
 
 // Заглушка: функциональность заметок удалена; имя оставлено, чтобы не ловить ReferenceError
@@ -788,22 +789,24 @@ const TestListeningPage = ({
                         />
                     ) : null}
 
-                    {
-                        activePart.instruction && (
-                            <div className="part-instructions selectable-content">
-                                <p className="instruction-text">{activePart.instruction}</p>
-                            </div>
-                        )
-                    }
+                    <HighlightText className="selectable-content highlight-text-root">
+                        {
+                            activePart.instruction && (
+                                <div className="part-instructions">
+                                    <p className="instruction-text">{activePart.instruction}</p>
+                                </div>
+                            )
+                        }
 
-                    <div className="questions-area selectable-content">
-                        <QuestionRenderer
-                            item={activePart}
-                            userAnswers={userAnswers}
-                            onAnswerChange={handleAnswerChange}
-                            optionsBox={null}
-                        />
-                    </div>
+                        <div className="questions-area">
+                            <QuestionRenderer
+                                item={activePart}
+                                userAnswers={userAnswers}
+                                onAnswerChange={handleAnswerChange}
+                                optionsBox={null}
+                            />
+                        </div>
+                    </HighlightText>
 
                     <TestNavigation
                         currentPartIndex={currentPartIndex}

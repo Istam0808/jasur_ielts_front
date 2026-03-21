@@ -8,7 +8,6 @@ import Spinner from '@/components/common/spinner';
 
 // Import extracted components and hooks
 import { useReadingState } from '../hooks/useReadingState';
-import { useTextHighlighting } from '../hooks/useTextHighlighting';
 import NormalReadingMode from './NormalReadingMode';
 
 export default function ReadingPage({
@@ -109,18 +108,6 @@ export default function ReadingPage({
         handleScrollDots,
         handleInlinePassagePickChange
     } = useReadingState(readingExercise, difficulty, id);
-
-    // Use text highlighting hook
-    const {
-        passageHighlights,
-        setPassageHighlights,
-        highlightTextSelection,
-        clearPassageHighlights,
-        clearAllHighlights,
-        restorePassageHighlights,
-        handleTextSelection,
-        handleHighlightClick
-    } = useTextHighlighting(readingData, isFullScreen, activePassageId);
 
     // Ref for the scrollable question dots container
     const dotsContainerRef = useRef(null);
@@ -265,38 +252,6 @@ export default function ReadingPage({
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [toggleFullScreen, exitFullScreen, isFullScreen]);
 
-    // Clear highlights when reading data changes (new test loaded)
-    useEffect(() => {
-        if (readingData?.id) {
-            clearAllHighlights();
-        }
-    }, [readingData?.id, clearAllHighlights]);
-
-    // Cleanup highlights when component unmounts
-    useEffect(() => {
-        return () => {
-            clearAllHighlights();
-        };
-    }, [clearAllHighlights]);
-
-    // Restore highlights when component mounts, passage changes, or mode changes
-    useEffect(() => {
-        if (!readingData) return;
-
-        // Use a timeout to ensure the DOM is fully updated
-        const timeoutId = setTimeout(() => {
-            if (readingData.isMultiPassage) {
-                // For multi-passage readings, restore highlights for the current passage
-                restorePassageHighlights(activePassageId);
-            } else {
-                // For single-passage readings, restore highlights for passage 1
-                restorePassageHighlights(1);
-            }
-        }, 200); // Increased delay for better reliability
-
-        return () => clearTimeout(timeoutId);
-    }, [readingData, activePassageId, restorePassageHighlights, isFullScreen, isReviewMode]);
-
     // Manages visibility of scroll arrows for the question dots container
     useEffect(() => {
         const container = dotsContainerRef.current;
@@ -390,7 +345,6 @@ export default function ReadingPage({
         columnWidth,
         onColumnResize: setColumnWidth,
         handleQuestionClick,
-        handleHighlightClick,
         adjustedTimeLimit,
         timerStartTime,
         finalTimerState,
