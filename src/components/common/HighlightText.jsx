@@ -2,7 +2,7 @@
 
 import './HighlightText.scss';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { serializeRange, deserializeToRange } from '@/utils/highlight/serializeRange';
 import { wrapTextRangeInMarks } from '@/utils/highlight/wrapTextRangeInMarks';
 
@@ -82,6 +82,36 @@ function saveStoredHighlights(storageKey, list) {
     } catch {
         /* ignore quota */
     }
+}
+
+/**
+ * Re-applies marks from sessionStorage when DOM was reset (e.g. parent re-render
+ * after window blur / timer state) but storageKey unchanged.
+ */
+function restoreMissingMarksFromStorage(root, storageKey, markClassName) {
+    if (!storageKey || !root) return;
+
+    const list = loadStoredHighlights(storageKey);
+    if (list.length === 0) return;
+
+    const excluded = (el) => isExcludedHighlightRoot(el);
+
+    const allPresent = list.every(({ id }) => {
+        if (!id) return true;
+        return root.querySelector(`mark[data-highlight-id="${escapeHighlightIdForSelector(id)}"]`);
+    });
+    if (allPresent) return;
+
+    list.forEach(({ id, serialized }) => {
+        if (!serialized || !id) return;
+        if (root.querySelector(`mark[data-highlight-id="${escapeHighlightIdForSelector(id)}"]`)) {
+            return;
+        }
+        const range = deserializeToRange(serialized, root);
+        if (!range || range.collapsed) return;
+        wrapTextRangeInMarks(range, root, id, markClassName, excluded);
+    });
+    root.normalize();
 }
 
 export default function HighlightText({
@@ -307,30 +337,28 @@ export default function HighlightText({
         };
     }, [hideToolbar]);
 
+    // After any render: passage DOM may have been recreated (e.g. blur → timer pause →
+    // re-render resets dangerouslySetInnerHTML) while sessionStorage still holds highlights.
+    useLayoutEffect(() => {
+        if (!storageKey) return;
+        const root = rootRef.current;
+        if (!root) return;
+        restoreMissingMarksFromStorage(root, storageKey, markClassName);
+        // Intentionally after every commit; deps would miss re-renders that wipe marks.
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- sync DOM with storage after any parent update
+    });
+
     useEffect(() => {
         if (!storageKey) return;
-
-        const list = loadStoredHighlights(storageKey);
-        if (list.length === 0) return;
-
-        const excluded = (el) => isExcludedHighlightRoot(el);
-
-        requestAnimationFrame(() => {
+        const onVisibility = () => {
+            if (document.visibilityState !== 'visible') return;
             const root = rootRef.current;
             if (!root) return;
-
-            list.forEach(({ id, serialized }) => {
-                if (!serialized || !id) return;
-                if (root.querySelector(`mark[data-highlight-id="${escapeHighlightIdForSelector(id)}"]`)) {
-                    return;
-                }
-                const range = deserializeToRange(serialized, root);
-                if (!range || range.collapsed) return;
-                wrapTextRangeInMarks(range, root, id, markClassName, excluded);
-            });
-            root.normalize();
-        });
-    }, [storageKey, restoreVersion, markClassName]);
+            restoreMissingMarksFromStorage(root, storageKey, markClassName);
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        return () => document.removeEventListener('visibilitychange', onVisibility);
+    }, [storageKey, markClassName]);
 
     return (
         <div

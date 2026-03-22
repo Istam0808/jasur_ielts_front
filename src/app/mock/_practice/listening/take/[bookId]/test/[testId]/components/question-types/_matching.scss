@@ -137,11 +137,11 @@
 
 .question-drag-and-drop {
     margin-top: $spacing-md;
-    max-width: 820px;
+    max-width: 1020px;
 
     .drag-drop-grid {
         display: grid;
-        grid-template-columns: minmax(0, 580px) minmax(220px, 300px);
+        grid-template-columns: minmax(0, 580px) minmax(280px, 400px);
         gap: $spacing-lg;
         justify-content: start;
     }
@@ -155,7 +155,7 @@
 
     .drag-drop-row {
         display: grid;
-        grid-template-columns: minmax(140px, 230px) minmax(130px, 220px);
+        grid-template-columns: minmax(120px, 220px) minmax(200px, 320px);
         gap: $spacing-sm;
         align-items: center;
     }
@@ -184,8 +184,9 @@
 
         &.filled {
             border-style: solid;
-            border-color: color.scale($success-color, $lightness: 30%);
-            background-color: color.scale($success-color, $lightness: 88%);
+            border-color: $neutral-300;
+            background-color: $neutral-50;
+            color: $text-primary;
         }
 
         &:hover,
@@ -216,15 +217,16 @@
         width: 20px;
         height: 20px;
         border-radius: $border-radius-full;
-        border: 1px solid color.scale($danger-color, $lightness: 20%);
-        color: color.scale($danger-color, $lightness: -10%);
+        border: 1px solid $neutral-400;
+        color: $text-primary;
         background-color: $background-light;
         font-size: $font-size-xs;
         line-height: 1;
         flex-shrink: 0;
 
         &:hover {
-            background-color: color.scale($danger-color, $lightness: 88%);
+            background-color: $neutral-100;
+            border-color: $neutral-500;
         }
     }
 
@@ -245,7 +247,7 @@
     .drag-drop-options {
         display: flex;
         flex-direction: column;
-        gap: $spacing-xs;
+        gap: $spacing-sm;
     }
 
     .drag-drop-option {
@@ -286,6 +288,7 @@
         font-size: $font-size-sm;
         line-height: 1.35;
         overflow-wrap: anywhere;
+        font-size: larger;
     }
 
     .drag-drop-empty {
