@@ -775,10 +775,6 @@ function WritingPageContent({
                                 </div>
 
                                 <div className="ielts-writing-right-pane">
-                                    <div className="section-header">
-                                        <h2>{t('yourResponse', { ns: 'writing', defaultValue: 'Your Response' })}</h2>
-                                    </div>
-
                                     <WritingTextarea
                                         value={userResponse}
                                         onChange={(e) => {

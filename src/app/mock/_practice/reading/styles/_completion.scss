@@ -24,7 +24,7 @@
         }
 
         &.unanswered {
-            border-color: $border-light;
+            border: none;
         }
 
 
@@ -41,7 +41,7 @@
             .title-text {
                 margin: 0;
                 color: $text-primary;
-                font-size: 1rem;
+                font-size: 1.4rem;
                 font-weight: 700;
                 line-height: 1.4;
             }
@@ -1587,7 +1587,7 @@
             margin: 0;
             font-weight: 600;
             color: $text-primary;
-            font-size: 1.1rem;
+            font-size: 1.35rem;
             line-height: 1.4;
             position: relative;
             padding-left: $spacing-md;
@@ -1669,7 +1669,7 @@
             }
 
             .title-text {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
         }
 
@@ -1700,7 +1700,7 @@
             }
 
             .title-text {
-                font-size: 0.95rem;
+                font-size: 1.05rem;
             }
         }
 

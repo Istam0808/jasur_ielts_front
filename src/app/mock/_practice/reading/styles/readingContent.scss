@@ -484,6 +484,7 @@
 // Questions section
 .questions-section {
     padding: 0;
+    background: #fff;
     border-radius: 0 $border-radius-xl $border-radius-xl 0;
     box-shadow: $shadow-lg;
     border: 1px solid $border-light;
@@ -577,6 +578,36 @@
 
     &:last-child {
         margin-bottom: 0;
+    }
+}
+
+.reading-question-card.question-type-matching-headings {
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+
+    @include respond-down('sm') {
+        border-radius: 0;
+    }
+}
+
+.reading-question-card.unanswered.question-type-multiple-choice_multiple {
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+
+    @include respond-down('sm') {
+        border-radius: 0;
+    }
+}
+
+.reading-question-card.unanswered.question-type-summary-completion {
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+
+    @include respond-down('sm') {
+        border-radius: 0;
     }
 }
 
