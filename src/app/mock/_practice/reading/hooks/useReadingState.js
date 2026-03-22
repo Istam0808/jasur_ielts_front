@@ -6,15 +6,17 @@ import { useLoading } from '@/components/common/LoadingContext';
 import { checkAnswer, getCorrectAnswerTextForScoring, checkAnswerVariants, normalizeText } from '@/utils/answerChecker';
 import { getQuestionAnswerCount, getProvidedAnswerCount } from '../helpers/questionUtils';
 import { groupQuestionsByType } from '../helpers/QuestionGrouping';
-import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
+import {
+    isMockNotBoundError,
+    isMockSessionMismatchError,
+    saveMockSectionAnswers
+} from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
 
 // Constants
 const HIGHLIGHT_DURATION = 2000;
 const LOADING_DELAY = 300;
 const SCROLL_DELAY = 200;
-const AUTOSAVE_DELAY_MS = 700;
-
 const EMPTY_VALUE = null;
 
 const normalizeSlotValue = (value) => {
@@ -184,6 +186,183 @@ const getReadingSlotValue = (question, userAnswer, answerIndex) => {
     }
 };
 
+const normalizeIncomingReadingSlot = (rawValue) => {
+    if (rawValue === null || rawValue === undefined) return EMPTY_VALUE;
+    const normalized = String(rawValue).trim();
+    return normalized === '' ? EMPTY_VALUE : normalized;
+};
+
+/** Для API reading: слоты должны быть строками; пустые — `""`, не `null`. */
+const readingSlotValueForApi = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value).trim();
+};
+
+const setReadingSlotValue = (question, prevAnswer, answerIndex, rawValue) => {
+    const val = normalizeIncomingReadingSlot(rawValue);
+    if (!question) return prevAnswer;
+
+    switch (question.type) {
+        case 'multiple_choice':
+        case 'true_false':
+        case 'true_false_not_given':
+        case 'yes_no_not_given':
+            return val === EMPTY_VALUE ? null : val;
+
+        case 'multiple_choice_multiple': {
+            const arr = Array.isArray(prevAnswer) ? [...prevAnswer] : [];
+            while (arr.length <= answerIndex) arr.push(EMPTY_VALUE);
+            arr[answerIndex] = val;
+            return arr;
+        }
+
+        case 'matching_headings': {
+            const section = question.sections?.[answerIndex];
+            const key = typeof section === 'object' ? section?.section : section;
+            if (!key) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'matching_information': {
+            const item = question.information?.[answerIndex];
+            const key = typeof item === 'object' ? item?.info : item;
+            if (!key) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'matching_features': {
+            const feature = question.features?.[answerIndex];
+            if (!feature) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const raw = typeof feature === 'string' ? feature : String(feature);
+            const key = raw.includes('.') ? raw.slice(0, raw.indexOf('.')) : raw;
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'matching_sentences': {
+            const item = question.items?.[answerIndex];
+            const key = item?.id != null ? String(item.id) : null;
+            if (!key) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'short_answer': {
+            if (question.instruction && Array.isArray(question.questions)) {
+                const subKey = question.questions[answerIndex];
+                if (!subKey) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+                const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+                if (val === EMPTY_VALUE) {
+                    delete base[subKey];
+                } else {
+                    base[subKey] = val;
+                }
+                return base;
+            }
+            return val === EMPTY_VALUE ? null : val;
+        }
+
+        case 'sentence_completion': {
+            const sentence = question.sentences?.[answerIndex];
+            const key = typeof sentence === 'object' ? sentence?.beginning : sentence;
+            if (!key) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'summary_completion': {
+            const blankId = getBlankByIndexFromSummary(question.summary, answerIndex);
+            if (!blankId) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[blankId];
+            } else {
+                base[blankId] = val;
+            }
+            return base;
+        }
+
+        case 'flow_chart_completion': {
+            const blankId = getBlankByIndexFromFlowChart(question.flow_chart, answerIndex);
+            if (!blankId) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[blankId];
+            } else {
+                base[blankId] = val;
+            }
+            return base;
+        }
+
+        case 'table_completion': {
+            const blankId = getBlankByIndexFromTable(question.table, answerIndex);
+            if (!blankId) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[blankId];
+            } else {
+                base[blankId] = val;
+            }
+            return base;
+        }
+
+        case 'diagram_labelling': {
+            const label = question.labels?.[answerIndex];
+            const key = label?.position;
+            if (!key) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[key];
+            } else {
+                base[key] = val;
+            }
+            return base;
+        }
+
+        case 'note_completion': {
+            const blankId = getBlankByIndexFromNotes(question.notes, answerIndex);
+            if (!blankId) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[blankId];
+            } else {
+                base[blankId] = val;
+            }
+            return base;
+        }
+
+        default:
+            return val === EMPTY_VALUE ? null : val;
+    }
+};
+
 // Storage utility functions
 const storageUtils = {
     getGuestReadingData: () => {
@@ -345,8 +524,6 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(false);
     const [inlinePassagePick, setInlinePassagePick] = useState(null);
-    const autosaveTimeoutRef = useRef(null);
-    const lastSavedPayloadRef = useRef('');
     // Ref keeps the latest readingSavedAnswersPayload available inside handleSubmit
     // without creating a forward-reference issue (payload is computed below handleSubmit).
     const readingSavedAnswersPayloadRef = useRef(null);
@@ -801,15 +978,15 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
                     if (token && sessionId) {
                         try {
-                            await saveMockSectionAnswers(
-                                readingData.mockId,
-                                'reading',
-                                readingSavedAnswersPayloadRef.current,
-                                { token, sessionId }
-                            );
+                            await saveMockSectionAnswers('reading', readingSavedAnswersPayloadRef.current, {
+                                token,
+                                sessionId
+                            });
                         } catch (saveError) {
                             if (isMockSessionMismatchError(saveError)) {
                                 notifyMockSessionMismatch();
+                            } else if (isMockNotBoundError(saveError)) {
+                                console.warn('Reading final submit: mock not bound on session:', saveError);
                             } else {
                                 console.warn('Reading final submit failed:', saveError);
                             }
@@ -1299,7 +1476,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
 
             const userAnswer = userAnswers[question.id];
             const value = getReadingSlotValue(question, userAnswer, slot.answerIndex);
-            answersBySection[sectionKey][String(slot.sequentialNumber)] = value;
+            answersBySection[sectionKey][String(slot.sequentialNumber)] = readingSlotValueForApi(value);
         });
 
         return { answers: answersBySection };
@@ -1308,12 +1485,12 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     // Keep ref in sync so handleSubmit can always access the latest payload
     readingSavedAnswersPayloadRef.current = readingSavedAnswersPayload;
 
+    // Локальный backup без отправки на сервер — API вызывается только при submit.
     useEffect(() => {
         const isBackendMockReading = readingData?.source === 'backend-mock';
         if (!isBackendMockReading || !readingData?.mockId) return;
         if (!Object.keys(userAnswers).length) return;
 
-        // Persist answers to localStorage as a local backup
         try {
             localStorage.setItem(
                 `mock-answers-${readingData.mockId}-reading`,
@@ -1322,44 +1499,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         } catch {
             // localStorage unavailable — silently skip
         }
-
-        const session = getMockSession();
-        const token = session?.accessToken;
-        const sessionId = session?.sessionId;
-        if (!token || !sessionId) return;
-
-        const payloadKey = JSON.stringify(readingSavedAnswersPayload);
-        if (payloadKey === lastSavedPayloadRef.current) return;
-
-        if (autosaveTimeoutRef.current) {
-            clearTimeout(autosaveTimeoutRef.current);
-        }
-
-        autosaveTimeoutRef.current = setTimeout(async () => {
-            try {
-                await saveMockSectionAnswers(
-                    readingData.mockId,
-                    'reading',
-                    readingSavedAnswersPayload,
-                    { token, sessionId }
-                );
-                lastSavedPayloadRef.current = payloadKey;
-            } catch (error) {
-                if (isMockSessionMismatchError(error)) {
-                    notifyMockSessionMismatch();
-                    return;
-                }
-                console.warn('Reading autosave failed:', error);
-            }
-        }, AUTOSAVE_DELAY_MS);
-
-        return () => {
-            if (autosaveTimeoutRef.current) {
-                clearTimeout(autosaveTimeoutRef.current);
-                autosaveTimeoutRef.current = null;
-            }
-        };
-    }, [notifyMockSessionMismatch, readingData?.mockId, readingData?.source, readingSavedAnswersPayload, userAnswers]);
+    }, [readingData?.mockId, readingData?.source, readingSavedAnswersPayload, userAnswers]);
 
     // Horizontal scroll handler
     const handleScrollDots = useCallback((direction) => {

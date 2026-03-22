@@ -51,6 +51,7 @@ export default async function MockListeningPage({ searchParams }) {
             nextHref="/mock/reading"
             isMockExam={true}
             mockId={mockId}
+            useUnifiedMockHeader={true}
         />
     );
 }

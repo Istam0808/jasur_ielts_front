@@ -9,7 +9,7 @@ import {
   MOCK_SESSION_STATUS,
   postMockSessionStatus,
 } from "@/lib/mockApi";
-import { getMockSession, saveMockSession } from "@/lib/mockSession";
+import { clearMockPayloads, getMockSession, saveMockSession } from "@/lib/mockSession";
 import "./student-login.scss";
 
 export default function StudentLoginPage() {
@@ -75,6 +75,7 @@ export default function StudentLoginPage() {
         sessionId: auth.sessionId,
         username: login.trim(),
       };
+      clearMockPayloads();
       saveMockSession(newSession);
       setSession(newSession);
       setPassword("");

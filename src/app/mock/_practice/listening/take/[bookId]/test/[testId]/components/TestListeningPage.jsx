@@ -16,6 +16,7 @@ import {
     isMockSessionMismatchError,
     MOCK_SESSION_STATUS,
     postMockSessionStatus,
+    isMockNotBoundError,
     saveMockSectionAnswers
 } from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
@@ -35,19 +36,17 @@ const resolvePartAudioUrl = (part) => {
     return rawUrl.trim();
 };
 
-const AUTOSAVE_DELAY_MS = 700;
-
+/** Для API listening ответы должны быть строками; пустые слоты — `""`, не `null`. */
 const normalizeListeningAnswerValue = (value) => {
-    if (value === null || value === undefined) return null;
+    if (value === null || value === undefined) return '';
 
     if (typeof value === 'string') {
-        const trimmed = value.trim();
-        return trimmed === '' ? null : trimmed;
+        return value.trim();
     }
 
     if (Array.isArray(value)) {
         const firstFilled = value.find((item) => item !== null && item !== undefined && String(item).trim() !== '');
-        if (firstFilled === undefined) return null;
+        if (firstFilled === undefined) return '';
         return String(firstFilled).trim();
     }
 
@@ -55,12 +54,28 @@ const normalizeListeningAnswerValue = (value) => {
         const firstFilled = Object.values(value).find(
             (item) => item !== null && item !== undefined && String(item).trim() !== ''
         );
-        if (firstFilled === undefined) return null;
+        if (firstFilled === undefined) return '';
         return String(firstFilled).trim();
     }
 
     const normalized = String(value).trim();
-    return normalized === '' ? null : normalized;
+    return normalized;
+};
+
+const mergeListeningServerAnswers = (serverAnswers, prevUserAnswers, testParts, extractQuestionNumbersFn) => {
+    if (!serverAnswers || typeof serverAnswers !== 'object') return prevUserAnswers;
+    const next = { ...prevUserAnswers };
+    testParts.forEach((part, partIndex) => {
+        const partKey = `p${partIndex + 1}`;
+        const partObj = serverAnswers[partKey];
+        if (!partObj || typeof partObj !== 'object') return;
+        extractQuestionNumbersFn(part).forEach((questionNumber) => {
+            const k = String(questionNumber);
+            if (!Object.prototype.hasOwnProperty.call(partObj, k)) return;
+            next[questionNumber] = normalizeListeningAnswerValue(partObj[k]);
+        });
+    });
+    return next;
 };
 
 const TestListeningPage = ({
@@ -94,8 +109,6 @@ const TestListeningPage = ({
 
     const [hasInstructionAcknowledged, setHasInstructionAcknowledged] = useState(false);
     const [audioError, setAudioError] = useState(null);
-    const autoSaveTimeoutRef = useRef(null);
-    const lastSavedPayloadRef = useRef('');
     const sessionMismatchNotifiedRef = useRef(false);
     const listeningTutorialStatusSentRef = useRef(false);
 
@@ -375,11 +388,11 @@ const TestListeningPage = ({
         }
     }, [currentPartIndex, activePartQuestionNumbers, currentQuestionNumber]);
 
+    // Локальный backup без отправки на сервер — API только при submit.
     useEffect(() => {
         if (!isMockExam || !mockId || !testParts.length) return;
         if (!Object.keys(userAnswers).length) return;
 
-        // Persist answers to localStorage as a local backup
         try {
             localStorage.setItem(
                 `mock-answers-${mockId}-listening`,
@@ -388,45 +401,7 @@ const TestListeningPage = ({
         } catch {
             // localStorage unavailable — silently skip
         }
-
-        const session = getMockSession();
-        const token = session?.accessToken;
-        const sessionId = session?.sessionId;
-
-        if (!token || !sessionId) return;
-
-        const payloadKey = JSON.stringify(listeningSavedAnswersPayload);
-        if (payloadKey === lastSavedPayloadRef.current) return;
-
-        if (autoSaveTimeoutRef.current) {
-            clearTimeout(autoSaveTimeoutRef.current);
-        }
-
-        autoSaveTimeoutRef.current = setTimeout(async () => {
-            try {
-                await saveMockSectionAnswers(
-                    mockId,
-                    'listening',
-                    listeningSavedAnswersPayload,
-                    { token, sessionId }
-                );
-                lastSavedPayloadRef.current = payloadKey;
-            } catch (error) {
-                if (isMockSessionMismatchError(error)) {
-                    notifyMockSessionMismatch();
-                    return;
-                }
-                console.warn('Listening autosave failed:', error);
-            }
-        }, AUTOSAVE_DELAY_MS);
-
-        return () => {
-            if (autoSaveTimeoutRef.current) {
-                clearTimeout(autoSaveTimeoutRef.current);
-                autoSaveTimeoutRef.current = null;
-            }
-        };
-    }, [isMockExam, listeningSavedAnswersPayload, mockId, notifyMockSessionMismatch, testParts.length, userAnswers]);
+    }, [isMockExam, listeningSavedAnswersPayload, mockId, testParts.length, userAnswers]);
 
     const scrollToQuestion = useCallback((questionNumber) => {
         setCurrentQuestionNumber(questionNumber);
@@ -632,15 +607,20 @@ const TestListeningPage = ({
 
             if (token && sessionId) {
                 try {
-                    await saveMockSectionAnswers(
-                        mockId,
-                        'listening',
-                        listeningSavedAnswersPayload,
-                        { token, sessionId }
-                    );
+                    const data = await saveMockSectionAnswers('listening', listeningSavedAnswersPayload, {
+                        token,
+                        sessionId
+                    });
+                    if (data?.answers && typeof data.answers === 'object') {
+                        setUserAnswers((prev) =>
+                            mergeListeningServerAnswers(data.answers, prev, testParts, extractQuestionNumbers)
+                        );
+                    }
                 } catch (error) {
                     if (isMockSessionMismatchError(error)) {
                         notifyMockSessionMismatch();
+                    } else if (isMockNotBoundError(error)) {
+                        console.warn('Listening final submit: mock not bound on session:', error);
                     } else {
                         console.warn('Listening final submit failed:', { isTimeUp, error });
                     }
@@ -657,7 +637,17 @@ const TestListeningPage = ({
 
         const target = nextHref || '/mock/listening';
         router.push(target);
-    }, [isTestSubmitted, isMockExam, mockId, listeningSavedAnswersPayload, notifyMockSessionMismatch, nextHref, router]);
+    }, [
+        extractQuestionNumbers,
+        isTestSubmitted,
+        isMockExam,
+        mockId,
+        listeningSavedAnswersPayload,
+        notifyMockSessionMismatch,
+        nextHref,
+        router,
+        testParts,
+    ]);
 
     // Handle timer expiration
     const handleTimeUp = useCallback(() => {

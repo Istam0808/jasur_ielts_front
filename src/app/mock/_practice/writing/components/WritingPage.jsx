@@ -18,6 +18,7 @@ import {
     isMockSessionMismatchError,
     MOCK_SESSION_STATUS,
     postMockSessionStatus,
+    isMockNotBoundError,
     saveMockSectionAnswers
 } from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
@@ -52,6 +53,20 @@ const MIN_WORD_REQUIREMENT = TASK_1_MIN_WORDS;
 const WRITING_TASK_2_MIN_WORDS = 250;
 const WRITING_TASK_2_RECOMMENDED_MINUTES = 40;
 const AUTOSAVE_DELAY_MS = 700;
+
+function mergeWritingServerAnswersIntoResponses(serverAnswers, writingTasks, prevResponsesByPart) {
+    if (!serverAnswers || typeof serverAnswers !== 'object') return prevResponsesByPart;
+    const next = { ...prevResponsesByPart };
+    writingTasks.forEach((task, index) => {
+        const taskNumber = Number(task?.taskNumber) || Number(task?.part) || index + 1;
+        if (taskNumber !== 1 && taskNumber !== 2) return;
+        const key = `t${taskNumber}`;
+        if (typeof serverAnswers[key] === 'string') {
+            next[index] = serverAnswers[key];
+        }
+    });
+    return next;
+}
 
 const extractPromptText = (fullText) => {
     if (!fullText) return '';
@@ -171,7 +186,8 @@ function WritingPageContent({
     }, [writingTasks, responsesByPart, userResponse]);
 
     const writingSavedAnswersPayload = useMemo(() => {
-        const answers = {};
+        // API ожидает строки для t1/t2; пустые ответы — `""`, не пропуск ключей и не `null`.
+        const answers = { t1: '', t2: '' };
 
         writingTasks.forEach((task, index) => {
             const taskNumber = Number(task?.taskNumber) || Number(task?.part) || index + 1;
@@ -179,9 +195,7 @@ function WritingPageContent({
 
             const rawText = responsesByPart[index];
             const normalizedText = typeof rawText === 'string' ? rawText.trim() : '';
-            if (normalizedText) {
-                answers[`t${taskNumber}`] = normalizedText;
-            }
+            answers[`t${taskNumber}`] = normalizedText;
         });
 
         return { answers };
@@ -310,14 +324,21 @@ function WritingPageContent({
 
                 if (token && sessionId) {
                     try {
-                        await saveMockSectionAnswers(mockId, 'writing', writingSavedAnswersPayload, {
+                        const savePayload = await saveMockSectionAnswers('writing', writingSavedAnswersPayload, {
                             token,
                             sessionId
                         });
+                        if (savePayload?.answers && typeof savePayload.answers === 'object') {
+                            setResponsesByPart((prev) =>
+                                mergeWritingServerAnswersIntoResponses(savePayload.answers, writingTasks, prev)
+                            );
+                        }
                         await postMockSessionStatus(MOCK_SESSION_STATUS.SUBMITTED, { token, sessionId });
                     } catch (saveError) {
                         if (isMockSessionMismatchError(saveError)) {
                             notifyMockSessionMismatch();
+                        } else if (isMockNotBoundError(saveError)) {
+                            console.warn('Writing final submit: mock not bound on session:', saveError);
                         } else {
                             console.warn('Writing final submit failed:', saveError);
                         }
@@ -339,8 +360,15 @@ function WritingPageContent({
 
         handleSubmitBase();
     }, [
-        pauseTimer, useUnifiedMockHeader, id, writingSavedAnswersPayload,
-        notifyMockSessionMismatch, nextHref, router, handleSubmitBase
+        pauseTimer,
+        useUnifiedMockHeader,
+        id,
+        writingSavedAnswersPayload,
+        writingTasks,
+        notifyMockSessionMismatch,
+        nextHref,
+        router,
+        handleSubmitBase,
     ]);
 
     // Memoize writing data transformation
@@ -453,14 +481,33 @@ function WritingPageContent({
 
         autosaveTimeoutRef.current = setTimeout(async () => {
             try {
-                await saveMockSectionAnswers(mockId, 'writing', writingSavedAnswersPayload, {
+                const data = await saveMockSectionAnswers('writing', writingSavedAnswersPayload, {
                     token,
                     sessionId
                 });
-                lastSavedPayloadRef.current = payloadKey;
+                if (data?.answers && typeof data.answers === 'object') {
+                    lastSavedPayloadRef.current = JSON.stringify({ answers: data.answers });
+                    setResponsesByPart((prev) =>
+                        mergeWritingServerAnswersIntoResponses(data.answers, writingTasks, prev)
+                    );
+                    try {
+                        localStorage.setItem(
+                            `mock-answers-${mockId}-writing`,
+                            JSON.stringify({ answers: data.answers })
+                        );
+                    } catch {
+                        // ignore
+                    }
+                } else {
+                    lastSavedPayloadRef.current = payloadKey;
+                }
             } catch (saveError) {
                 if (isMockSessionMismatchError(saveError)) {
                     notifyMockSessionMismatch();
+                    return;
+                }
+                if (isMockNotBoundError(saveError)) {
+                    console.warn('Writing autosave: mock not bound on session:', saveError);
                     return;
                 }
                 console.warn('Writing autosave failed:', saveError);
@@ -473,7 +520,14 @@ function WritingPageContent({
                 autosaveTimeoutRef.current = null;
             }
         };
-    }, [id, notifyMockSessionMismatch, responsesByPart, useUnifiedMockHeader, writingSavedAnswersPayload]);
+    }, [
+        id,
+        notifyMockSessionMismatch,
+        responsesByPart,
+        useUnifiedMockHeader,
+        writingSavedAnswersPayload,
+        writingTasks,
+    ]);
 
     // Load data on mount and when exercise identity changes (not when object reference changes)
     useEffect(() => {

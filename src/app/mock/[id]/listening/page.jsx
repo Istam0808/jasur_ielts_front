@@ -6,7 +6,7 @@ import Spinner from "@/components/common/spinner";
 import TestListeningPage from "@/app/mock/_components/TestListeningPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptListeningMockToUi } from "@/lib/mockAdapters";
-import { getMockAccessToken, getMockPayload, setMockPayload } from "@/lib/mockSession";
+import { getMockAccessToken, setMockPayload } from "@/lib/mockSession";
 import MockPreloadScreen from "@/components/MockPreloadScreen";
 import { useMockPreloader } from "@/hooks/useMockPreloader";
 
@@ -36,12 +36,6 @@ export default function MockListeningByIdPage() {
     const load = async () => {
       setLoading(true);
       setError("");
-      const cached = getMockPayload(mockId);
-      if (cached) {
-        setMockDetail(cached);
-        setLoading(false);
-        return;
-      }
       try {
         const detail = await getMockById(mockId, token);
         setMockPayload(mockId, detail);

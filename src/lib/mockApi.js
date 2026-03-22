@@ -9,6 +9,11 @@ class BackendApiError extends Error {
   }
 }
 
+/**
+ * Заголовки Safe Exam Browser для бэкенда с REQUIRE_SEB_HEADERS.
+ * Задайте в .env.local JSON-объект с ключами как в API (пример):
+ * NEXT_PUBLIC_SEB_HEADERS_JSON={"SEB-Browser-Exam-Key":"YOUR_EXAM_KEY","SEB-Config-Key":"YOUR_CONFIG_KEY"}
+ */
 function buildSebHeaders() {
   const headers = {};
   const raw = process.env.NEXT_PUBLIC_SEB_HEADERS_JSON;
@@ -54,6 +59,14 @@ async function parseResponseBody(response) {
 
 function deriveErrorMessage(status, payload, fallback) {
   if (status === 401) return "Неверный логин или пароль.";
+  if (status === 400) {
+    if (payload && typeof payload === "object") {
+      if (typeof payload.detail === "string") return payload.detail;
+      if (typeof payload.message === "string") return payload.message;
+    }
+    if (typeof payload === "string" && payload.trim()) return payload.trim();
+    return "Некорректный запрос.";
+  }
   if (status === 403) {
     if (payload && typeof payload === "object" && typeof payload.detail === "string") {
       return payload.detail;
@@ -234,8 +247,14 @@ export async function validateListeningMockAnswers(
   });
 }
 
+/**
+ * POST /api/v1/mocks/saved-answers/{section}/
+ * Сохраняет ответы для mock, привязанного к сессии (mock_id задаётся через GET /api/v1/mocks/{id}/).
+ * Требует JWT из POST /api/v1/auth/login/ и X-Session-Id (session_id из ответа логина).
+ * Тело: { answers: ... } — форма зависит от секции (reading: p1–p3; listening: p1–p4; writing: t1, t2).
+ * 400 — если mock к сессии не привязан (нужно сначала открыть mock через GET /api/v1/mocks/{id}/).
+ */
 export async function saveMockSectionAnswers(
-  mockId,
   section,
   answersPayload,
   { token, sessionId } = {}
@@ -262,7 +281,7 @@ export async function saveMockSectionAnswers(
   const customHeaders = {};
   customHeaders["X-Session-Id"] = normalizedSessionId;
 
-  return request(`/api/v1/mocks/${mockId}/saved-answers/${normalizedSection}/`, {
+  return request(`/api/v1/mocks/saved-answers/${normalizedSection}/`, {
     method: "POST",
     body: answersPayload,
     token: normalizedToken,
@@ -281,6 +300,30 @@ export function isMockSessionMismatchError(error) {
   return (
     normalizedDetail.includes("x-session-id does not match") ||
     normalizedDetail.includes("session is not associated")
+  );
+}
+
+/** 400 при сохранении ответов без привязанного к сессии mock (нужен GET /api/v1/mocks/{id}/). */
+export function isMockNotBoundError(error) {
+  if (!(error instanceof BackendApiError)) return false;
+  if (Number(error.status) !== 400) return false;
+
+  const detail = error?.payload?.detail;
+  const message = error?.payload?.message;
+  const text =
+    typeof detail === "string"
+      ? detail
+      : typeof message === "string"
+        ? message
+        : typeof error?.message === "string"
+          ? error.message
+          : "";
+  const normalized = text.toLowerCase();
+  return (
+    normalized.includes("retrieve") ||
+    normalized.includes("mock_id") ||
+    normalized.includes("mock id") ||
+    (normalized.includes("mock") && normalized.includes("first"))
   );
 }
 
