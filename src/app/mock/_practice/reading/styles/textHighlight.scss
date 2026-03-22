@@ -37,23 +37,28 @@
     }
 }
 
-// Text highlighting in passage - Real marker yellow for authentic highlighting
+// IELTS-style highlight (class from HighlightText) + legacy .text-highlight
+.ielts-text-highlight,
 .text-highlight {
-    background-color: $marker-yellow; // Authentic marker yellow
-    color: #000000; // Black text for maximum contrast
-    padding: 2px 4px;
-    border-radius: 2px; // Smaller radius for more authentic marker look
+    background-color: #ffe066;
+    color: inherit;
+    font-weight: inherit;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
     cursor: pointer;
-    transition: all $transition-fast;
-    font-weight: $font-weight-medium;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     text-decoration: none;
     border: none;
     user-select: none; // Prevent text selection when clicking
     pointer-events: auto; // Ensure clicks are captured
-    position: relative; // For better click handling
-    display: inline; // Ensure proper inline display
-    z-index: 1; // Ensure highlights are above other content
+    // inline + relative/z-index раздувает line-box между строками/абзацами — оставляем обычный поток
+    position: static;
+    display: inline;
+    z-index: auto;
+    vertical-align: baseline;
+    line-height: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
 
     // CRITICAL FIX: Prevent highlighting in structural elements
     &.passage-title,
@@ -75,16 +80,6 @@
         }
     }
 
-    &:hover {
-        background-color: $marker-yellow-light; // Predefined lighter yellow on hover
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        transform: translateY(-1px);
-    }
-
-    &:active {
-        background-color: $marker-yellow-dark; // Predefined darker yellow when clicked
-        transform: translateY(0);
-    }
 }
 
 // Prevent highlighting in passage titles and structural elements
@@ -157,16 +152,12 @@
         }
     }
 
+    .ielts-text-highlight,
     .text-highlight {
-        padding: 2px 3px;
-        background-color: $marker-yellow; // Maintain marker yellow on mobile
-        color: #000000; // Keep black text for readability
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-
-        &:hover {
-            background-color: $marker-yellow-light; // Predefined lighter yellow on hover
-            transform: none; // Disable transform on mobile for better performance
-        }
+        background-color: #ffe066;
+        color: inherit;
+        font-weight: inherit;
+        padding: 0;
     }
 }
 

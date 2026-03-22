@@ -118,6 +118,17 @@ export default function NormalReadingMode({
         return foundIndex >= 0 ? foundIndex : 0;
     }, [mockFooterPassages, activePassageId]);
 
+    const readingHighlightStorageKey = useMemo(() => {
+        const rid = readingData?.id ?? readingId ?? 'na';
+        return `ielts-reading-hl-${rid}-${activePassageId}`;
+    }, [readingData?.id, readingId, activePassageId]);
+
+    const readingHighlightRestoreVersion = useMemo(
+        () =>
+            `${activePassageId}-${passageIsHtml ? String(passageParagraphs?.[0] || '').length : (passageParagraphs?.length ?? 0)}`,
+        [activePassageId, passageIsHtml, passageParagraphs]
+    );
+
     const getPassageQuestionNumbers = useCallback((passage) => {
         const numbers = [];
         if (!passage?.questions?.length) return numbers;
@@ -488,60 +499,65 @@ export default function NormalReadingMode({
             )}
 
             {/* Main Content */}
-            <ResizableColumns
-                defaultLeftWidth={50}
-                minLeftWidth={35}
-                maxLeftWidth={65}
-                onResize={onColumnResize}
-                className="reading-content"
+            <HighlightText
+                className="reading-highlight-root"
+                storageKey={readingHighlightStorageKey}
+                restoreVersion={readingHighlightRestoreVersion}
             >
-                {/* Passage Section */}
-                <div className="passage-section">
-                    <div className="section-header">
-                        <div className="header-left">
-                            <h2>
-                                {readingData.isMultiPassage
-                                    ? `${t('passage')} ${activePassageId}`
-                                    : t('readingPassage')
-                                }
-                            </h2>
+                <ResizableColumns
+                    defaultLeftWidth={50}
+                    minLeftWidth={35}
+                    maxLeftWidth={65}
+                    onResize={onColumnResize}
+                    className="reading-content"
+                >
+                    {/* Passage Section */}
+                    <div className="passage-section">
+                        <div className="section-header">
+                            <div className="header-left">
+                                <h2>
+                                    {readingData.isMultiPassage
+                                        ? `${t('passage')} ${activePassageId}`
+                                        : t('readingPassage')
+                                    }
+                                </h2>
+                            </div>
+                        </div>
+
+                        {/* Passage navigation moved below resizable content */}
+
+                        <div className="passage-content highlight-text-root">
+                            <h3 className="passage-title" data-highlight-ignore="true">{passageTitle}</h3>
+                            {passageIsHtml && passageParagraphs?.length > 0 ? (
+                                inlineMatchingQuestion ? (
+                                    <PassageWithDropzones
+                                        htmlText={passageParagraphs[0]}
+                                        question={inlineMatchingQuestion}
+                                        questionRange={questionRanges?.[inlineMatchingQuestion.id]}
+                                        answer={inlineMatchingAnswer}
+                                        isReviewMode={isReviewMode}
+                                        onAnswerChange={onAnswerChange}
+                                        inlinePickedOption={inlinePickedValue}
+                                        onInlinePickOptionChange={onInlinePassagePickChange}
+                                    />
+                                ) : (
+                                    <div
+                                        className="passage-html"
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
+                                    />
+                                )
+                            ) : (
+                                passageParagraphs.map((paragraph, index) => (
+                                    <p key={`paragraph-${index}`} className="passage-paragraph">
+                                        {paragraph}
+                                    </p>
+                                ))
+                            )}
                         </div>
                     </div>
 
-                    {/* Passage navigation moved below resizable content */}
-
-                    <HighlightText className="passage-content highlight-text-root">
-                        <h3 className="passage-title" data-highlight-ignore="true">{passageTitle}</h3>
-                        {passageIsHtml && passageParagraphs?.length > 0 ? (
-                            inlineMatchingQuestion ? (
-                                <PassageWithDropzones
-                                    htmlText={passageParagraphs[0]}
-                                    question={inlineMatchingQuestion}
-                                    questionRange={questionRanges?.[inlineMatchingQuestion.id]}
-                                    answer={inlineMatchingAnswer}
-                                    isReviewMode={isReviewMode}
-                                    onAnswerChange={onAnswerChange}
-                                    inlinePickedOption={inlinePickedValue}
-                                    onInlinePickOptionChange={onInlinePassagePickChange}
-                                />
-                            ) : (
-                                <div
-                                    className="passage-html"
-                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(passageParagraphs[0]) }}
-                                />
-                            )
-                        ) : (
-                            passageParagraphs.map((paragraph, index) => (
-                                <p key={`paragraph-${index}`} className="passage-paragraph">
-                                    {paragraph}
-                                </p>
-                            ))
-                        )}
-                    </HighlightText>
-                </div>
-
-                {/* Questions Section */}
-                <div className="questions-section">
+                    {/* Questions Section */}
+                    <div className="questions-section">
                     <div className="section-header">
                         <h2>{t('questions')}</h2>
                         {readingData.isMultiPassage && currentPassage?.question_range && (
@@ -579,7 +595,8 @@ export default function NormalReadingMode({
                         })()}
                     </div>
                 </div>
-            </ResizableColumns>
+                </ResizableColumns>
+            </HighlightText>
 
             {/* Bottom Passage Navigation (below content, right-aligned) */}
             {!isMockFullscreenLike && readingData.isMultiPassage && (

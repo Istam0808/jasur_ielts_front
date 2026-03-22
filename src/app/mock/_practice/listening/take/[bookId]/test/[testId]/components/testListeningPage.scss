@@ -578,23 +578,26 @@
     }
 }
 
-// Shared highlight style used by HighlightText component
-.text-highlight {
-    color: #111827;
-    padding: 2px 4px;
-    border-radius: $border-radius-xs;
+// HighlightText uses .ielts-text-highlight (imported from HighlightText.scss); keep alias for legacy class names
+.text-highlight,
+.ielts-text-highlight {
+    background-color: #ffe066;
+    color: inherit;
+    font-weight: inherit;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
     cursor: pointer;
-    box-shadow: $shadow-sm;
-    transition: all $transition-fast;
-    border: 1px solid $warning-color;
-    @include highlight-gradient;
-
-    &:hover {
-        box-shadow: $shadow-md;
-        transform: translateY(-1px);
-        border-color: color.scale($warning-color, $lightness: -20%);
-        @include highlight-hover-gradient;
-    }
+    box-shadow: none;
+    transition: none;
+    border: none;
+    position: static;
+    display: inline;
+    z-index: auto;
+    vertical-align: baseline;
+    line-height: inherit;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
 }
 
 // Text selection styling

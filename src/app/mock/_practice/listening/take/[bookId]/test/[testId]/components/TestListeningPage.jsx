@@ -683,6 +683,16 @@ const TestListeningPage = ({
         el.muted = isAudioMuted;
     }, [audioVolume, isAudioMuted, activePartAudioUrl]);
 
+    const listeningHighlightStorageKey = useMemo(
+        () => `ielts-listening-hl-${bookId}-${testId}-${currentPartIndex}`,
+        [bookId, testId, currentPartIndex]
+    );
+
+    const listeningHighlightRestoreVersion = useMemo(() => {
+        const part = testParts?.[currentPartIndex];
+        return `${currentPartIndex}-${String(part?.instruction || '').length}`;
+    }, [testParts, currentPartIndex]);
+
     if (isLoading) {
         return (
             <div className="ielts-section loading" style={{
@@ -881,7 +891,11 @@ const TestListeningPage = ({
                         />
                     ) : null}
 
-                    <HighlightText className="selectable-content highlight-text-root">
+                    <HighlightText
+                        className="selectable-content highlight-text-root"
+                        storageKey={listeningHighlightStorageKey}
+                        restoreVersion={listeningHighlightRestoreVersion}
+                    >
                         {
                             activePart.instruction && (
                                 <div className="part-instructions">

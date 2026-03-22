@@ -1,6 +1,10 @@
 'use client';
 
+import './HighlightText.scss';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { serializeRange, deserializeToRange } from '@/utils/highlight/serializeRange';
+import { wrapTextRangeInMarks } from '@/utils/highlight/wrapTextRangeInMarks';
 
 const INTERACTIVE_SELECTOR = [
     'button',
@@ -8,14 +12,17 @@ const INTERACTIVE_SELECTOR = [
     'textarea',
     'select',
     'option',
-    'a',
     '[role="button"]',
     '[contenteditable="true"]',
-    '[data-highlight-ignore="true"]'
+    '[data-highlight-ignore="true"]',
+    '.inline-drop-placeholder',
+    '[data-blank-id]'
 ].join(', ');
 
 const createHighlightId = () =>
-    `highlight-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `hl-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
 
 const getNodeElement = (node) => {
     if (!node) return null;
@@ -24,16 +31,72 @@ const getNodeElement = (node) => {
     return null;
 };
 
+const escapeHighlightIdForSelector = (id) => {
+    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+        return CSS.escape(id);
+    }
+    return String(id).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+};
+
+/**
+ * @param {Element} el
+ */
+function isExcludedHighlightRoot(el) {
+    if (!(el instanceof Element)) return true;
+    if (el.closest('[data-highlight-ignore="true"]')) return true;
+    if (el.closest(INTERACTIVE_SELECTOR)) return true;
+    if (el.closest('input, textarea, select, button')) return true;
+    return false;
+}
+
+/** Toolbar above selection midpoint (viewport). */
+function getToolbarPosition(range) {
+    const r = range.getBoundingClientRect();
+    if (!r || (r.width === 0 && r.height === 0)) return null;
+    return {
+        left: r.left + r.width / 2,
+        top: r.top - 40
+    };
+}
+
+/**
+ * @param {string | undefined} storageKey
+ * @returns {{ id: string, text: string, serialized: import('@/utils/highlight/serializeRange').SerializedRange }[]}
+ */
+function loadStoredHighlights(storageKey) {
+    if (!storageKey || typeof sessionStorage === 'undefined') return [];
+    try {
+        const raw = sessionStorage.getItem(storageKey);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveStoredHighlights(storageKey, list) {
+    if (!storageKey || typeof sessionStorage === 'undefined') return;
+    try {
+        sessionStorage.setItem(storageKey, JSON.stringify(list));
+    } catch {
+        /* ignore quota */
+    }
+}
+
 export default function HighlightText({
     children,
     className = '',
-    highlightClassName = 'text-highlight'
+    /** Session persistence key (e.g. readingId + passageId). */
+    storageKey = null,
+    /** Re-run restore when passage HTML / section changes. */
+    restoreVersion = 0,
+    markClassName = 'ielts-text-highlight'
 }) {
     const rootRef = useRef(null);
     const toolbarRef = useRef(null);
     const pendingRangeRef = useRef(null);
     const selectedHighlightRef = useRef(null);
-
     const [toolbarState, setToolbarState] = useState({
         visible: false,
         mode: 'highlight',
@@ -47,22 +110,18 @@ export default function HighlightText({
         setToolbarState((prev) => ({ ...prev, visible: false }));
     }, []);
 
-    const showToolbar = useCallback((rect, mode) => {
-        if (!rect) return;
-        const left = rect.left + rect.width / 2;
-        const top = Math.max(8, rect.top - 12);
-
+    const showToolbarAt = useCallback((left, top, mode) => {
         setToolbarState({
             visible: true,
             mode,
             left,
-            top
+            top: Math.max(8, top)
         });
     }, []);
 
-    const isRangeValid = useCallback((range) => {
+    const isRangeValidForNewHighlight = useCallback((range) => {
         const root = rootRef.current;
-        if (!root || !range) return false;
+        if (!root || !range || range.collapsed) return false;
 
         if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) {
             return false;
@@ -72,60 +131,70 @@ export default function HighlightText({
         const endElement = getNodeElement(range.endContainer);
         if (!startElement || !endElement) return false;
 
-        if (startElement.closest(INTERACTIVE_SELECTOR) || endElement.closest(INTERACTIVE_SELECTOR)) {
+        if (isExcludedHighlightRoot(startElement) || isExcludedHighlightRoot(endElement)) {
             return false;
         }
 
-        // Prevent nested/overlapping highlights.
-        if (startElement.closest('[data-highlight-id]') || endElement.closest('[data-highlight-id]')) {
+        if (startElement.closest('mark[data-highlight-id]') || endElement.closest('mark[data-highlight-id]')) {
             return false;
         }
 
         try {
             const fragment = range.cloneContents();
-            if (fragment.querySelector('[data-highlight-id]')) return false;
-        } catch (_) {
+            if (fragment.querySelector && fragment.querySelector('mark[data-highlight-id]')) {
+                return false;
+            }
+        } catch {
             return false;
         }
 
         return true;
     }, []);
 
-    const handleTextSelection = useCallback(() => {
-        const root = rootRef.current;
-        if (!root) return;
+    const handleTextSelection = useCallback(
+        (event) => {
+            const root = rootRef.current;
+            if (!root) return;
+            if (toolbarRef.current?.contains(event?.target)) return;
 
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-            hideToolbar();
-            return;
-        }
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+                hideToolbar();
+                return;
+            }
 
-        const range = selection.getRangeAt(0);
-        const selectedText = selection.toString().trim();
-        if (!selectedText || !isRangeValid(range)) {
-            hideToolbar();
-            return;
-        }
+            const range = selection.getRangeAt(0);
+            const selectedText = selection.toString();
+            if (!selectedText || selectedText.length === 0) {
+                hideToolbar();
+                return;
+            }
 
-        const rect = range.getBoundingClientRect();
-        if (!rect || rect.width === 0 || rect.height === 0) {
-            hideToolbar();
-            return;
-        }
+            if (!isRangeValidForNewHighlight(range)) {
+                hideToolbar();
+                return;
+            }
 
-        pendingRangeRef.current = range.cloneRange();
-        selectedHighlightRef.current = null;
-        showToolbar(rect, 'highlight');
-    }, [hideToolbar, isRangeValid, showToolbar]);
+            const pos = getToolbarPosition(range);
+            if (!pos) {
+                hideToolbar();
+                return;
+            }
+
+            pendingRangeRef.current = range.cloneRange();
+            selectedHighlightRef.current = null;
+            showToolbarAt(pos.left, pos.top, 'highlight');
+        },
+        [hideToolbar, isRangeValidForNewHighlight, showToolbarAt]
+    );
 
     const handleRootClick = useCallback(
         (event) => {
             const root = rootRef.current;
             if (!root) return;
 
-            const highlight = event.target?.closest?.('[data-highlight-id]');
-            if (!highlight || !root.contains(highlight)) return;
+            const mark = event.target?.closest?.('mark[data-highlight-id]');
+            if (!mark || !root.contains(mark)) return;
 
             event.preventDefault();
             event.stopPropagation();
@@ -134,62 +203,84 @@ export default function HighlightText({
             if (selection) selection.removeAllRanges();
 
             pendingRangeRef.current = null;
-            selectedHighlightRef.current = highlight;
-            showToolbar(highlight.getBoundingClientRect(), 'remove');
+            selectedHighlightRef.current = mark;
+
+            const r = mark.getBoundingClientRect();
+            showToolbarAt(r.left + r.width / 2, r.top - 40, 'remove');
         },
-        [showToolbar]
+        [showToolbarAt]
     );
 
     const handleApplyHighlight = useCallback(() => {
         const range = pendingRangeRef.current;
         const root = rootRef.current;
 
-        if (!root || !range || range.collapsed || !isRangeValid(range)) {
+        if (!root || !range || range.collapsed || !isRangeValidForNewHighlight(range)) {
             hideToolbar();
             return;
         }
 
-        const mark = document.createElement('mark');
-        mark.className = highlightClassName;
-        mark.setAttribute('data-highlight-id', createHighlightId());
+        const id = createHighlightId();
+        const text = range.toString();
+        const serialized = serializeRange(range, root);
 
-        try {
-            const fragment = range.extractContents();
-            if (!fragment.textContent?.trim()) {
-                hideToolbar();
-                return;
-            }
+        const excluded = (el) => isExcludedHighlightRoot(el);
 
-            mark.appendChild(fragment);
-            range.insertNode(mark);
-            mark.parentNode?.normalize();
-        } catch (_) {
+        const ok = wrapTextRangeInMarks(range, root, id, markClassName, excluded);
+        if (!ok) {
             hideToolbar();
             return;
+        }
+
+        root.normalize();
+
+        if (serialized && storageKey) {
+            const list = loadStoredHighlights(storageKey);
+            list.push({ id, text, serialized });
+            saveStoredHighlights(storageKey, list);
         }
 
         const selection = window.getSelection();
         if (selection) selection.removeAllRanges();
         hideToolbar();
-    }, [highlightClassName, hideToolbar, isRangeValid]);
+    }, [hideToolbar, isRangeValidForNewHighlight, markClassName, storageKey]);
 
     const handleRemoveHighlight = useCallback(() => {
-        const highlight = selectedHighlightRef.current;
-        if (!highlight || !highlight.parentNode) {
+        const markEl = selectedHighlightRef.current;
+        const root = rootRef.current;
+
+        if (!markEl || !root) {
             hideToolbar();
             return;
         }
 
-        const fragment = document.createDocumentFragment();
-        while (highlight.firstChild) {
-            fragment.appendChild(highlight.firstChild);
+        const highlightId = markEl.getAttribute('data-highlight-id');
+        if (!highlightId) {
+            hideToolbar();
+            return;
         }
 
-        const parent = highlight.parentNode;
-        parent.replaceChild(fragment, highlight);
-        parent.normalize();
+        const selector = `mark[data-highlight-id="${escapeHighlightIdForSelector(highlightId)}"]`;
+        const marks = root.querySelectorAll(selector);
+
+        marks.forEach((mark) => {
+            if (!mark.parentNode) return;
+            const fragment = document.createDocumentFragment();
+            while (mark.firstChild) {
+                fragment.appendChild(mark.firstChild);
+            }
+            mark.parentNode.replaceChild(fragment, mark);
+        });
+
+        root.normalize();
+
+        if (storageKey) {
+            const list = loadStoredHighlights(storageKey).filter((h) => h.id !== highlightId);
+            saveStoredHighlights(storageKey, list);
+        }
+
         hideToolbar();
-    }, [hideToolbar]);
+    }, [hideToolbar, storageKey]);
 
     useEffect(() => {
         const handleDocumentMouseDown = (event) => {
@@ -216,6 +307,31 @@ export default function HighlightText({
         };
     }, [hideToolbar]);
 
+    useEffect(() => {
+        if (!storageKey) return;
+
+        const list = loadStoredHighlights(storageKey);
+        if (list.length === 0) return;
+
+        const excluded = (el) => isExcludedHighlightRoot(el);
+
+        requestAnimationFrame(() => {
+            const root = rootRef.current;
+            if (!root) return;
+
+            list.forEach(({ id, serialized }) => {
+                if (!serialized || !id) return;
+                if (root.querySelector(`mark[data-highlight-id="${escapeHighlightIdForSelector(id)}"]`)) {
+                    return;
+                }
+                const range = deserializeToRange(serialized, root);
+                if (!range || range.collapsed) return;
+                wrapTextRangeInMarks(range, root, id, markClassName, excluded);
+            });
+            root.normalize();
+        });
+    }, [storageKey, restoreVersion, markClassName]);
+
     return (
         <div
             ref={rootRef}
@@ -229,58 +345,33 @@ export default function HighlightText({
             {toolbarState.visible && (
                 <div
                     ref={toolbarRef}
-                    data-tooltip="true"
-                    className="highlight-toolbar"
+                    className="ielts-highlight-toolbar"
+                    onMouseDown={(event) => event.stopPropagation()}
+                    onMouseUp={(event) => event.stopPropagation()}
+                    onTouchStart={(event) => event.stopPropagation()}
+                    onTouchEnd={(event) => event.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
                     style={{
                         position: 'fixed',
                         left: `${toolbarState.left}px`,
                         top: `${toolbarState.top}px`,
                         transform: 'translateX(-50%)',
-                        background: '#1f2937',
-                        color: '#fff',
-                        padding: '4px',
-                        borderRadius: '8px',
-                        display: 'flex',
-                        gap: '2px',
-                        zIndex: 10000,
-                        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.35)'
+                        zIndex: 10000
                     }}
                 >
                     {toolbarState.mode === 'highlight' ? (
                         <button
                             type="button"
-                            className="highlight-toolbar-btn highlight-toolbar-btn--highlight"
-                            title="Highlight"
+                            className="ielts-highlight-toolbar__btn ielts-highlight-toolbar__btn--highlight"
                             onClick={handleApplyHighlight}
-                            style={{
-                                padding: '4px 8px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#fcd34d',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                borderRadius: '6px'
-                            }}
                         >
                             Highlight
                         </button>
                     ) : (
                         <button
                             type="button"
-                            className="highlight-toolbar-btn highlight-toolbar-btn--remove"
-                            title="Remove"
+                            className="ielts-highlight-toolbar__btn ielts-highlight-toolbar__btn--remove"
                             onClick={handleRemoveHighlight}
-                            style={{
-                                padding: '4px 8px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#fca5a5',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                borderRadius: '6px'
-                            }}
                         >
                             Remove
                         </button>
