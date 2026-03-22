@@ -409,7 +409,6 @@ export default function NormalReadingMode({
     // даже если размеры футера меняются (за счёт контента/брейкпоинтов/правок стилей).
     useEffect(() => {
         if (!isMockFullscreenLike) return;
-        if (!readingData?.isMultiPassage) return; // MockExamFooter рендерится только для multi-passage
 
         const containerEl = containerRef.current;
         if (!containerEl) return;
@@ -420,6 +419,7 @@ export default function NormalReadingMode({
         const footerEl = containerEl.querySelector('.mock-exam-bottom-nav--ielts');
         const footerLayoutEl = containerEl.querySelector('.mock-exam-footer-layout');
 
+        // Футер есть только в multi-passage mock; без него ранний выход (CSS задаёт высоту)
         if (!readingContentEl || !footerEl) return;
 
         const footerAnchorEl = footerLayoutEl || footerEl;
@@ -453,16 +453,12 @@ export default function NormalReadingMode({
             if (passageSectionEl) passageSectionEl.style.maxHeight = '';
             if (questionsSectionEl) questionsSectionEl.style.maxHeight = '';
         };
-    }, [
-        containerRef,
-        isMockFullscreenLike,
-        readingData?.isMultiPassage
-    ]);
+    }, [containerRef, isMockFullscreenLike]);
 
     return (
         <div
             ref={containerRef}
-            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like mock-footer-active' : ''} ${showMockHeaderState ? 'mock-unified-header-active' : ''} with-unified-header`}
+            className={`reading-container ${isMockFullscreenLike ? 'mock-fullscreen-like' : ''} ${isMockFullscreenLike && readingData?.isMultiPassage ? 'mock-footer-active' : ''} ${showMockHeaderState ? 'mock-unified-header-active' : ''} with-unified-header`}
             data-level={readingData?.level}
             data-mock-text-size={showMockHeaderState ? textSize : undefined}
         >

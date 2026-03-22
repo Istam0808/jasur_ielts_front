@@ -235,6 +235,36 @@ function WritingPageContent({
         t
     });
 
+    // Реальная высота окна (F11, Fullscreen API, полоска браузера): `100vh` не всегда совпадает с видимой областью
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const root = document.documentElement;
+        const applyViewportHeight = () => {
+            const h = window.visualViewport?.height ?? window.innerHeight;
+            root.style.setProperty('--writing-vh', `${h}px`);
+        };
+
+        applyViewportHeight();
+        window.addEventListener('resize', applyViewportHeight, { passive: true });
+        window.addEventListener('orientationchange', applyViewportHeight);
+        document.addEventListener('fullscreenchange', applyViewportHeight);
+        const vv = window.visualViewport;
+        if (vv) {
+            vv.addEventListener('resize', applyViewportHeight, { passive: true });
+        }
+
+        return () => {
+            window.removeEventListener('resize', applyViewportHeight);
+            window.removeEventListener('orientationchange', applyViewportHeight);
+            document.removeEventListener('fullscreenchange', applyViewportHeight);
+            if (vv) {
+                vv.removeEventListener('resize', applyViewportHeight);
+            }
+            root.style.removeProperty('--writing-vh');
+        };
+    }, []);
+
     // Wrap handleSubmit to pause timer when submitting
     const handleSubmit = useCallback(() => {
         pauseTimer();

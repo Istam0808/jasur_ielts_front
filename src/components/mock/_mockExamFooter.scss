@@ -4,10 +4,13 @@
     bottom: 0;
     left: 0;
     z-index: 105;
+    box-sizing: border-box;
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
+// Важно: не задавать `position: relative` на этом же узле — иначе перебивается
+// `position: fixed` у `.mock-exam-bottom-nav`, футер уходит в поток и под ним появляется «пустота».
 .mock-exam-bottom-nav--ielts {
-    position: relative;
     display: flex;
     flex-direction: column;
     width: 100%;

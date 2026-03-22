@@ -6,8 +6,9 @@
 .writing-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    max-height: 100vh;
+    // `--writing-vh` выставляется в WritingPage (visualViewport / resize / F11)
+    height: var(--writing-vh, 100dvh);
+    max-height: var(--writing-vh, 100dvh);
     color: $neutral-800;
     font-family: $body-font-family;
     padding: 0; // Remove padding to allow TestNavbar to be full-width
@@ -691,12 +692,12 @@
 
     @media (max-width: 768px) {
         top: calc(72px + #{$spacing-lg});
-        max-height: calc(100vh - 72px - #{$spacing-xl * 2});
+        max-height: calc(var(--writing-vh, 100dvh) - 72px - #{$spacing-xl * 2});
     }
 
     @media (max-width: 576px) {
         top: calc(64px + #{$spacing-lg});
-        max-height: calc(100vh - 64px - #{$spacing-xl * 2});
+        max-height: calc(var(--writing-vh, 100dvh) - 64px - #{$spacing-xl * 2});
     }
 
     @media (max-width: 784px) {
@@ -894,14 +895,14 @@
     margin: 0;
     border-radius: 0;
     box-shadow: none;
-    min-height: calc(100vh - 80px - #{$spacing-sm});
+    min-height: calc(var(--writing-vh, 100dvh) - 80px - #{$spacing-sm});
 
     @media (max-width: 784px) {
-        min-height: calc(100vh - 72px);
+        min-height: calc(var(--writing-vh, 100dvh) - 72px);
     }
 
     @media (max-width: 576px) {
-        min-height: calc(100vh - 64px);
+        min-height: calc(var(--writing-vh, 100dvh) - 64px);
     }
 
     // After submission: remove height limits and scrollbar

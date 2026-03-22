@@ -969,6 +969,7 @@
 
     &.mock-unified-header-active {
         padding-top: 72px;
+        padding-bottom: 0;
     }
 
     &[data-mock-text-size="regular"] {
@@ -1059,6 +1060,7 @@
 
         &.mock-unified-header-active {
             padding-top: 64px;
+            padding-bottom: 0;
         }
 
     }

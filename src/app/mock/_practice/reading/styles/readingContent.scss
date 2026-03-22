@@ -942,37 +942,52 @@
     }
 }
 
+// Mock fullscreen без нижнего `MockExamFooter` (один passage): только отступ под fixed header
+.reading-container.mock-fullscreen-like:not(.mock-footer-active) {
+    .reading-content,
+    .passage-section,
+    .questions-section {
+        max-height: calc(100vh - 56px - env(safe-area-inset-bottom, 0px));
+    }
+}
+
 // When `MockExamFooter` is visible (`position: fixed`), increase available height for
 // the scrolling columns so they don't end early and leave a blank gap.
 .reading-container.mock-fullscreen-like.mock-footer-active {
     .reading-content {
-        // Override the base `max-height` from `.reading-content` above.
-        // 56px unified header + ~100px двухрядный футер
-        max-height: calc(100vh - 156px);
+        // Fallback до измерения в JS: unified header 56px + одна строка футера ~56–64px
+        max-height: calc(100vh - 120px - env(safe-area-inset-bottom, 0px));
     }
 
     .passage-section {
-        max-height: calc(100vh - 156px);
+        max-height: calc(100vh - 120px - env(safe-area-inset-bottom, 0px));
     }
 
     .questions-section {
-        max-height: calc(100vh - 156px);
+        max-height: calc(100vh - 120px - env(safe-area-inset-bottom, 0px));
     }
 }
 
 @media (max-width: 992px) {
+    .reading-container.mock-fullscreen-like:not(.mock-footer-active) {
+        .reading-content,
+        .passage-section,
+        .questions-section {
+            max-height: calc(100vh - 52px - env(safe-area-inset-bottom, 0px));
+        }
+    }
+
     .reading-container.mock-fullscreen-like.mock-footer-active {
         .reading-content {
-            // Header ~52px + двухрядный футер ~92px
-            max-height: calc(100vh - 144px);
+            max-height: calc(100vh - 108px - env(safe-area-inset-bottom, 0px));
         }
 
         .passage-section {
-            max-height: calc(100vh - 144px);
+            max-height: calc(100vh - 108px - env(safe-area-inset-bottom, 0px));
         }
 
         .questions-section {
-            max-height: calc(100vh - 144px);
+            max-height: calc(100vh - 108px - env(safe-area-inset-bottom, 0px));
         }
     }
 }
