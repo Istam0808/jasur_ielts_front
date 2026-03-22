@@ -16,6 +16,7 @@ import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockAp
 import { getMockSession } from '@/lib/mockSession';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import HighlightText from '@/components/common/HighlightText';
+import IELTSListeningInstructionsCard from './IELTSListeningInstructionsCard';
 import './testListeningPage.scss';
 
 // Заглушка: функциональность заметок удалена; имя оставлено, чтобы не ловить ReferenceError
@@ -86,6 +87,7 @@ const TestListeningPage = ({
     const audioRef = useRef(null);
     const pendingScrollRef = useRef(null);
 
+    const [hasInstructionAcknowledged, setHasInstructionAcknowledged] = useState(false);
     const [audioError, setAudioError] = useState(null);
     const autoSaveTimeoutRef = useRef(null);
     const lastSavedPayloadRef = useRef('');
@@ -119,12 +121,14 @@ const TestListeningPage = ({
         loadNamespaces();
     }, [i18n]);
 
-    // Start the test timer when component mounts (after user accepts modal)
+    // Start the test only after instructions are acknowledged (mock) or immediately (non-mock)
     useEffect(() => {
         if (!isLoading && test) {
-            setTestStarted(true);
+            if (!isMockExam || hasInstructionAcknowledged) {
+                setTestStarted(true);
+            }
         }
-    }, [isLoading, test]);
+    }, [isLoading, test, isMockExam, hasInstructionAcknowledged]);
 
     // Scroll to top when part changes, but not on initial load
     useEffect(() => {
@@ -348,6 +352,16 @@ const TestListeningPage = ({
     useEffect(() => {
         if (!isMockExam || !mockId || !testParts.length) return;
         if (!Object.keys(userAnswers).length) return;
+
+        // Persist answers to localStorage as a local backup
+        try {
+            localStorage.setItem(
+                `mock-answers-${mockId}-listening`,
+                JSON.stringify(listeningSavedAnswersPayload)
+            );
+        } catch {
+            // localStorage unavailable — silently skip
+        }
 
         const session = getMockSession();
         const token = session?.accessToken;
@@ -581,20 +595,43 @@ const TestListeningPage = ({
     };
 
     const handleSubmit = useCallback(async (isTimeUp = false) => {
-        // Предотвращаем повторные сабмиты
         if (isTestSubmitted) return;
         setIsTestSubmitted(true);
 
-        try {
-            // Submit больше не вызывает legacy validate endpoint.
-            // Все ответы отправляются через autosave на saved-answers/listening.
-        } catch (error) {
-            console.warn('Listening submission validation skipped:', { isTimeUp, error });
-        } finally {
-            const target = nextHref || '/mock/listening';
-            router.push(target);
+        // Final guaranteed send of all answers on submit
+        if (isMockExam && mockId) {
+            const session = getMockSession();
+            const token = session?.accessToken;
+            const sessionId = session?.sessionId;
+
+            if (token && sessionId) {
+                try {
+                    await saveMockSectionAnswers(
+                        mockId,
+                        'listening',
+                        listeningSavedAnswersPayload,
+                        { token, sessionId }
+                    );
+                } catch (error) {
+                    if (isMockSessionMismatchError(error)) {
+                        notifyMockSessionMismatch();
+                    } else {
+                        console.warn('Listening final submit failed:', { isTimeUp, error });
+                    }
+                }
+            }
+
+            // Clear localStorage backup after final submit
+            try {
+                localStorage.removeItem(`mock-answers-${mockId}-listening`);
+            } catch {
+                // ignore
+            }
         }
-    }, [isTestSubmitted, nextHref, router]);
+
+        const target = nextHref || '/mock/listening';
+        router.push(target);
+    }, [isTestSubmitted, isMockExam, mockId, listeningSavedAnswersPayload, notifyMockSessionMismatch, nextHref, router]);
 
     // Handle timer expiration
     const handleTimeUp = useCallback(() => {
@@ -743,6 +780,26 @@ const TestListeningPage = ({
     const testTakerUsername = typeof sessionUsername === 'string' && sessionUsername.trim()
         ? sessionUsername.trim()
         : 'unknown';
+
+    // Show IELTS-style instructions screen before the test starts (mock exam only)
+    if (isMockExam && !hasInstructionAcknowledged) {
+        return (
+            <div
+                className={`test-listening-page mock-exam-mode ${shouldShowUnifiedHeader ? 'mock-unified-header-active' : ''}`}
+                data-mock-text-size={shouldShowUnifiedHeader ? textSize : undefined}
+            >
+                {shouldShowUnifiedHeader && (
+                    <MockUnifiedHeader
+                        testTakerId={testTakerUsername}
+                        timerContent={null}
+                    />
+                )}
+                <IELTSListeningInstructionsCard
+                    onStart={() => setHasInstructionAcknowledged(true)}
+                />
+            </div>
+        );
+    }
 
     return (
         <div

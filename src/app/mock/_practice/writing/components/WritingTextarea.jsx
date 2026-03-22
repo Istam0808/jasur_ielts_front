@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { showToast } from '@/lib/toastNotify';
 import { useWordCount } from '@/hooks/useWordCount';
 import HighlightedWritingText from './HighlightedWritingText';
 
@@ -19,128 +18,6 @@ export default function WritingTextarea({
 }) {
   const { t } = useTranslation(['writing', 'common']);
   const { wordCount } = useWordCount(value);
-
-  const handleCopy = (e) => {
-    if (!disabled && !hasSubmitted) {
-      showToast.warning(
-        t('writing:copyNotAllowed', {
-          defaultValue: 'Copying is not allowed in writing practice'
-        }),
-        {
-          position: 'bottom-center',
-          duration: 3000,
-          progress: true,
-          closeOnClick: true,
-          pauseOnHover: true
-        }
-      );
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
-
-  const handlePaste = (e) => {
-    if (!disabled && !hasSubmitted) {
-      showToast.warning(
-        t('writing:pasteNotAllowed', {
-          defaultValue: 'Pasting is not allowed in writing practice'
-        }),
-        {
-          position: 'bottom-center',
-          duration: 3000,
-          progress: true,
-          closeOnClick: true,
-          pauseOnHover: true
-        }
-      );
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
-
-  const handleCut = (e) => {
-    if (!disabled && !hasSubmitted) {
-      showToast.warning(
-        t('writing:cutNotAllowed', {
-          defaultValue: 'Cutting is not allowed in writing practice'
-        }),
-        {
-          position: 'bottom-center',
-          duration: 3000,
-          progress: true,
-          closeOnClick: true,
-          pauseOnHover: true
-        }
-      );
-    }
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
-
-  const handleContextMenu = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
-
-  const handleKeyDown = (e) => {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
-      if (!disabled && !hasSubmitted) {
-        if (e.key === 'c') {
-          showToast.warning(
-            t('writing:copyNotAllowed', {
-              defaultValue: 'Copying is not allowed in writing practice'
-            }),
-            {
-              position: 'bottom-center',
-              duration: 3000,
-              progress: true,
-              closeOnClick: true,
-              pauseOnHover: true
-            }
-          );
-        } else if (e.key === 'v') {
-          showToast.warning(
-            t('writing:pasteNotAllowed', {
-              defaultValue: 'Pasting is not allowed in writing practice'
-            }),
-            {
-              position: 'bottom-center',
-              duration: 3000,
-              progress: true,
-              closeOnClick: true,
-              pauseOnHover: true
-            }
-          );
-        } else if (e.key === 'x') {
-          showToast.warning(
-            t('writing:cutNotAllowed', {
-              defaultValue: 'Cutting is not allowed in writing practice'
-            }),
-            {
-              position: 'bottom-center',
-              duration: 3000,
-              progress: true,
-              closeOnClick: true,
-              pauseOnHover: true
-            }
-          );
-        }
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-  };
 
   if (hasSubmitted) {
     return (
@@ -167,12 +44,6 @@ export default function WritingTextarea({
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck={false}
-        onCopy={handleCopy}
-        onPaste={handlePaste}
-        onCut={handleCut}
-        onContextMenu={handleContextMenu}
-        onKeyDown={handleKeyDown}
-        onDrop={handleDrop}
       />
 
       <div className="writing-word-count" aria-live="polite">

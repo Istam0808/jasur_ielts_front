@@ -1279,3 +1279,117 @@
         }
     }
 }
+
+// IELTS instructions screen — reused from writing; shown before test starts
+.ielts-academic-instructions {
+    min-height: 60vh;
+    padding: $spacing-xl;
+    background-color: color.adjust($primary-color, $lightness: 92%);
+    @include flex(column, center, center, nowrap, $spacing-lg);
+
+    .ielts-academic-instructions__card {
+        width: 100%;
+        max-width: 560px;
+        padding: $spacing-xxl;
+        border-radius: $border-radius-lg;
+        box-shadow: $shadow-lg;
+        background-color: $background-light;
+        color: $neutral-800;
+        text-align: left;
+    }
+
+    .ielts-academic-instructions__title {
+        margin: 0 0 $spacing-sm;
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-bold;
+        color: $text-primary;
+        line-height: 1.25;
+    }
+
+    .ielts-academic-instructions__time {
+        margin: 0 0 $spacing-xl;
+        font-size: $font-size-base;
+        color: $neutral-700;
+    }
+
+    .ielts-academic-instructions__heading {
+        margin: $spacing-lg 0 $spacing-sm;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-bold;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: $text-primary;
+
+        &:first-of-type {
+            margin-top: 0;
+        }
+    }
+
+    .ielts-academic-instructions__list {
+        margin: 0 0 $spacing-md;
+        padding-left: $spacing-lg;
+        font-size: $font-size-base;
+        line-height: 1.6;
+        color: $neutral-800;
+    }
+
+    .ielts-academic-instructions__note {
+        display: flex;
+        align-items: flex-start;
+        gap: $spacing-sm;
+        margin: $spacing-lg 0 $spacing-xl;
+        font-size: $font-size-sm;
+        color: $neutral-700;
+        line-height: 1.5;
+    }
+
+    .ielts-academic-instructions__note-icon {
+        flex-shrink: 0;
+        margin-top: 0.15em;
+        font-size: 1.1rem;
+        color: $neutral-600;
+    }
+
+    .ielts-academic-instructions__btn {
+        display: block;
+        width: 100%;
+        max-width: 240px;
+        margin: 0 auto;
+        padding: $spacing-md $spacing-xl;
+        font-size: $font-size-base;
+        font-weight: $font-weight-bold;
+        color: $background-light;
+        background-color: $neutral-800;
+        border: none;
+        border-radius: $border-radius-md;
+        cursor: pointer;
+        transition: background-color $transition-fast, transform $transition-fast;
+        @include mobile-touch-target(48px);
+
+        &:hover {
+            background-color: $neutral-900;
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        &:focus-visible {
+            outline: 2px solid $primary-color;
+            outline-offset: 2px;
+        }
+    }
+
+    @media (max-width: 784px) {
+        padding: $spacing-lg;
+
+        .ielts-academic-instructions__card {
+            padding: $spacing-xl;
+        }
+
+        .ielts-academic-instructions__title {
+            font-size: $font-size-xl;
+        }
+    }
+}

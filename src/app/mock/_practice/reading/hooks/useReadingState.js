@@ -307,7 +307,7 @@ const countCompletionAnswers = (userAnswers, correctAnswers) => {
     }).length;
 };
 
-export const useReadingState = (readingExercise, difficulty, id, externalStartTime = null) => {
+export const useReadingState = (readingExercise, difficulty, id, externalStartTime = null, nextHref = null) => {
     const { isAuthenticated } = useUser();
     const { queueReadingCompletionUpdate, upsertReadingBestResult } = useUserDataMirror();
     const router = useRouter();
@@ -347,6 +347,9 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     const [inlinePassagePick, setInlinePassagePick] = useState(null);
     const autosaveTimeoutRef = useRef(null);
     const lastSavedPayloadRef = useRef('');
+    // Ref keeps the latest readingSavedAnswersPayload available inside handleSubmit
+    // without creating a forward-reference issue (payload is computed below handleSubmit).
+    const readingSavedAnswersPayloadRef = useRef(null);
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -790,17 +793,40 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
             const readingIdStr = String(id);
 
             if (isBackendMockReading) {
-                const calculatedResults = calculateResults();
-                setResults(calculatedResults);
-                setShowResults(true);
+                // Final guaranteed send of all answers then redirect — no results modal in mock exam
+                if (readingData?.mockId) {
+                    const session = getMockSession();
+                    const token = session?.accessToken;
+                    const sessionId = session?.sessionId;
 
-                if (calculatedResults) {
-                    await markCompletion(
-                        readingIdStr,
-                        calculatedResults.percentageCorrect,
-                        calculatedResults.totalQuestions
-                    );
+                    if (token && sessionId) {
+                        try {
+                            await saveMockSectionAnswers(
+                                readingData.mockId,
+                                'reading',
+                                readingSavedAnswersPayloadRef.current,
+                                { token, sessionId }
+                            );
+                        } catch (saveError) {
+                            if (isMockSessionMismatchError(saveError)) {
+                                notifyMockSessionMismatch();
+                            } else {
+                                console.warn('Reading final submit failed:', saveError);
+                            }
+                        }
+                    }
+
+                    // Clear localStorage backup after final submit
+                    try {
+                        localStorage.removeItem(`mock-answers-${readingData.mockId}-reading`);
+                    } catch {
+                        // ignore
+                    }
                 }
+
+                // Redirect to next section instead of showing results modal
+                router.push(nextHref || '/mock');
+                return;
             } else if (isAdvancedReading && readingData?.id) {
                 let payload = null;
                 try {
@@ -874,7 +900,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
     }, [
         isSubmitting, adjustedTimeLimit, readingData, timerStartTime, difficulty,
         userAnswers, selectedQuestionTypes, allQuestions, filteredQuestionsGlobal,
-        calculateResults, markCompletion, id
+        calculateResults, markCompletion, id, notifyMockSessionMismatch, nextHref, router
     ]);
 
     // Timer callback
@@ -1279,10 +1305,23 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         return { answers: answersBySection };
     }, [allAnswersData, allQuestions, readingData?.passages, userAnswers]);
 
+    // Keep ref in sync so handleSubmit can always access the latest payload
+    readingSavedAnswersPayloadRef.current = readingSavedAnswersPayload;
+
     useEffect(() => {
         const isBackendMockReading = readingData?.source === 'backend-mock';
         if (!isBackendMockReading || !readingData?.mockId) return;
         if (!Object.keys(userAnswers).length) return;
+
+        // Persist answers to localStorage as a local backup
+        try {
+            localStorage.setItem(
+                `mock-answers-${readingData.mockId}-reading`,
+                JSON.stringify(readingSavedAnswersPayload)
+            );
+        } catch {
+            // localStorage unavailable — silently skip
+        }
 
         const session = getMockSession();
         const token = session?.accessToken;

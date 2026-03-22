@@ -1,7 +1,7 @@
 'use client';
 import "../styles/readingProcess.scss"
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { BsExclamationCircle } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
 import Spinner from '@/components/common/spinner';
@@ -9,6 +9,7 @@ import Spinner from '@/components/common/spinner';
 // Import extracted components and hooks
 import { useReadingState } from '../hooks/useReadingState';
 import NormalReadingMode from './NormalReadingMode';
+import IELTSReadingInstructionsCard from './IELTSReadingInstructionsCard';
 
 export default function ReadingPage({
     readingExercise,
@@ -22,6 +23,9 @@ export default function ReadingPage({
 
     // PC only: fullscreen and keyboard shortcuts enabled
     const isMobile = false;
+
+    // Show instructions screen before the test starts (mock exam only)
+    const [hasInstructionAcknowledged, setHasInstructionAcknowledged] = useState(false);
 
     // Use custom hooks for state management
     const {
@@ -107,7 +111,7 @@ export default function ReadingPage({
         handlePassageChange,
         handleScrollDots,
         handleInlinePassagePickChange
-    } = useReadingState(readingExercise, difficulty, id);
+    } = useReadingState(readingExercise, difficulty, id, null, nextHref);
 
     // Ref for the scrollable question dots container
     const dotsContainerRef = useRef(null);
@@ -133,19 +137,19 @@ export default function ReadingPage({
         setIsFullScreen(false);
     }, [setIsFullScreen]);
 
-    // Initialize timer start time if not set (runs only once when readingData is available)
+    // Initialize timer start time if not set — only after instructions acknowledged
     useEffect(() => {
-        if (readingData && !timerStartTime) {
+        if (readingData && !timerStartTime && (!useUnifiedMockHeader || hasInstructionAcknowledged)) {
             setTimerStartTime(Date.now());
         }
-    }, [readingData, timerStartTime, setTimerStartTime]);
+    }, [readingData, timerStartTime, setTimerStartTime, useUnifiedMockHeader, hasInstructionAcknowledged]);
 
-    // Load data on mount and when dependencies change
+    // Load data on mount and when dependencies change — delayed in mock until instructions acknowledged
     useEffect(() => {
-        if (processedReadingData) {
+        if (processedReadingData && (!useUnifiedMockHeader || hasInstructionAcknowledged)) {
             loadReadingData();
         }
-    }, [loadReadingData, processedReadingData]);
+    }, [loadReadingData, processedReadingData, useUnifiedMockHeader, hasInstructionAcknowledged]);
 
     // Handle body and html scrollbar when in full-screen mode
     useEffect(() => {
@@ -273,6 +277,15 @@ export default function ReadingPage({
             observer.unobserve(container);
         };
     }, [isFullScreen, readingData, totalAllQuestions, updateArrowVisibility]);
+
+    // Show IELTS-style instructions screen before the test starts (mock exam only)
+    if (useUnifiedMockHeader && !hasInstructionAcknowledged) {
+        return (
+            <IELTSReadingInstructionsCard
+                onStart={() => setHasInstructionAcknowledged(true)}
+            />
+        );
+    }
 
     // Early returns for loading and error states
     if (loading) {

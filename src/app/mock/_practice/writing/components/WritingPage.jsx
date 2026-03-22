@@ -84,7 +84,8 @@ function WritingPageContent({
     timerDuration: externalTimerDuration = null,
     isTimerPaused: externalTimerPaused = false,
     startScreenVariant = 'default',
-    useUnifiedMockHeader = false
+    useUnifiedMockHeader = false,
+    nextHref = null
 }) {
     const router = useRouter();
     const { t, i18n } = useTranslation(['writing', 'practice', 'common', 'test']);
@@ -265,11 +266,51 @@ function WritingPageContent({
         };
     }, []);
 
-    // Wrap handleSubmit to pause timer when submitting
-    const handleSubmit = useCallback(() => {
+    // Wrap handleSubmit: in mock exam context make final API save then redirect;
+    // in non-mock context fall back to the base submission flow.
+    const handleSubmit = useCallback(async () => {
         pauseTimer();
+
+        if (useUnifiedMockHeader) {
+            const mockId = Number(id);
+            if (Number.isFinite(mockId) && mockId > 0) {
+                const session = getMockSession();
+                const token = session?.accessToken;
+                const sessionId = session?.sessionId;
+
+                if (token && sessionId) {
+                    try {
+                        await saveMockSectionAnswers(mockId, 'writing', writingSavedAnswersPayload, {
+                            token,
+                            sessionId
+                        });
+                    } catch (saveError) {
+                        if (isMockSessionMismatchError(saveError)) {
+                            notifyMockSessionMismatch();
+                        } else {
+                            console.warn('Writing final submit failed:', saveError);
+                        }
+                    }
+                }
+
+                // Clear localStorage backup after final submit
+                try {
+                    localStorage.removeItem(`mock-answers-${mockId}-writing`);
+                } catch {
+                    // ignore
+                }
+            }
+
+            const target = nextHref || '/finish-test';
+            router.push(target);
+            return;
+        }
+
         handleSubmitBase();
-    }, [handleSubmitBase, pauseTimer]);
+    }, [
+        pauseTimer, useUnifiedMockHeader, id, writingSavedAnswersPayload,
+        notifyMockSessionMismatch, nextHref, router, handleSubmitBase
+    ]);
 
     // Memoize writing data transformation
     const processedWritingData = useMemo(() => {
@@ -356,6 +397,16 @@ function WritingPageContent({
 
         const mockId = Number(id);
         if (!Number.isFinite(mockId) || mockId <= 0) return;
+
+        // Persist answers to localStorage as a local backup
+        try {
+            localStorage.setItem(
+                `mock-answers-${mockId}-writing`,
+                JSON.stringify(writingSavedAnswersPayload)
+            );
+        } catch {
+            // localStorage unavailable — silently skip
+        }
 
         const session = getMockSession();
         const token = session?.accessToken;
