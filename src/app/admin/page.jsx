@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff, FiLock } from "react-icons/fi";
 import { buildBackendUrl } from "@/lib/backend";
+import {
+  CENTER_ADMIN_ACCESS_TOKEN_KEY,
+  CENTER_ADMIN_ID_KEY,
+  clearCenterAdminAuthStorage,
+} from "@/lib/centerAdminAuth";
 import "./styles/style_admin.scss";
 
 const INVALID_CREDENTIALS_MESSAGE = "Неверный логин или пароль";
-const ADMIN_ACCESS_TOKEN_KEY = "adminAccessToken";
-const ADMIN_SESSION_ID_KEY = "adminSessionId";
 
 function parseJwtPayload(token) {
   try {
@@ -60,7 +63,11 @@ async function loginCenterAdmin({ username, password }) {
 
   if (response.ok) {
     const accessToken = typeof data?.access_token === "string" ? data.access_token : "";
-    const sessionId = typeof data?.session_id === "string" ? data.session_id : "";
+    const rawCenterAdminId = data?.center_admin_id;
+    const centerAdminId =
+      rawCenterAdminId != null && String(rawCenterAdminId).trim() !== ""
+        ? String(rawCenterAdminId)
+        : "";
 
     if (!accessToken) {
       return {
@@ -69,7 +76,22 @@ async function loginCenterAdmin({ username, password }) {
       };
     }
 
-    return { ok: true, accessToken, sessionId };
+    if (!centerAdminId) {
+      return {
+        ok: false,
+        message: "Сервер не вернул center_admin_id. Повторите вход.",
+      };
+    }
+
+    return { ok: true, accessToken, centerAdminId };
+  }
+
+  if (response.status === 409) {
+    return {
+      ok: false,
+      message:
+        "Уже есть активная сессия. Выйдите на другом устройстве или завершите сессию через выход.",
+    };
   }
 
   if (response.status === 400 || response.status === 401 || response.status === 403) {
@@ -99,14 +121,13 @@ export default function AdminLoginPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const token = localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY);
+    const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
     if (isAdminAccessTokenValid(token)) {
       router.replace("/admin/user");
       return;
     }
 
-    localStorage.removeItem(ADMIN_ACCESS_TOKEN_KEY);
-    localStorage.removeItem(ADMIN_SESSION_ID_KEY);
+    clearCenterAdminAuthStorage();
     setIsTokenCheckDone(true);
   }, [router]);
 
@@ -129,12 +150,8 @@ export default function AdminLoginPage() {
       }
 
       if (typeof window !== "undefined") {
-        localStorage.setItem(ADMIN_ACCESS_TOKEN_KEY, result.accessToken);
-        if (result.sessionId) {
-          localStorage.setItem(ADMIN_SESSION_ID_KEY, result.sessionId);
-        } else {
-          localStorage.removeItem(ADMIN_SESSION_ID_KEY);
-        }
+        localStorage.setItem(CENTER_ADMIN_ACCESS_TOKEN_KEY, result.accessToken);
+        localStorage.setItem(CENTER_ADMIN_ID_KEY, result.centerAdminId);
       }
       router.push("/admin/user");
     } finally {

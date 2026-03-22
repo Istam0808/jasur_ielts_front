@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiActivity, FiCpu, FiLogOut, FiSettings } from "react-icons/fi";
 import { buildBackendUrl } from "@/lib/backend";
+import {
+  CENTER_ADMIN_ACCESS_TOKEN_KEY,
+  CENTER_ADMIN_ID_KEY,
+  clearCenterAdminAuthStorage,
+  getCenterAdminAuthHeaders,
+} from "@/lib/centerAdminAuth";
 import "../styles/style_admin.scss";
 
 // --- Фейковые данные для мока админки ---
@@ -167,17 +173,11 @@ const NAV_RESULTS = "results";
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
 const ADMIN_THEME_KEY = "adminTheme";
-const ADMIN_ACCESS_TOKEN_KEY = "adminAccessToken";
-const ADMIN_SESSION_ID_KEY = "adminSessionId";
 
-async function logoutCenterAdmin({ token, sessionId }) {
+async function logoutCenterAdmin() {
   const response = await fetch(buildBackendUrl("/api/v1/auth/center-admin/logout/"), {
     method: "POST",
-    headers: {
-      Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(sessionId ? { "X-Session-Id": sessionId } : {}),
-    },
+    headers: getCenterAdminAuthHeaders(),
   });
 
   if (response.ok || response.status === 401) {
@@ -261,11 +261,17 @@ export default function AdminUserPage() {
     if (typeof window === "undefined") return;
 
     queueMicrotask(() => {
-      const token = localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY);
-      const ok = typeof token === "string" && token.trim().length > 0;
+      const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
+      const centerAdminId = localStorage.getItem(CENTER_ADMIN_ID_KEY);
+      const ok =
+        typeof token === "string" &&
+        token.trim().length > 0 &&
+        typeof centerAdminId === "string" &&
+        centerAdminId.trim().length > 0;
       setIsAuth(ok);
       setAuthChecked(true);
       if (!ok) {
+        clearCenterAdminAuthStorage();
         router.replace("/admin");
       }
     });
@@ -390,16 +396,13 @@ export default function AdminUserPage() {
     setLogoutError("");
     setIsLoggingOut(true);
     try {
-      const token = localStorage.getItem(ADMIN_ACCESS_TOKEN_KEY) || "";
-      const sessionId = localStorage.getItem(ADMIN_SESSION_ID_KEY) || "";
-      const result = await logoutCenterAdmin({ token, sessionId });
+      const result = await logoutCenterAdmin();
       if (!result.ok) {
         setLogoutError(result.message || "Не удалось выполнить выход");
         return;
       }
       closeExitConfirmModal();
-      localStorage.removeItem(ADMIN_ACCESS_TOKEN_KEY);
-      localStorage.removeItem(ADMIN_SESSION_ID_KEY);
+      clearCenterAdminAuthStorage();
       router.replace("/admin");
     } catch (_) {
       setLogoutError("Ошибка сети при выходе. Попробуйте ещё раз.");
