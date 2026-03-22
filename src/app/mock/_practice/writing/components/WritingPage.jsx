@@ -14,7 +14,12 @@ import Timer from '@/components/common/Timer';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
-import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
+import {
+    isMockSessionMismatchError,
+    MOCK_SESSION_STATUS,
+    postMockSessionStatus,
+    saveMockSectionAnswers
+} from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
 
 // Custom hooks
@@ -110,6 +115,7 @@ function WritingPageContent({
     const autosaveTimeoutRef = useRef(null);
     const lastSavedPayloadRef = useRef('');
     const sessionMismatchNotifiedRef = useRef(false);
+    const writingTutorialStatusSentRef = useRef(false);
 
     const titleRef = useRef(null);
 
@@ -236,6 +242,30 @@ function WritingPageContent({
         t
     });
 
+    const handleWritingExamStart = useCallback(() => {
+        if (useUnifiedMockHeader) {
+            const session = getMockSession();
+            postMockSessionStatus(MOCK_SESSION_STATUS.WRITING_EXAM, {
+                token: session?.accessToken,
+                sessionId: session?.sessionId
+            });
+        }
+        handleStartTimer();
+    }, [useUnifiedMockHeader, handleStartTimer]);
+
+    useEffect(() => {
+        if (!useUnifiedMockHeader || !writingData || hasTimerStarted || hasSubmitted || loading || submissionLoading) {
+            return;
+        }
+        if (writingTutorialStatusSentRef.current) return;
+        writingTutorialStatusSentRef.current = true;
+        const session = getMockSession();
+        postMockSessionStatus(MOCK_SESSION_STATUS.WRITING_TUTORIAL, {
+            token: session?.accessToken,
+            sessionId: session?.sessionId
+        });
+    }, [useUnifiedMockHeader, writingData, hasTimerStarted, hasSubmitted, loading, submissionLoading]);
+
     // Реальная высота окна (F11, Fullscreen API, полоска браузера): `100vh` не всегда совпадает с видимой областью
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -284,6 +314,7 @@ function WritingPageContent({
                             token,
                             sessionId
                         });
+                        await postMockSessionStatus(MOCK_SESSION_STATUS.SUBMITTED, { token, sessionId });
                     } catch (saveError) {
                         if (isMockSessionMismatchError(saveError)) {
                             notifyMockSessionMismatch();
@@ -798,12 +829,12 @@ function WritingPageContent({
                     {/* Start Writing Card or IELTS Academic instructions */}
                     {!hasTimerStarted && !hasSubmitted && (
                         startScreenVariant === 'ieltsAcademic' ? (
-                            <IELTSAcademicInstructionsCard onStart={handleStartTimer} />
+                            <IELTSAcademicInstructionsCard onStart={handleWritingExamStart} />
                         ) : (
                             <WritingStartCard
                                 title={writingTopicTitle}
                                 description={topicDescription}
-                                onStart={handleStartTimer}
+                                onStart={handleWritingExamStart}
                                 minWords={Number((writingTasksFromData[0] && writingTasksFromData[0].minWords) || TASK_1_MIN_WORDS)}
                                 timeMinutes={Number((writingTasksFromData[0] && writingTasksFromData[0].recommendedMinutes) || TASK_1_TIME_MINUTES)}
                             />

@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import Spinner from '@/components/common/spinner';
 
 // Import extracted components and hooks
+import { MOCK_SESSION_STATUS, postMockSessionStatus } from '@/lib/mockApi';
+import { getMockSession } from '@/lib/mockSession';
 import { useReadingState } from '../hooks/useReadingState';
 import NormalReadingMode from './NormalReadingMode';
 import IELTSReadingInstructionsCard from './IELTSReadingInstructionsCard';
@@ -115,6 +117,8 @@ export default function ReadingPage({
 
     // Ref for the scrollable question dots container
     const dotsContainerRef = useRef(null);
+    const readingTutorialStatusSentRef = useRef(false);
+    const readingExamStatusSentRef = useRef(false);
 
     // Memoized arrow visibility update function to prevent unnecessary re-creation
     const updateArrowVisibility = useCallback(() => {
@@ -277,6 +281,28 @@ export default function ReadingPage({
             observer.unobserve(container);
         };
     }, [isFullScreen, readingData, totalAllQuestions, updateArrowVisibility]);
+
+    useEffect(() => {
+        if (!useUnifiedMockHeader || hasInstructionAcknowledged) return;
+        if (readingTutorialStatusSentRef.current) return;
+        readingTutorialStatusSentRef.current = true;
+        const session = getMockSession();
+        postMockSessionStatus(MOCK_SESSION_STATUS.READING_TUTORIAL, {
+            token: session?.accessToken,
+            sessionId: session?.sessionId
+        });
+    }, [useUnifiedMockHeader, hasInstructionAcknowledged]);
+
+    useEffect(() => {
+        if (!useUnifiedMockHeader || !hasInstructionAcknowledged || !readingData || loading) return;
+        if (readingExamStatusSentRef.current) return;
+        readingExamStatusSentRef.current = true;
+        const session = getMockSession();
+        postMockSessionStatus(MOCK_SESSION_STATUS.READING_EXAM, {
+            token: session?.accessToken,
+            sessionId: session?.sessionId
+        });
+    }, [useUnifiedMockHeader, hasInstructionAcknowledged, readingData, loading]);
 
     // Show IELTS-style instructions screen before the test starts (mock exam only)
     if (useUnifiedMockHeader && !hasInstructionAcknowledged) {

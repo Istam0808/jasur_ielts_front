@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BackendApiError, getMocksList, loginAgent } from "@/lib/mockApi";
+import {
+  BackendApiError,
+  getMocksList,
+  loginAgent,
+  MOCK_SESSION_STATUS,
+  postMockSessionStatus,
+} from "@/lib/mockApi";
 import { getMockSession, saveMockSession } from "@/lib/mockSession";
 import "./student-login.scss";
 
@@ -72,6 +78,10 @@ export default function StudentLoginPage() {
       saveMockSession(newSession);
       setSession(newSession);
       setPassword("");
+      await postMockSessionStatus(MOCK_SESSION_STATUS.IDLE, {
+        token: newSession.accessToken,
+        sessionId: newSession.sessionId,
+      });
       await loadMocks(auth.accessToken);
     } catch (err) {
       if (err instanceof BackendApiError) {

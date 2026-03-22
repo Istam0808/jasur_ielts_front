@@ -116,6 +116,45 @@ export async function loginAgent(username, password, fullName) {
   };
 }
 
+/** Допустимые значения для POST /api/v1/auth/session/status/ (mock exam flow). */
+export const MOCK_SESSION_STATUS = Object.freeze({
+  IDLE: "idle",
+  LISTENING_TUTORIAL: "listening_tutorial",
+  LISTENING_EXAM: "listening_exam",
+  READING_TUTORIAL: "reading_tutorial",
+  READING_EXAM: "reading_exam",
+  WRITING_TUTORIAL: "writing_tutorial",
+  WRITING_EXAM: "writing_exam",
+  SUBMITTED: "submitted",
+});
+
+/**
+ * Обновляет статус сессии на backend (Bearer + X-Session-Id).
+ * Ошибки только в console.warn, без throw — чтобы не ломать UX.
+ */
+export async function postMockSessionStatus(status, { token, sessionId } = {}) {
+  const normalizedToken = typeof token === "string" ? token.trim() : "";
+  const normalizedSessionId =
+    typeof sessionId === "string" ? sessionId.trim() : String(sessionId || "").trim();
+
+  if (!normalizedToken || !normalizedSessionId) {
+    return;
+  }
+
+  const customHeaders = { "X-Session-Id": normalizedSessionId };
+
+  try {
+    await request("/api/v1/auth/session/status/", {
+      method: "POST",
+      body: { status },
+      token: normalizedToken,
+      headers: customHeaders,
+    });
+  } catch (err) {
+    console.warn("[mock session status]", status, err);
+  }
+}
+
 export async function logoutAgent(token) {
   await request("/api/v1/auth/logout", {
     method: "POST",

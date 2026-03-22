@@ -12,7 +12,12 @@ import { TestHeader, TestOverview, PartNavigation, PartHeader, TestNavigation } 
 import TestProgress from './TestProgress';
 import MockUnifiedHeader from '@/components/common/MockUnifiedHeader';
 import { useMockUi } from '@/components/common/MockUiContext';
-import { isMockSessionMismatchError, saveMockSectionAnswers } from '@/lib/mockApi';
+import {
+    isMockSessionMismatchError,
+    MOCK_SESSION_STATUS,
+    postMockSessionStatus,
+    saveMockSectionAnswers
+} from '@/lib/mockApi';
 import { getMockSession } from '@/lib/mockSession';
 import MockExamFooter from '@/components/mock/MockExamFooter';
 import HighlightText from '@/components/common/HighlightText';
@@ -92,6 +97,7 @@ const TestListeningPage = ({
     const autoSaveTimeoutRef = useRef(null);
     const lastSavedPayloadRef = useRef('');
     const sessionMismatchNotifiedRef = useRef(false);
+    const listeningTutorialStatusSentRef = useRef(false);
 
     // Listening audio volume control (syncs with <audio ref={audioRef} />)
     const [audioVolume, setAudioVolume] = useState(1); // 0..1, keeps last non-zero volume
@@ -120,6 +126,26 @@ const TestListeningPage = ({
 
         loadNamespaces();
     }, [i18n]);
+
+    useEffect(() => {
+        if (!isMockExam || !test || isLoading || hasInstructionAcknowledged) return;
+        if (listeningTutorialStatusSentRef.current) return;
+        listeningTutorialStatusSentRef.current = true;
+        const session = getMockSession();
+        postMockSessionStatus(MOCK_SESSION_STATUS.LISTENING_TUTORIAL, {
+            token: session?.accessToken,
+            sessionId: session?.sessionId
+        });
+    }, [isMockExam, test, isLoading, hasInstructionAcknowledged]);
+
+    const handleListeningInstructionStart = useCallback(() => {
+        const session = getMockSession();
+        postMockSessionStatus(MOCK_SESSION_STATUS.LISTENING_EXAM, {
+            token: session?.accessToken,
+            sessionId: session?.sessionId
+        });
+        setHasInstructionAcknowledged(true);
+    }, []);
 
     // Start the test only after instructions are acknowledged (mock) or immediately (non-mock)
     useEffect(() => {
@@ -795,7 +821,7 @@ const TestListeningPage = ({
                     />
                 )}
                 <IELTSListeningInstructionsCard
-                    onStart={() => setHasInstructionAcknowledged(true)}
+                    onStart={handleListeningInstructionStart}
                 />
             </div>
         );
