@@ -193,7 +193,7 @@ const BasicQuestionComponent = memo(({ question, answer, onAnswerChange, isRevie
 BasicQuestionComponent.displayName = 'BasicQuestionComponent';
 
 // Main Question Router Component
-const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode, questionRange, readingId, difficulty, reviewMap, isGrouped = false, showInstruction = true, globalNumber = null, inlinePickedOption = null, onInlinePickOptionChange = () => {} }) => {
+const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode, questionRange, readingId, difficulty, reviewMap, isGrouped = false, showInstruction = true, globalNumber = null, groupItemNumber = null, inlinePickedOption = null, onInlinePickOptionChange = () => {} }) => {
     const { t } = useTranslation('practice');
 
     // Determine if answer exists based on question type
@@ -576,6 +576,25 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
         return /^\d$/.test(displayNumber) ? 'single-digit' : 'range-number';
     }, [displayNumber]);
 
+    const groupedItemDisplayNumber = useMemo(() => {
+        if (groupItemNumber != null) {
+            return String(groupItemNumber);
+        }
+
+        if (questionRange?.start != null) {
+            return String(questionRange.start);
+        }
+
+        if (typeof question?.statement === 'string') {
+            const statementNumberMatch = question.statement.trim().match(/^(\d+)\./);
+            if (statementNumberMatch) {
+                return statementNumberMatch[1];
+            }
+        }
+
+        return '';
+    }, [groupItemNumber, questionRange?.start, question?.statement]);
+
     // If this question is part of a group, render only the content without the card wrapper
     if (isGrouped) {
         return (
@@ -583,13 +602,22 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
                 className="grouped-question-content"
                 data-question-id={question.id}
             >
-                {!shouldSuppressQuestionText && getQuestionText && (
-                    <div className="question-content">
-                        <h3 className="question-text">{getQuestionText}</h3>
+                <div className="grouped-question-layout">
+                    {groupedItemDisplayNumber && (
+                        <div className="question-number grouped-item-number">
+                            <span>{groupedItemDisplayNumber}</span>
+                        </div>
+                    )}
+                    <div className="grouped-question-main">
+                        {!shouldSuppressQuestionText && getQuestionText && (
+                            <div className="question-content">
+                                <h3 className="question-text">{getQuestionText}</h3>
+                            </div>
+                        )}
+                        <div className="question-body">
+                            {renderQuestionContent()}
+                        </div>
                     </div>
-                )}
-                <div className="question-body">
-                    {renderQuestionContent()}
                 </div>
             </div>
         );

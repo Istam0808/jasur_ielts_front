@@ -54,7 +54,6 @@ export default function NormalReadingMode({
     passageParagraphs,
     passageIsHtml = false,
     passageTitle,
-    totalQuestions,
     columnWidth,
     onColumnResize,
     handleQuestionClick,
@@ -544,13 +543,15 @@ export default function NormalReadingMode({
                 {/* Questions Section */}
                 <div className="questions-section">
                     <div className="section-header">
-                        <h2>
-                            {readingData.isMultiPassage
-                                ? `${t('questions')} ${currentPassage?.question_range || ''}`
-                                : t('questions')
-                            }
-                        </h2>
-                        <span className="questions-count">{totalQuestions} {t('questionCount')}</span>
+                        <h2>{t('questions')}</h2>
+                        {readingData.isMultiPassage && currentPassage?.question_range && (
+                            <div className="questions-range-wrap">
+                                <span className="questions-range-label">Questions</span>
+                                <span className="question-number range-number questions-range-badge">
+                                    <span>{currentPassage.question_range}</span>
+                                </span>
+                            </div>
+                        )}
                     </div>
                     <div className="questions-content">
                         {(() => {

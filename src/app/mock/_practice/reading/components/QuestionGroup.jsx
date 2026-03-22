@@ -280,6 +280,17 @@ const QuestionGroup = memo(({
                             globalNumber = groupRange.start + index;
                         }
                     }
+
+                    let groupItemNumber = questionRanges?.[question.id]?.start ?? null;
+                    if (!groupItemNumber && typeof question?.statement === 'string') {
+                        const statementNumberMatch = question.statement.trim().match(/^(\d+)\./);
+                        if (statementNumberMatch) {
+                            groupItemNumber = Number(statementNumberMatch[1]);
+                        }
+                    }
+                    if (!groupItemNumber && groupRange?.start) {
+                        groupItemNumber = groupRange.start + index;
+                    }
                     
                     return (
                         <div key={`${question.id}-${index}`} className="grouped-question">
@@ -295,6 +306,7 @@ const QuestionGroup = memo(({
                                 isGrouped={true}
                                 showInstruction={false}
                                 globalNumber={globalNumber}
+                                groupItemNumber={groupItemNumber}
                                 inlinePickedOption={inlinePickedOption}
                                 onInlinePickOptionChange={onInlinePickOptionChange}
                             />
