@@ -1,20 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Spinner from "@/components/common/spinner";
 import ReadingPage from "@/app/mock/_components/ReadingPage";
 import { getMockById } from "@/lib/mockApi";
 import { adaptReadingMockToUi } from "@/lib/mockAdapters";
 import { getMockAccessToken, setMockPayload } from "@/lib/mockSession";
+import MockPreloadScreen from "@/components/MockPreloadScreen";
+import { useMockPreloader } from "@/hooks/useMockPreloader";
 
 export default function MockReadingByIdPage() {
   const params = useParams();
   const router = useRouter();
   const mockId = params?.id;
-  const [readingExercise, setReadingExercise] = useState(null);
+  const [mockDetail, setMockDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const {
+    percent,
+    status,
+    errors,
+    cachedData,
+    bytesLoaded,
+    bytesTotal,
+    currentLabel,
+    filesDone,
+    filesTotal,
+    swPrefetchDone,
+    swPrefetchTotal,
+  } = useMockPreloader(mockDetail, {
+    includeStaticInstructions: true,
+  });
+
+  const readingExercise = useMemo(() => {
+    if (!cachedData) return null;
+    return adaptReadingMockToUi(cachedData);
+  }, [cachedData]);
 
   useEffect(() => {
     if (!mockId) return;
@@ -30,7 +52,7 @@ export default function MockReadingByIdPage() {
       try {
         const detail = await getMockById(mockId, token);
         setMockPayload(mockId, detail);
-        setReadingExercise(adaptReadingMockToUi(detail));
+        setMockDetail(detail);
       } catch (err) {
         setError(err?.message || "Не удалось загрузить reading mock.");
       } finally {
@@ -41,7 +63,13 @@ export default function MockReadingByIdPage() {
     load();
   }, [mockId, router]);
 
-  if (loading) {
+  useEffect(() => {
+    if (status === "done" && errors.length > 0) {
+      console.warn("[mock-preloader] some assets failed to preload:", errors);
+    }
+  }, [errors, status]);
+
+  if (loading && !mockDetail) {
     return (
       <div style={{ minHeight: "55vh", display: "grid", placeItems: "center" }}>
         <Spinner />
@@ -49,10 +77,34 @@ export default function MockReadingByIdPage() {
     );
   }
 
-  if (error || !readingExercise) {
+  if (error || !mockDetail) {
     return (
       <div style={{ minHeight: "55vh", display: "grid", placeItems: "center", padding: "1rem" }}>
         <p>{error || "Не удалось открыть reading mock."}</p>
+      </div>
+    );
+  }
+
+  if (status !== "done") {
+    return (
+      <MockPreloadScreen
+        percent={percent}
+        status={status}
+        bytesLoaded={bytesLoaded}
+        bytesTotal={bytesTotal}
+        currentLabel={currentLabel}
+        filesDone={filesDone}
+        filesTotal={filesTotal}
+        swPrefetchDone={swPrefetchDone}
+        swPrefetchTotal={swPrefetchTotal}
+      />
+    );
+  }
+
+  if (!readingExercise) {
+    return (
+      <div style={{ minHeight: "55vh", display: "grid", placeItems: "center", padding: "1rem" }}>
+        <p>Не удалось подготовить reading mock.</p>
       </div>
     );
   }

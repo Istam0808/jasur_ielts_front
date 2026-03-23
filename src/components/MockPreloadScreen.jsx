@@ -2,19 +2,44 @@
 
 import PropTypes from "prop-types";
 
-function getStatusText(percent, status) {
-  if (status === "error") return "Loading finished with some issues...";
-  if (status === "done") return "Almost ready...";
-  if (status === "idle") return "Preparing assets...";
-
-  if (percent < 45) return "Loading audio...";
-  if (percent < 90) return "Loading images...";
-  return "Almost ready...";
+function formatBytes(value) {
+  if (value == null || !Number.isFinite(value) || value < 0) return "—";
+  if (value < 1024) return `${Math.round(value)} B`;
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+  return `${(value / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function MockPreloadScreen({ percent, status }) {
+function getStatusText(percent, status) {
+  if (status === "error") return "Загрузка завершена с предупреждениями…";
+  if (status === "done") return "Почти готово…";
+  if (status === "idle") return "Подготовка материалов…";
+
+  if (percent < 45) return "Загрузка аудио…";
+  if (percent < 90) return "Загрузка изображений…";
+  return "Почти готово…";
+}
+
+export default function MockPreloadScreen({
+  percent,
+  status,
+  bytesLoaded = 0,
+  bytesTotal = null,
+  currentLabel = "",
+  filesDone = 0,
+  filesTotal = 0,
+  swPrefetchDone = null,
+  swPrefetchTotal = null,
+}) {
   const normalizedPercent = Number.isFinite(percent) ? Math.max(0, Math.min(100, Math.round(percent))) : 0;
   const statusText = getStatusText(normalizedPercent, status);
+  const showLiveBytes = status === "loading" && (bytesLoaded > 0 || (bytesTotal != null && bytesTotal > 0));
+  const showFilesRow =
+    status === "loading" && filesTotal > 0 && (swPrefetchTotal == null || swPrefetchTotal === 0);
+  const showSwRow =
+    status === "loading" &&
+    swPrefetchTotal != null &&
+    swPrefetchTotal > 0 &&
+    swPrefetchDone != null;
 
   return (
     <main
@@ -49,7 +74,7 @@ export default function MockPreloadScreen({ percent, status }) {
             fontWeight: 700,
           }}
         >
-          Preparing your IELTS mock exam
+          Подготовка IELTS mock
         </h1>
 
         <p
@@ -60,7 +85,7 @@ export default function MockPreloadScreen({ percent, status }) {
             fontSize: "0.95rem",
           }}
         >
-          We are loading audio and visual assets for a smoother exam experience.
+          Загружаем аудио и визуальные материалы — прогресс обновляется в реальном времени.
         </p>
 
         <div
@@ -68,7 +93,7 @@ export default function MockPreloadScreen({ percent, status }) {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={normalizedPercent}
-          aria-label="Mock exam asset preload progress"
+          aria-label="Прогресс загрузки материалов мок-экзамена"
           style={{
             width: "100%",
             height: "12px",
@@ -83,7 +108,7 @@ export default function MockPreloadScreen({ percent, status }) {
               width: `${normalizedPercent}%`,
               height: "100%",
               background: "linear-gradient(90deg, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%)",
-              transition: "width 220ms ease-out",
+              transition: "width 120ms linear",
               boxShadow: "0 0 20px rgba(14, 165, 233, 0.5)",
             }}
           />
@@ -104,6 +129,60 @@ export default function MockPreloadScreen({ percent, status }) {
             {normalizedPercent}%
           </span>
         </div>
+
+        {(showSwRow || showFilesRow || showLiveBytes) && (
+          <div
+            style={{
+              marginTop: "1rem",
+              paddingTop: "1rem",
+              borderTop: "1px solid rgba(148, 163, 184, 0.18)",
+              fontSize: "0.875rem",
+              color: "#94a3b8",
+              lineHeight: 1.5,
+            }}
+          >
+            {showSwRow ? (
+              <div style={{ fontVariantNumeric: "tabular-nums", marginBottom: showFilesRow || showLiveBytes ? "0.5rem" : 0 }}>
+                Кэш (Service Worker):{" "}
+                <span style={{ color: "#e2e8f0" }}>
+                  {swPrefetchDone} / {swPrefetchTotal}
+                </span>
+              </div>
+            ) : null}
+            {showFilesRow ? (
+              <div style={{ fontVariantNumeric: "tabular-nums", marginBottom: showLiveBytes ? "0.5rem" : 0 }}>
+                Файлы:{" "}
+                <span style={{ color: "#e2e8f0" }}>
+                  {filesDone} / {filesTotal}
+                </span>
+              </div>
+            ) : null}
+            {showLiveBytes ? (
+              <>
+                <div style={{ fontVariantNumeric: "tabular-nums" }}>
+                  Скачано: <span style={{ color: "#e2e8f0" }}>{formatBytes(bytesLoaded)}</span>
+                  {bytesTotal != null && bytesTotal > 0 ? (
+                    <>
+                      {" "}
+                      / <span style={{ color: "#e2e8f0" }}>{formatBytes(bytesTotal)}</span>
+                    </>
+                  ) : null}
+                </div>
+                {currentLabel ? (
+                  <div
+                    style={{
+                      marginTop: "0.35rem",
+                      color: "#cbd5e1",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    Файл: <span style={{ color: "#f1f5f9" }}>{currentLabel}</span>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+        )}
       </section>
     </main>
   );
@@ -112,4 +191,11 @@ export default function MockPreloadScreen({ percent, status }) {
 MockPreloadScreen.propTypes = {
   percent: PropTypes.number.isRequired,
   status: PropTypes.oneOf(["idle", "loading", "done", "error"]).isRequired,
+  bytesLoaded: PropTypes.number,
+  bytesTotal: PropTypes.number,
+  currentLabel: PropTypes.string,
+  filesDone: PropTypes.number,
+  filesTotal: PropTypes.number,
+  swPrefetchDone: PropTypes.number,
+  swPrefetchTotal: PropTypes.number,
 };

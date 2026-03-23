@@ -17,7 +17,21 @@ export default function MockListeningByIdPage() {
   const [mockDetail, setMockDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { percent, status, errors, cachedData } = useMockPreloader(mockDetail);
+  const {
+    percent,
+    status,
+    errors,
+    cachedData,
+    bytesLoaded,
+    bytesTotal,
+    currentLabel,
+    filesDone,
+    filesTotal,
+    swPrefetchDone,
+    swPrefetchTotal,
+  } = useMockPreloader(mockDetail, {
+    includeStaticInstructions: true,
+  });
 
   const preparedPayload = useMemo(() => {
     if (!cachedData) return null;
@@ -73,7 +87,19 @@ export default function MockListeningByIdPage() {
   }
 
   if (status !== "done") {
-    return <MockPreloadScreen percent={percent} status={status} />;
+    return (
+      <MockPreloadScreen
+        percent={percent}
+        status={status}
+        bytesLoaded={bytesLoaded}
+        bytesTotal={bytesTotal}
+        currentLabel={currentLabel}
+        filesDone={filesDone}
+        filesTotal={filesTotal}
+        swPrefetchDone={swPrefetchDone}
+        swPrefetchTotal={swPrefetchTotal}
+      />
+    );
   }
 
   if (!preparedPayload) {
