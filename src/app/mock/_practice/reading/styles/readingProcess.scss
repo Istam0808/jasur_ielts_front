@@ -1585,7 +1585,7 @@
 
     .ielts-academic-instructions__card {
         width: 100%;
-        max-width: 560px;
+        max-width: 920px;
         padding: $spacing-xxl;
         border-radius: $border-radius-lg;
         box-shadow: $shadow-lg;
@@ -1606,6 +1606,20 @@
         margin: 0 0 $spacing-xl;
         font-size: $font-size-base;
         color: $neutral-700;
+    }
+
+    .ielts-academic-instructions__video-wrap {
+        margin-bottom: $spacing-xl;
+    }
+
+    .ielts-academic-instructions__video {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        max-height: min(56vh, 520px);
+        border: 1px solid $border-light;
+        border-radius: $border-radius-md;
+        background-color: $neutral-900;
     }
 
     .ielts-academic-instructions__heading {

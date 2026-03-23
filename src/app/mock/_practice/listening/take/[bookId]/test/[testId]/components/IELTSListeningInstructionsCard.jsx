@@ -1,11 +1,10 @@
 'use client';
 
 import { useTranslation } from 'react-i18next';
-import { BsInfoCircle } from 'react-icons/bs';
 
 /**
  * IELTS Listening instructions screen — shown before test start in mock exam.
- * Displays official-style instructions and information for candidates.
+ * Displays instructional video before starting.
  */
 export default function IELTSListeningInstructionsCard({ onStart }) {
   const { t } = useTranslation('listening');
@@ -20,30 +19,18 @@ export default function IELTSListeningInstructionsCard({ onStart }) {
           {t('ieltsListeningTime', { defaultValue: 'Time: Approximately 30 minutes' })}
         </p>
 
-        <h2 className="ielts-academic-instructions__heading">
-          {t('instructionsToCandidates', { defaultValue: 'INSTRUCTIONS TO CANDIDATES' })}
-        </h2>
-        <ul className="ielts-academic-instructions__list">
-          <li>{t('listeningInstructionDoNotOpen', { defaultValue: 'Do not open this question paper until you are told to do so.' })}</li>
-          <li>{t('listeningInstructionWriteName', { defaultValue: 'Write your name and candidate number in the spaces at the top of this page.' })}</li>
-          <li>{t('listeningInstructionAnswerAll', { defaultValue: 'Answer all the questions.' })}</li>
-          <li>{t('listeningInstructionSpelling', { defaultValue: 'While you are listening, write your answers on the question paper.' })}</li>
-        </ul>
-
-        <h2 className="ielts-academic-instructions__heading">
-          {t('informationForCandidates', { defaultValue: 'INFORMATION FOR CANDIDATES' })}
-        </h2>
-        <ul className="ielts-academic-instructions__list">
-          <li>{t('listeningInfoFourParts', { defaultValue: 'There are four parts to the test.' })}</li>
-          <li>{t('listeningInfoFortyQuestions', { defaultValue: 'Each part is heard once only.' })}</li>
-          <li>{t('listeningInfoTransferTime', { defaultValue: 'The audio will begin automatically when you start the test.' })}</li>
-          <li>{t('listeningInfoSpelling', { defaultValue: 'Use a pencil. Spelling and grammar count.' })}</li>
-        </ul>
-
-        <p className="ielts-academic-instructions__note" role="note">
-          <BsInfoCircle className="ielts-academic-instructions__note-icon" aria-hidden="true" />
-          {t('listeningInvigilatorNote', { defaultValue: 'The recording will start as soon as you press Start Test. Make sure you are ready.' })}
-        </p>
+        <div className="ielts-academic-instructions__video-wrap">
+          <video
+            className="ielts-academic-instructions__video"
+            controls
+            preload="metadata"
+            playsInline
+            aria-label={t('listeningInstructionsVideo', { defaultValue: 'Listening instructions video' })}
+          >
+            <source src="/videos/listening_instructions.webm" type="video/webm" />
+            {t('videoNotSupported', { defaultValue: 'Your browser does not support the video tag.' })}
+          </video>
+        </div>
 
         <button
           type="button"
