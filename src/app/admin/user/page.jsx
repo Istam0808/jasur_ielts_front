@@ -12,7 +12,6 @@ import {
   fetchAgents,
   fetchAllSessions,
   fetchSessionDetail,
-  fetchSessionSavedAnswers,
   fetchSessionScore,
   mergeScoreBands,
   normalizeSessionSummary,
@@ -206,7 +205,6 @@ export default function AdminUserPage() {
   const [speakingSaving, setSpeakingSaving] = useState(false);
   const [speakingSaveError, setSpeakingSaveError] = useState("");
   const [savedAnswersPayload, setSavedAnswersPayload] = useState(null);
-  const [savedAnswersLoading, setSavedAnswersLoading] = useState(false);
   const [savedAnswersError, setSavedAnswersError] = useState("");
   const [savedAnswersModalOpen, setSavedAnswersModalOpen] = useState(false);
 
@@ -563,30 +561,9 @@ export default function AdminUserPage() {
     setSelectedSessionId(sessionId);
   }
 
-  async function handleViewSavedAnswersDetail() {
+  function handleViewSavedAnswersDetail() {
     if (!selectedSessionId) return;
-    setSavedAnswersError("");
-    const sid = String(selectedSessionId);
-    const cached = savedAnswersPayload?.session?.session_id === sid;
-    if (cached) {
-      setSavedAnswersModalOpen(true);
-      return;
-    }
-    setSavedAnswersLoading(true);
-    const res = await fetchSessionSavedAnswers(sid);
-    if (res.unauthorized) {
-      handleUnauthorized(router);
-      setSavedAnswersLoading(false);
-      return;
-    }
-    if (!res.ok) {
-      setSavedAnswersError(res.message || "Не удалось загрузить подробные данные");
-      setSavedAnswersLoading(false);
-      return;
-    }
-    setSavedAnswersPayload(res.data);
-    setSavedAnswersModalOpen(true);
-    setSavedAnswersLoading(false);
+    router.push(`/admin/user/${String(selectedSessionId)}/saved-answers`);
   }
 
   function closeSavedAnswersModal() {
@@ -1767,9 +1744,9 @@ export default function AdminUserPage() {
                         type="button"
                         className="admin-dashboard__btn-secondary"
                         onClick={() => handleViewSavedAnswersDetail()}
-                        disabled={savedAnswersLoading || !selectedSessionId}
+                        disabled={!selectedSessionId}
                       >
-                        {savedAnswersLoading ? "Загрузка…" : "Увидеть подробнее"}
+                        Увидеть подробнее
                       </button>
                       <p className="admin-dashboard__saved-answers-hint">
                         Данные:{" "}

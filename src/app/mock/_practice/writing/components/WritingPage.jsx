@@ -457,21 +457,6 @@ function WritingPageContent({
         const mockId = Number(id);
         if (!Number.isFinite(mockId) || mockId <= 0) return;
 
-        // Persist answers to localStorage as a local backup
-        try {
-            localStorage.setItem(
-                `mock-answers-${mockId}-writing`,
-                JSON.stringify(writingSavedAnswersPayload)
-            );
-        } catch {
-            // localStorage unavailable — silently skip
-        }
-
-        const session = getMockSession();
-        const token = session?.accessToken;
-        const sessionId = session?.sessionId;
-        if (!token || !sessionId) return;
-
         const payloadKey = JSON.stringify(writingSavedAnswersPayload);
         if (payloadKey === lastSavedPayloadRef.current) return;
 
@@ -479,38 +464,17 @@ function WritingPageContent({
             clearTimeout(autosaveTimeoutRef.current);
         }
 
-        autosaveTimeoutRef.current = setTimeout(async () => {
+        // Только локальное сохранение во время набора.
+        // На backend отправляем только при финальном submit.
+        autosaveTimeoutRef.current = setTimeout(() => {
             try {
-                const data = await saveMockSectionAnswers('writing', writingSavedAnswersPayload, {
-                    token,
-                    sessionId
-                });
-                if (data?.answers && typeof data.answers === 'object') {
-                    lastSavedPayloadRef.current = JSON.stringify({ answers: data.answers });
-                    setResponsesByPart((prev) =>
-                        mergeWritingServerAnswersIntoResponses(data.answers, writingTasks, prev)
-                    );
-                    try {
-                        localStorage.setItem(
-                            `mock-answers-${mockId}-writing`,
-                            JSON.stringify({ answers: data.answers })
-                        );
-                    } catch {
-                        // ignore
-                    }
-                } else {
-                    lastSavedPayloadRef.current = payloadKey;
-                }
-            } catch (saveError) {
-                if (isMockSessionMismatchError(saveError)) {
-                    notifyMockSessionMismatch();
-                    return;
-                }
-                if (isMockNotBoundError(saveError)) {
-                    console.warn('Writing autosave: mock not bound on session:', saveError);
-                    return;
-                }
-                console.warn('Writing autosave failed:', saveError);
+                localStorage.setItem(
+                    `mock-answers-${mockId}-writing`,
+                    JSON.stringify(writingSavedAnswersPayload)
+                );
+                lastSavedPayloadRef.current = payloadKey;
+            } catch {
+                // localStorage unavailable — silently skip
             }
         }, AUTOSAVE_DELAY_MS);
 
@@ -522,11 +486,9 @@ function WritingPageContent({
         };
     }, [
         id,
-        notifyMockSessionMismatch,
         responsesByPart,
         useUnifiedMockHeader,
         writingSavedAnswersPayload,
-        writingTasks,
     ]);
 
     // Load data on mount and when exercise identity changes (not when object reference changes)

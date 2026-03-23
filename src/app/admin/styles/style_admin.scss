@@ -1614,6 +1614,65 @@
   border-bottom: none;
 }
 
+.admin-dashboard__answer-row--correct {
+  background: rgba(s.c(success), 0.12);
+}
+
+.admin-dashboard__answer-row--wrong {
+  background: rgba(s.c(red), 0.12);
+}
+
+.admin-dashboard__answer-row--unknown {
+  background: rgba(s.c(gray-300), 0.12);
+}
+
+.admin-dashboard__correct-badge,
+.admin-dashboard__wrong-badge,
+.admin-dashboard__neutral-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  min-height: 26px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 1px solid rgba(s.c(gray-600), 0.45);
+}
+
+.admin-dashboard__correct-badge {
+  background: s.c(success);
+  border-color: rgba(s.c(success), 0.65);
+  color: s.t(text-on-dark);
+}
+
+.admin-dashboard__wrong-badge {
+  background: s.c(red);
+  border-color: rgba(s.c(red), 0.65);
+  color: s.t(text-on-dark);
+}
+
+.admin-dashboard__neutral-badge {
+  background: s.c(gray-300);
+  border-color: rgba(s.c(gray-600), 0.45);
+  color: s.t(text-on-light);
+}
+
+.admin-dashboard__correct-answers {
+  display: inline-block;
+  max-width: 70ch;
+  word-break: break-word;
+  color: s.t(text-on-light);
+  font-weight: 600;
+}
+
+.admin-dashboard__correct-answers--muted {
+  font-weight: 600;
+  color: s.t(text-muted-on-light);
+}
+
 .admin-dashboard__saved-answers-json-block {
   margin-top: 0.25rem;
 }
@@ -2060,6 +2119,32 @@
 .admin-dashboard[data-theme="dark"] .admin-dashboard__answers-matrix th,
 .admin-dashboard[data-theme="dark"] .admin-dashboard__answers-matrix td {
   border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__answer-row--correct {
+  background: rgba(s.c(success), 0.18);
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__answer-row--wrong {
+  background: rgba(s.c(red), 0.16);
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__answer-row--unknown {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__neutral-badge {
+  background: s.c(gray-600);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: settings.$admin-dark-text;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__correct-answers {
+  color: settings.$admin-dark-text;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__correct-answers--muted {
+  color: settings.$admin-dark-text-muted;
 }
 
 .admin-dashboard[data-theme="dark"] .admin-dashboard__saved-answers-pre--modal {
