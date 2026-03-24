@@ -3,6 +3,9 @@ import {
   SW_MESSAGE_MOCK_PREFETCH,
 } from "@/lib/mockAssetCacheConstants";
 
+const SW_READY_TIMEOUT_MS = 8000;
+const SW_PREFETCH_TIMEOUT_MS = 20000;
+
 /** SW prefetch + read cache: production или NEXT_PUBLIC_ENABLE_MOCK_SW_IN_DEV. */
 export function canUseServiceWorkerPrefetch() {
   if (typeof window === "undefined") return false;
@@ -40,7 +43,7 @@ function prefetchViaServiceWorker(activeWorker, urls, options = {}) {
         settled = true;
         resolve({ errors: [], via: "sw-timeout" });
       }
-    }, 120000);
+    }, SW_PREFETCH_TIMEOUT_MS);
 
     channel.port1.onmessage = (event) => {
       const msg = event.data;
@@ -69,6 +72,21 @@ function prefetchViaServiceWorker(activeWorker, urls, options = {}) {
       }
     }
   });
+}
+
+async function getServiceWorkerRegistrationWithTimeout() {
+  if (!("serviceWorker" in navigator)) return null;
+  try {
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise((resolve) => {
+        setTimeout(() => resolve(null), SW_READY_TIMEOUT_MS);
+      }),
+    ]);
+    return reg || null;
+  } catch {
+    return null;
+  }
 }
 
 export async function prefetchViaClientCache(urls) {
@@ -118,7 +136,7 @@ export async function prefetchMockAssetsToCache(absoluteUrls, options = {}) {
 
   if (canUseServiceWorkerPrefetch()) {
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await getServiceWorkerRegistrationWithTimeout();
       if (reg.active) {
         const swResult = await prefetchViaServiceWorker(reg.active, urls, { onProgress });
         if (Array.isArray(swResult.errors) && swResult.errors.length) {
@@ -150,8 +168,8 @@ export async function prefetchUrlsViaServiceWorkerOnly(urls, options = {}) {
     return { errors: [], via: "sw-disabled" };
   }
   try {
-    const reg = await navigator.serviceWorker.ready;
-    if (!reg.active) {
+    const reg = await getServiceWorkerRegistrationWithTimeout();
+    if (!reg?.active) {
       return { errors: [], via: "no-active-worker" };
     }
     return await prefetchViaServiceWorker(reg.active, list, options);
