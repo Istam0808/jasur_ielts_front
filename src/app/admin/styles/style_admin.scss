@@ -788,6 +788,119 @@
   gap: 0.75rem 1rem;
 }
 
+.admin-dashboard__terminate-selected-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(s.c(red), 0.55);
+  background: rgba(s.c(red), 0.08);
+  color: s.c(red);
+  font-size: 0.88rem;
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 44px;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+  @include button-base();
+}
+
+.admin-dashboard__terminate-selected-btn:hover:not(:disabled) {
+  background: rgba(s.c(red), 0.14);
+  border-color: s.c(red);
+}
+
+.admin-dashboard__terminate-selected-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.admin-dashboard__terminate-error {
+  margin: 0 0 1rem;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 1px solid s.c(red);
+  background: rgba(s.c(red), 0.08);
+  font-size: 0.9rem;
+  color: s.t(text-on-light);
+}
+
+.admin-dashboard__th--session-actions {
+  width: 1%;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.admin-dashboard__td--session-actions {
+  width: 1%;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-dashboard__session-action-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.admin-dashboard__session-row-checkbox {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: s.t(accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.admin-dashboard__session-row-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.admin-dashboard__session-terminate-btn {
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(s.c(red), 0.45);
+  background: s.t(surface);
+  color: s.c(red);
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+  min-height: 32px;
+  transition: background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  -webkit-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.admin-dashboard__session-terminate-btn:hover:not(:disabled) {
+  background: rgba(s.c(red), 0.1);
+  border-color: s.c(red);
+}
+
+.admin-dashboard__session-terminate-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-dashboard__session-select-all {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: s.t(accent);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.admin-dashboard__session-select-all:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
 .admin-dashboard__machines-refresh-meta {
   font-size: 0.85rem;
   color: s.t(text-muted-on-light);
@@ -1961,6 +2074,34 @@
 
 .admin-dashboard[data-theme="dark"] .admin-dashboard__inline-error p {
   color: settings.$admin-dark-text;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__terminate-selected-btn {
+  border-color: rgba(255, 120, 120, 0.5);
+  background: rgba(160, 40, 40, 0.22);
+  color: #ff9a9a;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__terminate-selected-btn:hover:not(:disabled) {
+  background: rgba(160, 40, 40, 0.32);
+  border-color: #ff9a9a;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__terminate-error {
+  border-color: rgba(255, 120, 120, 0.45);
+  background: rgba(160, 40, 40, 0.2);
+  color: settings.$admin-dark-text;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__session-terminate-btn {
+  border-color: rgba(255, 120, 120, 0.45);
+  background: settings.$admin-dark-surface;
+  color: #ff9a9a;
+}
+
+.admin-dashboard[data-theme="dark"] .admin-dashboard__session-terminate-btn:hover:not(:disabled) {
+  background: rgba(160, 40, 40, 0.25);
+  border-color: #ff9a9a;
 }
 
 .admin-dashboard[data-theme="dark"] .admin-dashboard__results-api-placeholder {

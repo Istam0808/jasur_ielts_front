@@ -57,7 +57,17 @@ async function parseResponseBody(response) {
   return response.text();
 }
 
+function isInvalidOrInactiveSessionPayload(payload) {
+  if (!payload || typeof payload !== "object") return false;
+  const d = payload.detail;
+  if (typeof d !== "string") return false;
+  return d.trim().toLowerCase().includes("invalid or inactive session");
+}
+
 function deriveErrorMessage(status, payload, fallback) {
+  if (isInvalidOrInactiveSessionPayload(payload)) {
+    return typeof payload.detail === "string" ? payload.detail.trim() : fallback;
+  }
   if (status === 401) return "Неверный логин или пароль.";
   if (status === 400) {
     if (payload && typeof payload === "object") {
@@ -325,6 +335,12 @@ export function isMockNotBoundError(error) {
     normalized.includes("mock id") ||
     (normalized.includes("mock") && normalized.includes("first"))
   );
+}
+
+/** Сессия снята админом или недействительна (часто 401/403 + detail). */
+export function isInvalidOrInactiveSessionError(error) {
+  if (!(error instanceof BackendApiError)) return false;
+  return isInvalidOrInactiveSessionPayload(error.payload);
 }
 
 export { BackendApiError };

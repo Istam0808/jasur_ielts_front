@@ -157,6 +157,23 @@
   color: s.c(red-2);
 }
 
+.student-login__revoked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+.student-login__revoked-text {
+  margin: 0;
+  max-width: 36ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: s.t(text-on-light);
+}
+
 .student-login__btn {
   margin-top: 0.5rem;
   padding: 1rem 1.5rem;
@@ -184,6 +201,21 @@
 
 .student-login__btn:active {
   transform: translateY(0);
+}
+
+.student-login__btn--secondary {
+  margin-top: 0;
+  border-color: s.t(border-on-light);
+  background: s.t(surface);
+  color: s.t(text-on-light);
+}
+
+.student-login__btn--secondary:hover {
+  border-color: s.t(accent);
+  color: s.t(accent);
+  background: s.t(surface);
+  box-shadow: none;
+  transform: translateY(-1px);
 }
 
 .student-login__mocks {

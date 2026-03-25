@@ -102,6 +102,11 @@ export function postSessionSpeakingScore(sessionId, speaking) {
   return centerAdminPost(`${sessionDetailPath(sessionId)}speaking-score/`, { speaking });
 }
 
+/** POST — принудительно завершить сессию агента (invigilation). */
+export function postTerminateAgentSession(sessionId) {
+  return centerAdminPost(`${sessionDetailPath(sessionId)}terminate/`, {});
+}
+
 function numBand(v) {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(v);

@@ -5,11 +5,17 @@ import { useRouter } from "next/navigation";
 import {
   BackendApiError,
   getMocksList,
+  isInvalidOrInactiveSessionError,
   loginAgent,
   MOCK_SESSION_STATUS,
   postMockSessionStatus,
 } from "@/lib/mockApi";
-import { clearMockPayloads, getMockSession, saveMockSession } from "@/lib/mockSession";
+import {
+  clearMockPayloads,
+  clearMockSession,
+  getMockSession,
+  saveMockSession,
+} from "@/lib/mockSession";
 import "./student-login.scss";
 
 export default function StudentLoginPage() {
@@ -22,6 +28,7 @@ export default function StudentLoginPage() {
   const [isLoadingMocks, setIsLoadingMocks] = useState(false);
   const [session, setSession] = useState(null);
   const [mocks, setMocks] = useState([]);
+  const [sessionRevokedByAdmin, setSessionRevokedByAdmin] = useState(false);
 
   const loadMocks = useCallback(async (token) => {
     setIsLoadingMocks(true);
@@ -29,7 +36,16 @@ export default function StudentLoginPage() {
     try {
       const listPayload = await getMocksList(token);
       setMocks(listPayload.results);
+      setSessionRevokedByAdmin(false);
     } catch (err) {
+      if (isInvalidOrInactiveSessionError(err)) {
+        clearMockSession();
+        setSession(null);
+        setMocks([]);
+        setError("");
+        setSessionRevokedByAdmin(true);
+        return;
+      }
       if (err instanceof BackendApiError) {
         if (Number(err.status) === 401) {
           setError(
@@ -103,6 +119,12 @@ export default function StudentLoginPage() {
     router.push(`/mock/${mockId}/listening`);
   }
 
+  function handleExitAfterRevokedSession() {
+    setSessionRevokedByAdmin(false);
+    setError("");
+    router.refresh();
+  }
+
   return (
     <div className="student-login">
         <header className="student-login__header" aria-label="IELTS Mode">
@@ -112,7 +134,22 @@ export default function StudentLoginPage() {
           </div>
         </header>
       <div className="student-login__card">
-        {!session ? (
+        {sessionRevokedByAdmin ? (
+          <div className="student-login__revoked">
+            <h1 className="student-login__title">Сессия завершена</h1>
+            <p className="student-login__revoked-text" role="alert">
+              Сессия была завершена администратором. Продолжить тест с этой учётной записью
+              нельзя — войдите снова, если вам выдали новый доступ.
+            </p>
+            <button
+              type="button"
+              className="student-login__btn student-login__btn--secondary"
+              onClick={handleExitAfterRevokedSession}
+            >
+              Выйти
+            </button>
+          </div>
+        ) : !session ? (
           <>
             <h1 className="student-login__title">Вход для mock теста</h1>
             <p className="student-login__subtitle">

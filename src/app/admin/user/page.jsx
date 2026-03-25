@@ -18,6 +18,7 @@ import {
   parseScoreDetailForAdminUi,
   pickSessionForAgentRow,
   postSessionSpeakingScore,
+  postTerminateAgentSession,
 } from "@/lib/centerAdminApi";
 import {
   CENTER_ADMIN_ACCESS_TOKEN_KEY,
@@ -78,6 +79,11 @@ function formatMockId(v) {
 
 function formatBoolRu(v) {
   return v ? "да" : "нет";
+}
+
+/** Сессию можно принудительно завершить только пока она не в финальном состоянии (finished / terminated и т.д.). */
+function canTerminateSession(s) {
+  return s?.status === "active";
 }
 
 function formatWritingTaskPreview(v) {
@@ -207,6 +213,10 @@ export default function AdminUserPage() {
   const [savedAnswersPayload, setSavedAnswersPayload] = useState(null);
   const [savedAnswersError, setSavedAnswersError] = useState("");
   const [savedAnswersModalOpen, setSavedAnswersModalOpen] = useState(false);
+  const [selectedTerminateIds, setSelectedTerminateIds] = useState(() => new Set());
+  const [terminateError, setTerminateError] = useState("");
+  const [terminatingSessionId, setTerminatingSessionId] = useState(null);
+  const [bulkTerminating, setBulkTerminating] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setListError("");
@@ -271,6 +281,14 @@ export default function AdminUserPage() {
 
       setAgents(agentList);
       setNormalizedSessions(sessions);
+      setSelectedTerminateIds((prev) => {
+        const valid = new Set(sessions.map((s) => String(s.id)));
+        const next = new Set();
+        for (const id of prev) {
+          if (valid.has(id)) next.add(id);
+        }
+        return next;
+      });
       setLastRefreshLabel(
         new Date().toLocaleString("ru-RU", { dateStyle: "short", timeStyle: "medium" })
       );
@@ -496,6 +514,111 @@ export default function AdminUserPage() {
   const totalSessionsCount = sessionsWithResults.length;
   const activeCount = activeSessions.length;
   const finishedCount = finishedSessions.length;
+
+  const selectedTerminatableCount = useMemo(() => {
+    let n = 0;
+    for (const id of selectedTerminateIds) {
+      const s = sessionsWithResults.find((x) => String(x.id) === String(id));
+      if (s && canTerminateSession(s)) n += 1;
+    }
+    return n;
+  }, [selectedTerminateIds, sessionsWithResults]);
+
+  const allActiveSessionsSelected = useMemo(() => {
+    if (activeSessions.length === 0) return false;
+    return activeSessions.every((s) => selectedTerminateIds.has(String(s.id)));
+  }, [activeSessions, selectedTerminateIds]);
+
+  const someActiveSessionsSelected = useMemo(() => {
+    return activeSessions.some((s) => selectedTerminateIds.has(String(s.id)));
+  }, [activeSessions, selectedTerminateIds]);
+
+  const toggleTerminateSelection = useCallback((sessionId) => {
+    const id = String(sessionId);
+    setSelectedTerminateIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAllActiveSessions = useCallback(() => {
+    const ids = activeSessions.map((s) => String(s.id));
+    setSelectedTerminateIds((prev) => {
+      const allSelected = ids.length > 0 && ids.every((i) => prev.has(i));
+      const next = new Set(prev);
+      if (allSelected) {
+        for (const id of ids) next.delete(id);
+      } else {
+        for (const id of ids) next.add(id);
+      }
+      return next;
+    });
+  }, [activeSessions]);
+
+  const handleTerminateSession = useCallback(
+    async (sessionId) => {
+      const id = String(sessionId);
+      setTerminateError("");
+      setTerminatingSessionId(id);
+      try {
+        const res = await postTerminateAgentSession(id);
+        if (res.unauthorized) {
+          handleUnauthorized(router);
+          return;
+        }
+        if (!res.ok) {
+          setTerminateError(res.message || "Не удалось завершить сессию");
+          return;
+        }
+        setSelectedTerminateIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+        await loadDashboardData();
+      } catch (_) {
+        setTerminateError("Ошибка сети при завершении сессии");
+      } finally {
+        setTerminatingSessionId(null);
+      }
+    },
+    [router, loadDashboardData]
+  );
+
+  const handleTerminateSelectedSessions = useCallback(async () => {
+    const ids = [];
+    for (const id of selectedTerminateIds) {
+      const s = sessionsWithResults.find((x) => String(x.id) === String(id));
+      if (s && canTerminateSession(s)) ids.push(String(id));
+    }
+    if (ids.length === 0) return;
+    setTerminateError("");
+    setBulkTerminating(true);
+    const errors = [];
+    try {
+      for (const id of ids) {
+        const res = await postTerminateAgentSession(id);
+        if (res.unauthorized) {
+          handleUnauthorized(router);
+          return;
+        }
+        if (!res.ok) {
+          errors.push(`${id}: ${res.message || "ошибка"}`);
+        }
+      }
+      if (errors.length > 0) {
+        setTerminateError(errors.slice(0, 3).join("; ") + (errors.length > 3 ? "…" : ""));
+      }
+      setSelectedTerminateIds(new Set());
+      await loadDashboardData();
+    } catch (_) {
+      setTerminateError("Ошибка сети при завершении сессий");
+    } finally {
+      setBulkTerminating(false);
+    }
+  }, [router, loadDashboardData, selectedTerminateIds, sessionsWithResults]);
 
   const averageOverall = useMemo(() => {
     const vals = finishedSessions
@@ -1138,6 +1261,19 @@ export default function AdminUserPage() {
                 <div className="admin-dashboard__machines-toolbar">
                   <button
                     type="button"
+                    className="admin-dashboard__terminate-selected-btn"
+                    onClick={() => handleTerminateSelectedSessions()}
+                    disabled={
+                      listLoading ||
+                      selectedTerminatableCount === 0 ||
+                      bulkTerminating ||
+                      terminatingSessionId != null
+                    }
+                  >
+                    {bulkTerminating ? "Завершение…" : "Завершить выбранные"}
+                  </button>
+                  <button
+                    type="button"
                     className="admin-dashboard__refresh-btn"
                     onClick={() => loadDashboardData()}
                     disabled={listLoading}
@@ -1151,6 +1287,11 @@ export default function AdminUserPage() {
                   </button>
                 </div>
               </div>
+              {terminateError ? (
+                <p className="admin-dashboard__terminate-error" role="alert">
+                  {terminateError}
+                </p>
+              ) : null}
 
               <div className="admin-dashboard__sessions-layout">
                 <div className="admin-dashboard__subsection">
@@ -1162,6 +1303,23 @@ export default function AdminUserPage() {
                     >
                       <thead>
                         <tr>
+                          <th scope="col" className="admin-dashboard__th admin-dashboard__th--session-actions">
+                            <span className="visually-hidden">Выбор</span>
+                            <input
+                              type="checkbox"
+                              className="admin-dashboard__session-select-all"
+                              aria-label="Выбрать все активные сессии"
+                              checked={allActiveSessionsSelected && activeSessions.length > 0}
+                              ref={(el) => {
+                                if (el) {
+                                  el.indeterminate =
+                                    someActiveSessionsSelected && !allActiveSessionsSelected;
+                                }
+                              }}
+                              onChange={handleSelectAllActiveSessions}
+                              disabled={listLoading || activeSessions.length === 0 || bulkTerminating}
+                            />
+                          </th>
                           <th scope="col" className="admin-dashboard__th">
                             Сессия
                           </th>
@@ -1192,7 +1350,7 @@ export default function AdminUserPage() {
                         {listLoading && activeSessions.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={8}
+                              colSpan={9}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               <span className="admin-dashboard__table-loading">Загрузка…</span>
@@ -1201,7 +1359,7 @@ export default function AdminUserPage() {
                         ) : activeSessions.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={8}
+                              colSpan={9}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               Сейчас нет активных сессий
@@ -1214,6 +1372,35 @@ export default function AdminUserPage() {
                               className="admin-dashboard__row-clickable"
                               onClick={() => handleSessionRowClick(session.id)}
                             >
+                              <td
+                                className="admin-dashboard__td admin-dashboard__td--session-actions"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="admin-dashboard__session-action-cell">
+                                  <input
+                                    type="checkbox"
+                                    className="admin-dashboard__session-row-checkbox"
+                                    aria-label={`Выбрать сессию ${session.id}`}
+                                    checked={selectedTerminateIds.has(String(session.id))}
+                                    onChange={() => toggleTerminateSelection(session.id)}
+                                    disabled={bulkTerminating || !canTerminateSession(session)}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="admin-dashboard__session-terminate-btn"
+                                    disabled={
+                                      !canTerminateSession(session) ||
+                                      terminatingSessionId === String(session.id) ||
+                                      bulkTerminating
+                                    }
+                                    onClick={() => handleTerminateSession(session.id)}
+                                  >
+                                    {terminatingSessionId === String(session.id)
+                                      ? "…"
+                                      : "Завершить"}
+                                  </button>
+                                </div>
+                              </td>
                               <td className="admin-dashboard__td admin-dashboard__td--uuid">
                                 {session.id}
                               </td>
@@ -1247,6 +1434,17 @@ export default function AdminUserPage() {
                     >
                       <thead>
                         <tr>
+                          <th scope="col" className="admin-dashboard__th admin-dashboard__th--session-actions">
+                            <span className="visually-hidden">Действия</span>
+                            <input
+                              type="checkbox"
+                              className="admin-dashboard__session-select-all"
+                              aria-label="Выбор недоступен для завершённых сессий"
+                              disabled
+                              checked={false}
+                              title="Завершённые сессии нельзя принудительно завершить"
+                            />
+                          </th>
                           <th scope="col" className="admin-dashboard__th">
                             Сессия
                           </th>
@@ -1277,7 +1475,7 @@ export default function AdminUserPage() {
                         {listLoading && finishedSessions.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={8}
+                              colSpan={9}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               <span className="admin-dashboard__table-loading">Загрузка…</span>
@@ -1286,7 +1484,7 @@ export default function AdminUserPage() {
                         ) : finishedSessions.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={8}
+                              colSpan={9}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               История попыток пока пуста
@@ -1299,6 +1497,29 @@ export default function AdminUserPage() {
                               className="admin-dashboard__row-clickable"
                               onClick={() => handleSessionRowClick(session.id)}
                             >
+                              <td
+                                className="admin-dashboard__td admin-dashboard__td--session-actions"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <div className="admin-dashboard__session-action-cell">
+                                  <input
+                                    type="checkbox"
+                                    className="admin-dashboard__session-row-checkbox"
+                                    aria-label={`Выбор недоступен для сессии ${session.id}`}
+                                    checked={false}
+                                    disabled
+                                    title="Сессия уже завершена"
+                                  />
+                                  <button
+                                    type="button"
+                                    className="admin-dashboard__session-terminate-btn"
+                                    disabled
+                                    title="Сессия уже завершена"
+                                  >
+                                    Завершить
+                                  </button>
+                                </div>
+                              </td>
                               <td className="admin-dashboard__td admin-dashboard__td--uuid">
                                 {session.id}
                               </td>
