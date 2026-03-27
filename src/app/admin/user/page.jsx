@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiCpu, FiLogOut, FiRefreshCw, FiSettings } from "react-icons/fi";
+import { FiCpu, FiFilter, FiLogOut, FiRefreshCw, FiSettings } from "react-icons/fi";
 import { buildBackendUrl } from "@/lib/backend";
 import {
   buildAgentLabelMap,
@@ -113,6 +113,69 @@ function formatIsoDateRu(iso) {
   }
 }
 
+function normalizeApiStatusKey(sessionOrApiStatus) {
+  if (sessionOrApiStatus && typeof sessionOrApiStatus === "object") {
+    return String(sessionOrApiStatus.apiStatus ?? "").trim().toLowerCase();
+  }
+  return String(sessionOrApiStatus ?? "").trim().toLowerCase();
+}
+
+function sessionMatchesSearch(session, q) {
+  const t = String(q ?? "").trim().toLowerCase();
+  if (!t) return true;
+  const parts = [
+    String(session.id ?? ""),
+    session.studentName,
+    session.agentUsername,
+    session.computerLabel,
+    session.apiStatus,
+  ].map((x) => String(x ?? "").toLowerCase());
+  return parts.some((p) => p.includes(t));
+}
+
+function sessionMatchesApiFilter(session, selectedKeys) {
+  if (!selectedKeys || selectedKeys.length === 0) return true;
+  const k = normalizeApiStatusKey(session);
+  if (!k || k === "—") return false;
+  return selectedKeys.includes(k);
+}
+
+function machineMatchesSearch(machine, q) {
+  const t = String(q ?? "").trim().toLowerCase();
+  if (!t) return true;
+  const parts = [machine.name];
+  if (machine.session) {
+    parts.push(
+      String(machine.session.id ?? ""),
+      machine.session.studentName,
+      machine.session.agentUsername,
+      machine.session.computerLabel
+    );
+  }
+  return parts.some((p) => String(p ?? "").toLowerCase().includes(t));
+}
+
+function machineMatchesOccupancy(machine, occ) {
+  if (occ === "all") return true;
+  if (occ === "free") return machine.status === "free";
+  return machine.status === "busy";
+}
+
+function machineMatchesApiFilter(machine, selectedKeys, includeNoSession) {
+  if (!selectedKeys || selectedKeys.length === 0) return true;
+  if (machine.status === "free") return Boolean(includeNoSession);
+  const k = normalizeApiStatusKey(machine.session);
+  if (!k || k === "—") return false;
+  return selectedKeys.includes(k);
+}
+
+/** Баллы L/R/W/S/Overall: приоритет у GET /score/, иначе вложенные scores из списка сессий. */
+function getMergedScoreBandsForSession(session, scoresBySessionId) {
+  const fromList = extractBandsFromScorePayload({ scores: session?.raw?.scores });
+  const fromFetch = scoresBySessionId[String(session?.id)];
+  return mergeScoreBands(fromFetch, fromList);
+}
+
 const READING_PART_KEYS = ["p1", "p2", "p3"];
 
 const READING_PART_LABELS = {
@@ -217,6 +280,14 @@ export default function AdminUserPage() {
   const [terminateError, setTerminateError] = useState("");
   const [terminatingSessionId, setTerminatingSessionId] = useState(null);
   const [bulkTerminating, setBulkTerminating] = useState(false);
+  const [listSearchQuery, setListSearchQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedApiStatusKeys, setSelectedApiStatusKeys] = useState([]);
+  const [machineOccupancyFilter, setMachineOccupancyFilter] = useState("all");
+  const [machineIncludeNoSessionRows, setMachineIncludeNoSessionRows] = useState(true);
+  const [resultsSearchQuery, setResultsSearchQuery] = useState("");
+  const filterPanelRef = useRef(null);
+  const filterToggleRef = useRef(null);
 
   const loadDashboardData = useCallback(async () => {
     setListError("");
@@ -481,6 +552,117 @@ export default function AdminUserPage() {
     [sessionsWithResults]
   );
 
+  const apiStatusOptions = useMemo(() => {
+    const set = new Set();
+    for (const s of sessionsWithResults) {
+      const k = normalizeApiStatusKey(s);
+      if (k && k !== "—") set.add(k);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "en"));
+  }, [sessionsWithResults]);
+
+  const filteredActiveSessions = useMemo(
+    () =>
+      activeSessions.filter(
+        (s) =>
+          sessionMatchesSearch(s, listSearchQuery) &&
+          sessionMatchesApiFilter(s, selectedApiStatusKeys)
+      ),
+    [activeSessions, listSearchQuery, selectedApiStatusKeys]
+  );
+
+  const filteredFinishedSessions = useMemo(
+    () =>
+      finishedSessions.filter(
+        (s) =>
+          sessionMatchesSearch(s, listSearchQuery) &&
+          sessionMatchesApiFilter(s, selectedApiStatusKeys)
+      ),
+    [finishedSessions, listSearchQuery, selectedApiStatusKeys]
+  );
+
+  const filteredMachines = useMemo(
+    () =>
+      machinesWithSession.filter(
+        (m) =>
+          machineMatchesSearch(m, listSearchQuery) &&
+          machineMatchesOccupancy(m, machineOccupancyFilter) &&
+          machineMatchesApiFilter(m, selectedApiStatusKeys, machineIncludeNoSessionRows)
+      ),
+    [
+      machinesWithSession,
+      listSearchQuery,
+      machineOccupancyFilter,
+      selectedApiStatusKeys,
+      machineIncludeNoSessionRows,
+    ]
+  );
+
+  const filteredSessionsForResults = useMemo(
+    () => sessionsWithResults.filter((s) => sessionMatchesSearch(s, resultsSearchQuery)),
+    [sessionsWithResults, resultsSearchQuery]
+  );
+
+  const selectedApiStatusKeysSerialized = useMemo(
+    () => selectedApiStatusKeys.slice().sort().join("\u0000"),
+    [selectedApiStatusKeys]
+  );
+
+  const hasActiveListFilters = useMemo(
+    () =>
+      Boolean(String(listSearchQuery).trim()) ||
+      selectedApiStatusKeys.length > 0 ||
+      machineOccupancyFilter !== "all" ||
+      !machineIncludeNoSessionRows,
+    [
+      listSearchQuery,
+      selectedApiStatusKeys.length,
+      machineOccupancyFilter,
+      machineIncludeNoSessionRows,
+    ]
+  );
+
+  useEffect(() => {
+    setSelectedTerminateIds(new Set());
+  }, [listSearchQuery, selectedApiStatusKeysSerialized, machineOccupancyFilter, machineIncludeNoSessionRows]);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    function handlePointerDown(e) {
+      const t = e.target;
+      if (filterPanelRef.current?.contains(t)) return;
+      if (filterToggleRef.current?.contains(t)) return;
+      setFiltersOpen(false);
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [filtersOpen]);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setFiltersOpen(false);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [filtersOpen]);
+
+  const toggleApiStatusKey = useCallback((key) => {
+    setSelectedApiStatusKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return Array.from(next).sort((a, b) => a.localeCompare(b, "en"));
+    });
+  }, []);
+
+  const clearListFilters = useCallback(() => {
+    setListSearchQuery("");
+    setSelectedApiStatusKeys([]);
+    setMachineOccupancyFilter("all");
+    setMachineIncludeNoSessionRows(true);
+  }, []);
+
   const selectedSession = useMemo(
     () =>
       sessionsWithResults.find((s) => String(s.id) === String(selectedSessionId)) || null,
@@ -518,20 +700,20 @@ export default function AdminUserPage() {
   const selectedTerminatableCount = useMemo(() => {
     let n = 0;
     for (const id of selectedTerminateIds) {
-      const s = sessionsWithResults.find((x) => String(x.id) === String(id));
+      const s = filteredActiveSessions.find((x) => String(x.id) === String(id));
       if (s && canTerminateSession(s)) n += 1;
     }
     return n;
-  }, [selectedTerminateIds, sessionsWithResults]);
+  }, [selectedTerminateIds, filteredActiveSessions]);
 
   const allActiveSessionsSelected = useMemo(() => {
-    if (activeSessions.length === 0) return false;
-    return activeSessions.every((s) => selectedTerminateIds.has(String(s.id)));
-  }, [activeSessions, selectedTerminateIds]);
+    if (filteredActiveSessions.length === 0) return false;
+    return filteredActiveSessions.every((s) => selectedTerminateIds.has(String(s.id)));
+  }, [filteredActiveSessions, selectedTerminateIds]);
 
   const someActiveSessionsSelected = useMemo(() => {
-    return activeSessions.some((s) => selectedTerminateIds.has(String(s.id)));
-  }, [activeSessions, selectedTerminateIds]);
+    return filteredActiveSessions.some((s) => selectedTerminateIds.has(String(s.id)));
+  }, [filteredActiveSessions, selectedTerminateIds]);
 
   const toggleTerminateSelection = useCallback((sessionId) => {
     const id = String(sessionId);
@@ -544,7 +726,7 @@ export default function AdminUserPage() {
   }, []);
 
   const handleSelectAllActiveSessions = useCallback(() => {
-    const ids = activeSessions.map((s) => String(s.id));
+    const ids = filteredActiveSessions.map((s) => String(s.id));
     setSelectedTerminateIds((prev) => {
       const allSelected = ids.length > 0 && ids.every((i) => prev.has(i));
       const next = new Set(prev);
@@ -555,7 +737,7 @@ export default function AdminUserPage() {
       }
       return next;
     });
-  }, [activeSessions]);
+  }, [filteredActiveSessions]);
 
   const handleTerminateSession = useCallback(
     async (sessionId) => {
@@ -622,7 +804,7 @@ export default function AdminUserPage() {
 
   const averageOverall = useMemo(() => {
     const vals = finishedSessions
-      .map((s) => scoresBySessionId[String(s.id)]?.overall)
+      .map((s) => getMergedScoreBandsForSession(s, scoresBySessionId).overall)
       .filter((v) => typeof v === "number" && Number.isFinite(v));
     if (vals.length === 0) return "—";
     return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
@@ -630,7 +812,7 @@ export default function AdminUserPage() {
 
   const distribution = useMemo(() => {
     const overallValues = finishedSessions
-      .map((s) => scoresBySessionId[String(s.id)]?.overall)
+      .map((s) => getMergedScoreBandsForSession(s, scoresBySessionId).overall)
       .filter((v) => typeof v === "number" && Number.isFinite(v));
     return OVERALL_DISTRIBUTION_BUCKETS.map((bucket) => ({
       ...bucket,
@@ -646,7 +828,7 @@ export default function AdminUserPage() {
   const hasCachedDistribution = useMemo(
     () =>
       finishedSessions.some((s) => {
-        const o = scoresBySessionId[String(s.id)]?.overall;
+        const o = getMergedScoreBandsForSession(s, scoresBySessionId).overall;
         return typeof o === "number" && Number.isFinite(o);
       }),
     [finishedSessions, scoresBySessionId]
@@ -1118,6 +1300,138 @@ export default function AdminUserPage() {
             </div>
           )}
 
+          {(activeNav === NAV_MACHINES || activeNav === NAV_SESSIONS) && (
+            <div className="admin-dashboard__list-toolbar-row">
+              <div className="admin-dashboard__list-toolbar">
+                <label htmlFor="admin-list-search" className="visually-hidden">
+                  Поиск по списку
+                </label>
+                <input
+                  id="admin-list-search"
+                  type="search"
+                  autoComplete="off"
+                  className="admin-dashboard__list-search"
+                  value={listSearchQuery}
+                  onChange={(e) => setListSearchQuery(e.target.value)}
+                  placeholder={
+                    activeNav === NAV_MACHINES
+                      ? "Поиск: компьютер, ученик, агент…"
+                      : "Поиск: ученик, агент, id сессии…"
+                  }
+                />
+                <div className="admin-dashboard__filter-dropdown">
+                  <button
+                    type="button"
+                    ref={filterToggleRef}
+                    className="admin-dashboard__filter-toggle"
+                    aria-expanded={filtersOpen}
+                    aria-haspopup="dialog"
+                    onClick={() => setFiltersOpen((v) => !v)}
+                  >
+                    <FiFilter aria-hidden="true" />
+                    <span>Фильтры</span>
+                    {(selectedApiStatusKeys.length > 0 ||
+                      machineOccupancyFilter !== "all" ||
+                      !machineIncludeNoSessionRows) && (
+                      <span className="admin-dashboard__filter-badge" aria-hidden="true" />
+                    )}
+                  </button>
+                  {filtersOpen && (
+                    <div
+                      ref={filterPanelRef}
+                      className="admin-dashboard__filter-panel"
+                      role="dialog"
+                      aria-label="Фильтры списка"
+                    >
+                      {activeNav === NAV_MACHINES && (
+                        <fieldset className="admin-dashboard__filter-fieldset">
+                          <legend className="admin-dashboard__filter-legend">Занятость</legend>
+                          <label className="admin-dashboard__filter-radio-label">
+                            <input
+                              type="radio"
+                              name="admin-machine-occ"
+                              checked={machineOccupancyFilter === "all"}
+                              onChange={() => setMachineOccupancyFilter("all")}
+                            />
+                            Все
+                          </label>
+                          <label className="admin-dashboard__filter-radio-label">
+                            <input
+                              type="radio"
+                              name="admin-machine-occ"
+                              checked={machineOccupancyFilter === "free"}
+                              onChange={() => setMachineOccupancyFilter("free")}
+                            />
+                            Свободен
+                          </label>
+                          <label className="admin-dashboard__filter-radio-label">
+                            <input
+                              type="radio"
+                              name="admin-machine-occ"
+                              checked={machineOccupancyFilter === "busy"}
+                              onChange={() => setMachineOccupancyFilter("busy")}
+                            />
+                            Занят
+                          </label>
+                        </fieldset>
+                      )}
+                      <fieldset className="admin-dashboard__filter-fieldset">
+                        <legend className="admin-dashboard__filter-legend">Статус API</legend>
+                        <button
+                          type="button"
+                          className="admin-dashboard__filter-link-btn"
+                          onClick={() => setSelectedApiStatusKeys([])}
+                        >
+                          Все статусы
+                        </button>
+                        {apiStatusOptions.length === 0 ? (
+                          <p className="admin-dashboard__filter-empty">Нет значений в загруженных данных</p>
+                        ) : (
+                          <div className="admin-dashboard__filter-check-list">
+                            {apiStatusOptions.map((key) => (
+                              <label key={key} className="admin-dashboard__filter-check-label">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedApiStatusKeys.includes(key)}
+                                  onChange={() => toggleApiStatusKey(key)}
+                                />
+                                <span className="admin-dashboard__filter-check-text">{key}</span>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </fieldset>
+                      {activeNav === NAV_MACHINES && (
+                        <label className="admin-dashboard__filter-check-label admin-dashboard__filter-check-label--block">
+                          <input
+                            type="checkbox"
+                            checked={machineIncludeNoSessionRows}
+                            onChange={(e) => setMachineIncludeNoSessionRows(e.target.checked)}
+                          />
+                          <span>
+                            Показывать свободные ПК при выбранных статусах API
+                          </span>
+                        </label>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {hasActiveListFilters && (
+                  <button
+                    type="button"
+                    className="admin-dashboard__filter-clear-btn"
+                    onClick={() => {
+                      clearListFilters();
+                      setFiltersOpen(false);
+                    }}
+                  >
+                    Сбросить
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {activeNav === NAV_MACHINES && (
             <section
               className="admin-dashboard__section"
@@ -1133,6 +1447,12 @@ export default function AdminUserPage() {
                   <strong>
                     {machinesWithSession.filter((m) => m.status === "busy").length}
                   </strong>
+                  {hasActiveListFilters && machinesWithSession.length > 0 ? (
+                    <>
+                      {" "}
+                      · Показано: <strong>{filteredMachines.length}</strong>
+                    </>
+                  ) : null}
                 </p>
                 <div className="admin-dashboard__machines-toolbar">
                   <button
@@ -1196,8 +1516,17 @@ export default function AdminUserPage() {
                           Нет зарегистрированных компьютеров
                         </td>
                       </tr>
+                    ) : filteredMachines.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className="admin-dashboard__td admin-dashboard__td--empty"
+                        >
+                          Ничего не найдено по текущим фильтрам
+                        </td>
+                      </tr>
                     ) : (
-                      machinesWithSession.map((machine) => (
+                      filteredMachines.map((machine) => (
                         <tr key={machine.id}>
                           <td className="admin-dashboard__td">{machine.name}</td>
                           <td className="admin-dashboard__td">
@@ -1257,6 +1586,13 @@ export default function AdminUserPage() {
               <div className="admin-dashboard__machines-header admin-dashboard__machines-header--sessions">
                 <p className="admin-dashboard__machines-meta">
                   Всего сессий: <strong>{totalSessionsCount}</strong>
+                  {hasActiveListFilters && totalSessionsCount > 0 ? (
+                    <>
+                      {" "}
+                      · Показано: активных <strong>{filteredActiveSessions.length}</strong>, в истории{" "}
+                      <strong>{filteredFinishedSessions.length}</strong>
+                    </>
+                  ) : null}
                 </p>
                 <div className="admin-dashboard__machines-toolbar">
                   <button
@@ -1309,7 +1645,7 @@ export default function AdminUserPage() {
                               type="checkbox"
                               className="admin-dashboard__session-select-all"
                               aria-label="Выбрать все активные сессии"
-                              checked={allActiveSessionsSelected && activeSessions.length > 0}
+                              checked={allActiveSessionsSelected && filteredActiveSessions.length > 0}
                               ref={(el) => {
                                 if (el) {
                                   el.indeterminate =
@@ -1317,7 +1653,9 @@ export default function AdminUserPage() {
                                 }
                               }}
                               onChange={handleSelectAllActiveSessions}
-                              disabled={listLoading || activeSessions.length === 0 || bulkTerminating}
+                              disabled={
+                                listLoading || filteredActiveSessions.length === 0 || bulkTerminating
+                              }
                             />
                           </th>
                           <th scope="col" className="admin-dashboard__th">
@@ -1365,8 +1703,17 @@ export default function AdminUserPage() {
                               Сейчас нет активных сессий
                             </td>
                           </tr>
+                        ) : filteredActiveSessions.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={9}
+                              className="admin-dashboard__td admin-dashboard__td--empty"
+                            >
+                              Ничего не найдено по текущим фильтрам
+                            </td>
+                          </tr>
                         ) : (
-                          activeSessions.map((session) => (
+                          filteredActiveSessions.map((session) => (
                             <tr
                               key={session.id}
                               className="admin-dashboard__row-clickable"
@@ -1490,8 +1837,17 @@ export default function AdminUserPage() {
                               История попыток пока пуста
                             </td>
                           </tr>
+                        ) : filteredFinishedSessions.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={9}
+                              className="admin-dashboard__td admin-dashboard__td--empty"
+                            >
+                              Ничего не найдено по текущим фильтрам
+                            </td>
+                          </tr>
                         ) : (
-                          finishedSessions.map((session) => (
+                          filteredFinishedSessions.map((session) => (
                             <tr
                               key={session.id}
                               className="admin-dashboard__row-clickable"
@@ -1686,6 +2042,20 @@ export default function AdminUserPage() {
               </div>
 
               <div className="admin-dashboard__results-layout">
+                <div className="admin-dashboard__results-layout-toolbar">
+                  <label htmlFor="admin-results-search" className="visually-hidden">
+                    Поиск в списке результатов
+                  </label>
+                  <input
+                    id="admin-results-search"
+                    type="search"
+                    autoComplete="off"
+                    className="admin-dashboard__list-search admin-dashboard__list-search--results"
+                    value={resultsSearchQuery}
+                    onChange={(e) => setResultsSearchQuery(e.target.value)}
+                    placeholder="Поиск: ученик, агент, id сессии, статус API…"
+                  />
+                </div>
                 <div className="admin-dashboard__subsection">
                   <h3 className="admin-dashboard__subsection-title">Список попыток</h3>
                   <div className="admin-dashboard__table-wrap">
@@ -1743,9 +2113,18 @@ export default function AdminUserPage() {
                               Пока нет сессий
                             </td>
                           </tr>
+                        ) : filteredSessionsForResults.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={9}
+                              className="admin-dashboard__td admin-dashboard__td--empty"
+                            >
+                              Ничего не найдено по запросу
+                            </td>
+                          </tr>
                         ) : (
-                          sessionsWithResults.map((session) => {
-                            const r = scoresBySessionId[String(session.id)];
+                          filteredSessionsForResults.map((session) => {
+                            const r = getMergedScoreBandsForSession(session, scoresBySessionId);
                             return (
                               <tr
                                 key={session.id}
