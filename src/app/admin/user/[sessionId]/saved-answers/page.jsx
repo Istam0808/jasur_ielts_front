@@ -10,16 +10,13 @@ import {
   CENTER_ADMIN_ACCESS_TOKEN_KEY,
   CENTER_ADMIN_ID_KEY,
   clearCenterAdminAuthStorage,
+  getCenterAdminTokenExpiryMs,
+  invalidateCenterAdminSession,
 } from "@/lib/centerAdminAuth";
 
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
 const ADMIN_THEME_KEY = "adminTheme";
-
-function handleUnauthorized(router) {
-  clearCenterAdminAuthStorage();
-  router.replace("/admin");
-}
 
 function formatBoolRu(v) {
   return v ? "да" : "нет";
@@ -271,8 +268,26 @@ export default function AdminSavedAnswersDetailPage() {
       centerAdminId.trim().length > 0;
     setIsAuth(ok);
     setAuthChecked(true);
-    if (!ok) handleUnauthorized(router);
+    if (!ok) {
+      clearCenterAdminAuthStorage();
+      router.replace("/admin");
+    }
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !authChecked || !isAuth) return;
+    const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
+    const targetMs = getCenterAdminTokenExpiryMs(token);
+    if (targetMs == null) {
+      invalidateCenterAdminSession({ reason: "expired" });
+      return;
+    }
+    const delay = Math.max(0, targetMs - Date.now());
+    const id = window.setTimeout(() => {
+      invalidateCenterAdminSession({ reason: "expired" });
+    }, delay);
+    return () => window.clearTimeout(id);
+  }, [authChecked, isAuth]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -293,7 +308,6 @@ export default function AdminSavedAnswersDetailPage() {
       if (!alive) return;
 
       if (res.unauthorized) {
-        handleUnauthorized(router);
         return;
       }
       if (!res.ok) {
@@ -310,7 +324,7 @@ export default function AdminSavedAnswersDetailPage() {
     return () => {
       alive = false;
     };
-  }, [authChecked, isAuth, router, sessionId]);
+  }, [authChecked, isAuth, sessionId]);
 
   const rootSession = data?.session;
   const reading = rootSession?.reading ?? {};

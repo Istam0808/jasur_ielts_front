@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiCpu, FiFilter, FiLogOut, FiRefreshCw, FiSettings } from "react-icons/fi";
+import {
+  FiBarChart2,
+  FiCpu,
+  FiFilter,
+  FiLayers,
+  FiLogOut,
+  FiMonitor,
+  FiRefreshCw,
+  FiSearch,
+  FiSettings,
+} from "react-icons/fi";
 import { buildBackendUrl } from "@/lib/backend";
 import {
   buildAgentLabelMap,
@@ -14,6 +24,7 @@ import {
   fetchSessionDetail,
   fetchSessionScore,
   mergeScoreBands,
+  normalizeAgentId,
   normalizeSessionSummary,
   parseScoreDetailForAdminUi,
   pickSessionForAgentRow,
@@ -25,7 +36,10 @@ import {
   CENTER_ADMIN_ID_KEY,
   clearCenterAdminAuthStorage,
   getCenterAdminAuthHeaders,
+  getCenterAdminTokenExpiryMs,
+  invalidateCenterAdminSession,
 } from "@/lib/centerAdminAuth";
+import CenterAdminLogoutConfirmModal from "@/components/admin/CenterAdminLogoutConfirmModal";
 import "../styles/style_admin.scss";
 
 const NAV_MACHINES = "machines";
@@ -56,11 +70,6 @@ async function logoutCenterAdmin() {
   } catch (_) {}
 
   return { ok: false, message: message || "Не удалось завершить сессию на сервере" };
-}
-
-function handleUnauthorized(router) {
-  clearCenterAdminAuthStorage();
-  router.replace("/admin");
 }
 
 function formatBand(v) {
@@ -286,6 +295,7 @@ export default function AdminUserPage() {
   const [machineOccupancyFilter, setMachineOccupancyFilter] = useState("all");
   const [machineIncludeNoSessionRows, setMachineIncludeNoSessionRows] = useState(true);
   const [resultsSearchQuery, setResultsSearchQuery] = useState("");
+  const [centerAdminIdDisplay, setCenterAdminIdDisplay] = useState("");
   const filterPanelRef = useRef(null);
   const filterToggleRef = useRef(null);
 
@@ -296,7 +306,6 @@ export default function AdminUserPage() {
       const [agentsRes, sessionsRes] = await Promise.all([fetchAgents(), fetchAllSessions()]);
 
       if (agentsRes.unauthorized || sessionsRes.unauthorized) {
-        handleUnauthorized(router);
         return;
       }
       if (!agentsRes.ok) {
@@ -321,13 +330,15 @@ export default function AdminUserPage() {
 
       const activeByAgentId = new Map();
       for (const s of sessions) {
-        if (s.agentId == null || !s.isActive) continue;
-        if (!activeByAgentId.has(s.agentId)) activeByAgentId.set(s.agentId, s);
+        const agentKey = normalizeAgentId(s.agentId);
+        if (agentKey == null || !s.isActive) continue;
+        if (!activeByAgentId.has(agentKey)) activeByAgentId.set(agentKey, s);
       }
 
-      const needAgentFetch = agentList.filter(
-        (a) => a.has_active_session && !activeByAgentId.get(a.id)
-      );
+      const needAgentFetch = agentList.filter((a) => {
+        const ak = normalizeAgentId(a.id);
+        return Boolean(a.has_active_session) && ak != null && !activeByAgentId.has(ak);
+      });
 
       if (needAgentFetch.length > 0) {
         const extraResults = await Promise.all(
@@ -337,7 +348,6 @@ export default function AdminUserPage() {
         for (let i = 0; i < needAgentFetch.length; i++) {
           const r = extraResults[i];
           if (r.unauthorized) {
-            handleUnauthorized(router);
             return;
           }
           if (!r.ok) continue;
@@ -374,7 +384,7 @@ export default function AdminUserPage() {
     } finally {
       setListLoading(false);
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     if (!authChecked || !isAuth) return;
@@ -403,7 +413,6 @@ export default function AdminUserPage() {
 
     if (scoreRes.unauthorized || detailRes.unauthorized) {
       setDetailLoading(false);
-      handleUnauthorized(router);
       return;
     }
 
@@ -446,7 +455,7 @@ export default function AdminUserPage() {
       bands.speaking != null && Number.isFinite(bands.speaking) ? String(bands.speaking) : ""
     );
     setDetailLoading(false);
-  }, [selectedSessionId, isAuth, router]);
+  }, [selectedSessionId, isAuth]);
 
   useEffect(() => {
     loadSessionScores();
@@ -457,6 +466,7 @@ export default function AdminUserPage() {
   }
 
   function closeExitConfirmModal() {
+    setLogoutError("");
     setExitConfirmModalOpen(false);
   }
 
@@ -473,12 +483,30 @@ export default function AdminUserPage() {
         centerAdminId.trim().length > 0;
       setIsAuth(ok);
       setAuthChecked(true);
+      setCenterAdminIdDisplay(
+        ok && typeof centerAdminId === "string" ? centerAdminId.trim() : ""
+      );
       if (!ok) {
         clearCenterAdminAuthStorage();
         router.replace("/admin");
       }
     });
   }, [router]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !authChecked || !isAuth) return;
+    const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
+    const targetMs = getCenterAdminTokenExpiryMs(token);
+    if (targetMs == null) {
+      invalidateCenterAdminSession({ reason: "expired" });
+      return;
+    }
+    const delay = Math.max(0, targetMs - Date.now());
+    const id = window.setTimeout(() => {
+      invalidateCenterAdminSession({ reason: "expired" });
+    }, delay);
+    return () => window.clearTimeout(id);
+  }, [authChecked, isAuth]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -499,20 +527,15 @@ export default function AdminUserPage() {
     return () => window.removeEventListener("keydown", handleEscape);
   }, [settingsModalOpen]);
 
-  useEffect(() => {
-    if (!exitConfirmModalOpen) return;
-    function handleEscape(e) {
-      if (e.key === "Escape") closeExitConfirmModal();
-    }
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [exitConfirmModalOpen]);
-
   const machinesWithSession = useMemo(() => {
     const activeByAgent = new Map();
+    const hasAnySessionByAgent = new Set();
     for (const s of normalizedSessions) {
-      if (s.agentId == null || !s.isActive) continue;
-      if (!activeByAgent.has(s.agentId)) activeByAgent.set(s.agentId, s);
+      const ak = normalizeAgentId(s.agentId);
+      if (ak == null) continue;
+      hasAnySessionByAgent.add(ak);
+      if (!s.isActive) continue;
+      if (!activeByAgent.has(ak)) activeByAgent.set(ak, s);
     }
 
     return agents.map((agent) => {
@@ -520,9 +543,14 @@ export default function AdminUserPage() {
         typeof agent.username === "string" && agent.username.trim()
           ? agent.username.trim()
           : `Agent #${agent.id}`;
-      const sessionFromGlobal = agent.id != null ? activeByAgent.get(agent.id) : null;
-      const busy =
-        Boolean(agent.has_active_session) || Boolean(sessionFromGlobal?.isActive);
+      const ak = normalizeAgentId(agent.id);
+      const sessionFromGlobal = ak != null ? activeByAgent.get(ak) : null;
+      const knowsAgentSessions = ak != null && hasAnySessionByAgent.has(ak);
+      const busy = sessionFromGlobal
+        ? true
+        : knowsAgentSessions
+          ? false
+          : Boolean(agent.has_active_session);
       return {
         id: agent.id,
         name,
@@ -747,7 +775,6 @@ export default function AdminUserPage() {
       try {
         const res = await postTerminateAgentSession(id);
         if (res.unauthorized) {
-          handleUnauthorized(router);
           return;
         }
         if (!res.ok) {
@@ -766,7 +793,7 @@ export default function AdminUserPage() {
         setTerminatingSessionId(null);
       }
     },
-    [router, loadDashboardData]
+    [loadDashboardData]
   );
 
   const handleTerminateSelectedSessions = useCallback(async () => {
@@ -783,7 +810,6 @@ export default function AdminUserPage() {
       for (const id of ids) {
         const res = await postTerminateAgentSession(id);
         if (res.unauthorized) {
-          handleUnauthorized(router);
           return;
         }
         if (!res.ok) {
@@ -800,7 +826,7 @@ export default function AdminUserPage() {
     } finally {
       setBulkTerminating(false);
     }
-  }, [router, loadDashboardData, selectedTerminateIds, sessionsWithResults]);
+  }, [loadDashboardData, selectedTerminateIds, sessionsWithResults]);
 
   const averageOverall = useMemo(() => {
     const vals = finishedSessions
@@ -841,6 +867,18 @@ export default function AdminUserPage() {
     }
   }
 
+  function finishLogoutLocally() {
+    closeExitConfirmModal();
+    clearCenterAdminAuthStorage();
+    router.replace("/admin");
+  }
+
+  function handleLogoutLocalOnly() {
+    setLogoutError("");
+    setIsLoggingOut(false);
+    finishLogoutLocally();
+  }
+
   async function handleLogout() {
     if (typeof window === "undefined") return;
     setLogoutError("");
@@ -851,11 +889,9 @@ export default function AdminUserPage() {
         setLogoutError(result.message || "Не удалось выполнить выход");
         return;
       }
-      closeExitConfirmModal();
-      clearCenterAdminAuthStorage();
-      router.replace("/admin");
+      finishLogoutLocally();
     } catch (_) {
-      setLogoutError("Ошибка сети при выходе. Попробуйте ещё раз.");
+      setLogoutError("Ошибка сети при выходе. Попробуйте ещё раз или выйдите локально.");
     } finally {
       setIsLoggingOut(false);
     }
@@ -904,7 +940,6 @@ export default function AdminUserPage() {
     setSpeakingSaving(true);
     const res = await postSessionSpeakingScore(String(selectedSessionId), rounded);
     if (res.unauthorized) {
-      handleUnauthorized(router);
       setSpeakingSaving(false);
       return;
     }
@@ -954,6 +989,12 @@ export default function AdminUserPage() {
               <p className="admin-dashboard__title-subtitle">
                 Управление компьютерами и сессиями тестов
               </p>
+              {centerAdminIdDisplay ? (
+                <p className="admin-dashboard__header-greeting-sub">
+                  Здравствуйте · ID администратора:{" "}
+                  <span className="admin-dashboard__header-admin-id">{centerAdminIdDisplay}</span>
+                </p>
+              ) : null}
             </div>
           </div>
           <div className="admin-dashboard__actions">
@@ -969,7 +1010,10 @@ export default function AdminUserPage() {
             <button
               type="button"
               className="admin-dashboard__logout"
-              onClick={() => setExitConfirmModalOpen(true)}
+              onClick={() => {
+                setLogoutError("");
+                setExitConfirmModalOpen(true);
+              }}
               aria-label="Выйти из админ-панели"
             >
               <FiLogOut aria-hidden="true" />
@@ -979,53 +1023,14 @@ export default function AdminUserPage() {
         </div>
       </header>
 
-      {exitConfirmModalOpen && (
-        <div
-          className="admin-dashboard__modal-backdrop"
-          onClick={closeExitConfirmModal}
-          role="presentation"
-        >
-          <div
-            className="admin-dashboard__modal"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="exit-confirm-title"
-          >
-            <h2 id="exit-confirm-title" className="admin-dashboard__modal-title">
-              Выйти из аккаунта
-            </h2>
-            <p className="admin-dashboard__modal-text">
-              Вы уверены, что хотите выйти из аккаунта администратора?
-            </p>
-            {logoutError && (
-              <p className="admin-login__error" role="alert">
-                {logoutError}
-              </p>
-            )}
-            <div className="admin-dashboard__modal-actions">
-              <button
-                type="button"
-                className="admin-dashboard__btn-primary admin-dashboard__modal-confirm-btn"
-                onClick={handleLogout}
-                aria-label="Да, выйти из аккаунта"
-                disabled={isLoggingOut}
-              >
-                {isLoggingOut ? "Выходим…" : "Выйти"}
-              </button>
-              <button
-                type="button"
-                className="admin-dashboard__modal-close"
-                onClick={closeExitConfirmModal}
-                aria-label="Отмена выхода"
-                disabled={isLoggingOut}
-              >
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <CenterAdminLogoutConfirmModal
+        isOpen={exitConfirmModalOpen}
+        onRequestClose={closeExitConfirmModal}
+        onConfirmLogout={handleLogout}
+        onLogoutLocal={handleLogoutLocalOnly}
+        error={logoutError}
+        isLoggingOut={isLoggingOut}
+      />
 
       {settingsModalOpen && (
         <div
@@ -1255,6 +1260,9 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_MACHINES)}
                 aria-current={activeNav === NAV_MACHINES ? "true" : undefined}
               >
+                <span className="admin-dashboard__nav-icon">
+                  <FiMonitor />
+                </span>
                 <span className="admin-dashboard__nav-label">Компьютеры</span>
               </button>
             </li>
@@ -1267,6 +1275,9 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_SESSIONS)}
                 aria-current={activeNav === NAV_SESSIONS ? "true" : undefined}
               >
+                <span className="admin-dashboard__nav-icon">
+                  <FiLayers />
+                </span>
                 <span className="admin-dashboard__nav-label">Сессии</span>
               </button>
             </li>
@@ -1279,6 +1290,9 @@ export default function AdminUserPage() {
                 onClick={() => setActiveNav(NAV_RESULTS)}
                 aria-current={activeNav === NAV_RESULTS ? "true" : undefined}
               >
+                <span className="admin-dashboard__nav-icon">
+                  <FiBarChart2 />
+                </span>
                 <span className="admin-dashboard__nav-label">Результаты</span>
               </button>
             </li>
@@ -1306,19 +1320,24 @@ export default function AdminUserPage() {
                 <label htmlFor="admin-list-search" className="visually-hidden">
                   Поиск по списку
                 </label>
-                <input
-                  id="admin-list-search"
-                  type="search"
-                  autoComplete="off"
-                  className="admin-dashboard__list-search"
-                  value={listSearchQuery}
-                  onChange={(e) => setListSearchQuery(e.target.value)}
-                  placeholder={
-                    activeNav === NAV_MACHINES
-                      ? "Поиск: компьютер, ученик, агент…"
-                      : "Поиск: ученик, агент, id сессии…"
-                  }
-                />
+                <div className="admin-dashboard__list-search-wrap">
+                  <span className="admin-dashboard__list-search-icon" aria-hidden="true">
+                    <FiSearch />
+                  </span>
+                  <input
+                    id="admin-list-search"
+                    type="search"
+                    autoComplete="off"
+                    className="admin-dashboard__list-search"
+                    value={listSearchQuery}
+                    onChange={(e) => setListSearchQuery(e.target.value)}
+                    placeholder={
+                      activeNav === NAV_MACHINES
+                        ? "Поиск: компьютер, ученик, агент…"
+                        : "Поиск: ученик, агент, id сессии…"
+                    }
+                  />
+                </div>
                 <div className="admin-dashboard__filter-dropdown">
                   <button
                     type="button"
@@ -1899,60 +1918,6 @@ export default function AdminUserPage() {
                     </table>
                   </div>
                 </div>
-
-                {selectedSession && (
-                  <aside className="admin-dashboard__session-details">
-                    <h3 className="admin-dashboard__subsection-title">Детали сессии</h3>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>session_id</span>
-                      <strong className="admin-dashboard__session-details-strong--wrap">
-                        {selectedSession.id}
-                      </strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>agent_id</span>
-                      <strong>{selectedSession.agentId ?? "—"}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>agent_username</span>
-                      <strong>{selectedSession.agentUsername || "—"}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>status</span>
-                      <strong>{selectedSession.apiStatus}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>is_active</span>
-                      <strong>{formatBoolRu(selectedSession.isActiveFlag)}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>created_at</span>
-                      <strong>{selectedSession.createdAtDisplay}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>last_heartbeat</span>
-                      <strong>{selectedSession.lastHeartbeatDisplay}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>mock_id</span>
-                      <strong>{formatMockId(selectedSession.mockId)}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>Ключ сессии</span>
-                      <strong>{selectedSession.sessionKey}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>Ученик (если есть)</span>
-                      <strong>{selectedSession.studentName}</strong>
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>Отображение в UI</span>
-                      <strong>
-                        {selectedSession.status === "active" ? "Активная сессия" : "Завершённая / неактивная"}
-                      </strong>
-                    </p>
-                  </aside>
-                )}
               </div>
             </section>
           )}
@@ -2046,15 +2011,20 @@ export default function AdminUserPage() {
                   <label htmlFor="admin-results-search" className="visually-hidden">
                     Поиск в списке результатов
                   </label>
-                  <input
-                    id="admin-results-search"
-                    type="search"
-                    autoComplete="off"
-                    className="admin-dashboard__list-search admin-dashboard__list-search--results"
-                    value={resultsSearchQuery}
-                    onChange={(e) => setResultsSearchQuery(e.target.value)}
-                    placeholder="Поиск: ученик, агент, id сессии, статус API…"
-                  />
+                  <div className="admin-dashboard__list-search-wrap admin-dashboard__list-search-wrap--results">
+                    <span className="admin-dashboard__list-search-icon" aria-hidden="true">
+                      <FiSearch />
+                    </span>
+                    <input
+                      id="admin-results-search"
+                      type="search"
+                      autoComplete="off"
+                      className="admin-dashboard__list-search admin-dashboard__list-search--results"
+                      value={resultsSearchQuery}
+                      onChange={(e) => setResultsSearchQuery(e.target.value)}
+                      placeholder="Поиск: ученик, агент, id сессии, статус API…"
+                    />
+                  </div>
                 </div>
                 <div className="admin-dashboard__subsection">
                   <h3 className="admin-dashboard__subsection-title">Список попыток</h3>
@@ -2207,12 +2177,6 @@ export default function AdminUserPage() {
                         className="admin-dashboard__score-board"
                         aria-label="Баллы из API /score/"
                       >
-                        <p className="admin-dashboard__score-board-caption">
-                          Данные:{" "}
-                          <code>
-                            {`GET /api/v1/auth/center-admin/sessions/<session_id>/score/`}
-                          </code>
-                        </p>
                         {selectedScoreDetail?.sessionId && (
                           <p className="admin-dashboard__score-board-session">
                             <span className="admin-dashboard__score-board-k">session_id</span>

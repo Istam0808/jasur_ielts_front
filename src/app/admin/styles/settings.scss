@@ -1,21 +1,46 @@
-@use "../../../style/__settings" as s;
+@use "sass:color";
 
 // -----------------------------------------------------------------------------
-// Admin theme settings: dark mode colors.
-// Used by style_admin.scss when .admin-dashboard has data-theme="dark".
+// Admin theme: MyCourse soft UI (light) + dashboard dark overrides.
+// Used by style_admin.scss for .admin-dashboard.
 // -----------------------------------------------------------------------------
 
-// Dark mode palette for admin panel
-$admin-dark-bg: #0f0f0f;
-$admin-dark-surface: #1a1a1a;
-$admin-dark-surface-strong: #242424;
-$admin-dark-border: rgba(255, 255, 255, 0.12);
-$admin-dark-text: #f5f5f5;
-$admin-dark-text-muted: rgba(255, 255, 255, 0.7);
-$admin-dark-nav-hover: #2d2d2d;
-$admin-dark-table-header: #2d2d2d;
-$admin-dark-placeholder-bg: #2d2d2d;
-$admin-dark-input-bg: #1a1a1a;
-$admin-dark-overlay: rgba(0, 0, 0, 0.6);
-$admin-dark-modal-bg: #1a1a1a;
-$admin-dark-modal-border: rgba(255, 255, 255, 0.15);
+// --- Light: MyCourse palette ---
+$admin-user-page-bg: #f5f7fa;
+$admin-user-surface: #ffffff;
+$admin-user-primary: #2d60ff;
+$admin-user-primary-hover: color.adjust($admin-user-primary, $lightness: -7%);
+$admin-user-primary-soft: rgba(45, 96, 255, 0.1);
+$admin-user-primary-muted: rgba(45, 96, 255, 0.16);
+$admin-user-text: #1a1d26;
+$admin-user-text-muted: #6b7280;
+$admin-user-border: #e8ecf1;
+$admin-user-border-strong: #dce3ee;
+$admin-user-card-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+$admin-user-header-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 4px 20px rgba(15, 23, 42, 0.04);
+$admin-user-radius-lg: 18px;
+$admin-user-radius-md: 12px;
+$admin-user-radius-sm: 10px;
+$admin-user-nav-width: 248px;
+$admin-user-info-bg: #e8f0ff;
+$admin-user-info-text: #1e4ed8;
+$admin-user-success-bg: #e6f9f0;
+$admin-user-success-text: #0d7a52;
+$admin-user-on-primary: #ffffff;
+
+// --- Dark: aligned with blue accent (soft surfaces) ---
+$admin-dark-bg: #12151c;
+$admin-dark-surface: #1a1f2e;
+$admin-dark-surface-strong: #222836;
+$admin-dark-border: rgba(255, 255, 255, 0.1);
+$admin-dark-text: #f0f2f7;
+$admin-dark-text-muted: rgba(240, 242, 247, 0.72);
+$admin-dark-nav-hover: rgba(255, 255, 255, 0.06);
+$admin-dark-table-header: #252b3a;
+$admin-dark-placeholder-bg: #2a3142;
+$admin-dark-input-bg: #1e2433;
+$admin-dark-overlay: rgba(0, 0, 0, 0.62);
+$admin-dark-modal-bg: #1e2433;
+$admin-dark-modal-border: rgba(255, 255, 255, 0.12);
+$admin-dark-primary: #5b82ff;
+$admin-dark-primary-hover: color.adjust(#5b82ff, $lightness: -6%);

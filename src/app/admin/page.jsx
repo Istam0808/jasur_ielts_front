@@ -8,40 +8,14 @@ import {
   CENTER_ADMIN_ACCESS_TOKEN_KEY,
   CENTER_ADMIN_ID_KEY,
   clearCenterAdminAuthStorage,
+  isCenterAdminAccessTokenValid,
 } from "@/lib/centerAdminAuth";
 import "./styles/style_admin.scss";
 
 const INVALID_CREDENTIALS_MESSAGE = "Неверный логин или пароль";
 
-function parseJwtPayload(token) {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const normalized = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
-    const json = atob(normalized);
-    return JSON.parse(json);
-  } catch (_) {
-    return null;
-  }
-}
-
-function isAdminAccessTokenValid(token) {
-  if (typeof token !== "string" || !token.trim()) return false;
-  const payload = parseJwtPayload(token);
-  if (!payload || typeof payload !== "object") return false;
-
-  if (payload.actor_type && payload.actor_type !== "center_admin") {
-    return false;
-  }
-
-  if (typeof payload.exp !== "number") {
-    return false;
-  }
-
-  const nowInSeconds = Math.floor(Date.now() / 1000);
-  return payload.exp > nowInSeconds;
-}
+const ACTIVE_SESSION_FALLBACK_MESSAGE =
+  "Уже есть активная сессия. Выйдите на другом устройстве или завершите сессию через выход.";
 
 async function loginCenterAdmin({ username, password }) {
   const response = await fetch(
@@ -87,10 +61,13 @@ async function loginCenterAdmin({ username, password }) {
   }
 
   if (response.status === 409) {
+    const fromBody =
+      (typeof data?.detail === "string" && data.detail) ||
+      (typeof data?.message === "string" && data.message) ||
+      "";
     return {
       ok: false,
-      message:
-        "Уже есть активная сессия. Выйдите на другом устройстве или завершите сессию через выход.",
+      message: fromBody || ACTIVE_SESSION_FALLBACK_MESSAGE,
     };
   }
 
@@ -116,13 +93,14 @@ export default function AdminLoginPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [sessionMessage, setSessionMessage] = useState("");
   const [isTokenCheckDone, setIsTokenCheckDone] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
-    if (isAdminAccessTokenValid(token)) {
+    if (isCenterAdminAccessTokenValid(token)) {
       router.replace("/admin/user");
       return;
     }
@@ -131,9 +109,25 @@ export default function AdminLoginPage() {
     setIsTokenCheckDone(true);
   }, [router]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    let msg = "";
+    if (sp.get("session_expired") === "1") {
+      msg = "Время сессии истекло. Войдите снова.";
+    } else if (sp.get("session_invalid") === "1") {
+      msg = "Сессия недействительна. Войдите снова.";
+    }
+    if (msg) {
+      setSessionMessage(msg);
+      router.replace("/admin", { scroll: false });
+    }
+  }, [router]);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setSessionMessage("");
     setIsSubmitting(true);
 
     try {
@@ -159,7 +153,7 @@ export default function AdminLoginPage() {
     }
   }
 
-  const errorId = error ? "admin-login-error" : undefined;
+  const errorId = error || sessionMessage ? "admin-login-error" : undefined;
 
   if (!isTokenCheckDone) {
     return (
@@ -209,7 +203,7 @@ export default function AdminLoginPage() {
                 placeholder="Например, admin"
                 autoComplete="username"
                 autoFocus
-                aria-invalid={Boolean(error) || undefined}
+                aria-invalid={Boolean(error || sessionMessage) || undefined}
                 aria-describedby={errorId}
               />
             </div>
@@ -227,7 +221,7 @@ export default function AdminLoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Введите пароль"
                   autoComplete="current-password"
-                  aria-invalid={Boolean(error) || undefined}
+                  aria-invalid={Boolean(error || sessionMessage) || undefined}
                   aria-describedby={errorId}
                 />
                 <button
@@ -241,9 +235,9 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            {error && (
+            {(sessionMessage || error) && (
               <p id={errorId} className="admin-login__error" role="alert">
-                {error}
+                {error || sessionMessage}
               </p>
             )}
 

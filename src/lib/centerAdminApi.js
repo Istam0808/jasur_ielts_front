@@ -1,5 +1,9 @@
 import { buildBackendUrl } from "@/lib/backend";
-import { getCenterAdminAuthHeaders } from "@/lib/centerAdminAuth";
+import {
+  getCenterAdminAuthHeaders,
+  invalidateCenterAdminSession,
+  tryRefreshCenterAdminAccess,
+} from "@/lib/centerAdminAuth";
 
 async function parseJsonSafe(response) {
   const text = await response.text();
@@ -22,16 +26,57 @@ function extractErrorMessage(data, status) {
   return `Ошибка запроса (${status})`;
 }
 
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+/**
+ * Общий fetch для center-admin: при 401 — попытка refresh (когда появится), иначе сброс сессии и редирект на /admin.
+ * @param {string} path
+ * @param {{ method?: string, body?: string, extraHeaders?: Record<string, string> }} [options]
+ */
+async function centerAdminRequest(path, options = {}) {
+  const { method = "GET", body, extraHeaders = {} } = options;
+  const url = buildBackendUrl(path);
+
+  async function doFetch() {
+    const headers = {
+      ...getCenterAdminAuthHeaders(),
+      ...extraHeaders,
+    };
+    const init = { method, headers };
+    if (body !== undefined) {
+      init.body = body;
+    }
+    return fetch(url, init);
+  }
+
+  let response = await doFetch();
+  let data = await parseJsonSafe(response);
+
+  if (response.status === 401) {
+    const refreshed = await tryRefreshCenterAdminAccess();
+    if (refreshed) {
+      response = await doFetch();
+      data = await parseJsonSafe(response);
+    }
+  }
+
+  if (response.status === 401) {
+    invalidateCenterAdminSession({ reason: "invalid" });
+    return { response, data, unauthorized: true };
+  }
+
+  return { response, data, unauthorized: false };
+}
+
 /**
  * GET с заголовками center-admin.
  * @returns {Promise<{ ok: true, data: object } | { ok: false, unauthorized?: boolean, status: number, data?: object, message?: string }>}
  */
 export async function centerAdminGet(path) {
-  const response = await fetch(buildBackendUrl(path), {
-    headers: getCenterAdminAuthHeaders(),
+  const { response, data, unauthorized } = await centerAdminRequest(path, {
+    method: "GET",
   });
-  const data = await parseJsonSafe(response);
-  if (response.status === 401) {
+  if (unauthorized) {
     return { ok: false, unauthorized: true, status: 401, data };
   }
   if (!response.ok) {
@@ -46,23 +91,17 @@ export async function centerAdminGet(path) {
   return { ok: true, data };
 }
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
-
 /**
  * POST с JSON-телом (center-admin).
  * @returns {Promise<{ ok: true, data: object } | { ok: false, unauthorized?: boolean, status: number, data?: object, message?: string }>}
  */
 export async function centerAdminPost(path, body) {
-  const response = await fetch(buildBackendUrl(path), {
+  const { response, data, unauthorized } = await centerAdminRequest(path, {
     method: "POST",
-    headers: {
-      ...getCenterAdminAuthHeaders(),
-      ...JSON_HEADERS,
-    },
     body: JSON.stringify(body ?? {}),
+    extraHeaders: JSON_HEADERS,
   });
-  const data = await parseJsonSafe(response);
-  if (response.status === 401) {
+  if (unauthorized) {
     return { ok: false, unauthorized: true, status: 401, data };
   }
   if (!response.ok) {
@@ -314,6 +353,28 @@ function pickFirstNumber(...vals) {
   return null;
 }
 
+/**
+ * Явное булево с бэкенда (в т.ч. 0/1) или null, если поле не задано / не распознано.
+ */
+export function coerceTriStateBool(v) {
+  if (v === null || v === undefined || v === "") return null;
+  if (v === true || v === 1 || v === "1") return true;
+  if (v === false || v === 0 || v === "0") return false;
+  if (typeof v === "string") {
+    const t = v.trim().toLowerCase();
+    if (t === "true" || t === "yes" || t === "active") return true;
+    if (t === "false" || t === "no" || t === "inactive") return false;
+  }
+  return null;
+}
+
+/** Единый числовой id агента для сопоставления сессий и агентов. */
+export function normalizeAgentId(id) {
+  if (id == null) return null;
+  const n = Number(id);
+  return Number.isFinite(n) ? n : null;
+}
+
 function formatSessionTimestamp(value) {
   if (value == null || value === "") return "";
   const d = new Date(value);
@@ -405,6 +466,7 @@ export function normalizeSessionSummary(raw) {
   const activeStatuses = new Set([
     "active",
     "in_progress",
+    "inprogress",
     "started",
     "running",
     "live",
@@ -412,11 +474,20 @@ export function normalizeSessionSummary(raw) {
     "pending",
     "open",
     "reading_tutorial",
+    "busy",
   ]);
+
+  const explicitActive = coerceTriStateBool(
+    raw.is_active ?? raw.session_active ?? raw.active ?? raw.sessionActive
+  );
 
   let isFinished = false;
 
-  if (hasEndTimestamp) {
+  if (explicitActive === false) {
+    isFinished = true;
+  } else if (explicitActive === true) {
+    isFinished = false;
+  } else if (hasEndTimestamp) {
     isFinished = true;
   } else if (completedFlags) {
     isFinished = true;
@@ -454,7 +525,7 @@ export function normalizeSessionSummary(raw) {
     ),
     apiStatus: apiStatusDisplay,
     mockId: mockIdSafe,
-    isActiveFlag: Boolean(raw.is_active),
+    isActiveFlag: explicitActive !== null ? explicitActive : Boolean(raw.is_active),
     createdAtDisplay: formatSessionTimestamp(raw.created_at) || "—",
     lastHeartbeatDisplay: formatSessionTimestamp(raw.last_heartbeat) || "—",
     startedAtDisplay: formatSessionTimestamp(startedRaw) || "—",
