@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { FiArrowLeft, FiCpu } from "react-icons/fi";
+import { FiArrowLeft, FiRefreshCw } from "react-icons/fi";
 import "../../../styles/style_admin.scss";
 
-import { fetchSessionSavedAnswers } from "@/lib/centerAdminApi";
+import {
+  extractBandsFromScorePayload,
+  fetchSessionDetail,
+  fetchSessionSavedAnswers,
+  fetchSessionScore,
+  mergeScoreBands,
+  parseScoreDetailForAdminUi,
+  postSessionSpeakingScore,
+} from "@/lib/centerAdminApi";
 import {
   CENTER_ADMIN_ACCESS_TOKEN_KEY,
   CENTER_ADMIN_ID_KEY,
@@ -17,6 +25,139 @@ import {
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
 const ADMIN_THEME_KEY = "adminTheme";
+
+const ACTIVE_STATUS_HINTS = new Set([
+  "active",
+  "in_progress",
+  "inprogress",
+  "started",
+  "running",
+  "live",
+  "ongoing",
+  "pending",
+  "open",
+  "reading_tutorial",
+  "busy",
+]);
+
+function formatBand(v) {
+  if (v === null || v === undefined || Number.isNaN(v)) return "—";
+  return String(v);
+}
+
+function roundToHalf(n) {
+  return Math.round(n * 2) / 2;
+}
+
+function formatWritingTaskPreview(v) {
+  if (v == null) return "—";
+  if (typeof v === "string") {
+    const t = v.trim();
+    if (t.length === 0) return "—";
+    return t.length > 400 ? `${t.slice(0, 400)}…` : t;
+  }
+  try {
+    const s = JSON.stringify(v, null, 2);
+    return s.length > 800 ? `${s.slice(0, 800)}…` : s;
+  } catch {
+    return String(v);
+  }
+}
+
+/**
+ * @param {object | null} session
+ * @returns {{ started: string | null, ended: string | null }}
+ */
+function pickTestStartedEnded(session) {
+  if (!session || typeof session !== "object") {
+    return { started: null, ended: null };
+  }
+  const started =
+    session.test_started_at ??
+    session.testStartedAt ??
+    session.exam_started_at ??
+    session.examStartedAt ??
+    session.started_at ??
+    session.startedAt ??
+    session.begin_at ??
+    session.created_at ??
+    null;
+  const ended =
+    session.test_finished_at ??
+    session.testFinishedAt ??
+    session.exam_finished_at ??
+    session.examFinishedAt ??
+    session.finished_at ??
+    session.ended_at ??
+    session.endedAt ??
+    session.completed_at ??
+    session.completedAt ??
+    session.end_time ??
+    session.session_end ??
+    null;
+  return { started, ended };
+}
+
+function pickStudentLabel(session) {
+  if (!session || typeof session !== "object") return "—";
+  const candidates = [
+    session.student_name,
+    session.studentName,
+    session.user_full_name,
+    session.full_name,
+    session.username,
+    session.student?.username,
+    session.agent_username,
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  return "—";
+}
+
+/**
+ * @param {{ sessionId: string | null, session: object, root: object }} normalized
+ * @param {{ ok: boolean, data?: object, message?: string, status?: number, unauthorized?: boolean }} scoreRes
+ * @param {{ ok: boolean, data?: object, message?: string, status?: number, unauthorized?: boolean }} detailRes
+ */
+function mergeScoreDataFromResponses(normalized, scoreRes, detailRes) {
+  const fromScore = extractBandsFromScorePayload(scoreRes.ok ? scoreRes.data : {});
+  const fromDetail = extractBandsFromScorePayload(detailRes.ok ? detailRes.data : {});
+  const apiBands = mergeScoreBands(fromScore, fromDetail);
+
+  const savedPayload =
+    normalized?.session && typeof normalized.session === "object"
+      ? { session: normalized.session, session_id: normalized.sessionId }
+      : normalized?.root ?? {};
+  const fromSaved = extractBandsFromScorePayload(savedPayload);
+  const mergedBands = mergeScoreBands(apiBands, fromSaved);
+
+  let scoreDetailUi;
+  if (scoreRes.ok && scoreRes.data) {
+    scoreDetailUi = parseScoreDetailForAdminUi(scoreRes.data);
+  } else if (detailRes.ok && detailRes.data?.session) {
+    const s = detailRes.data.session;
+    scoreDetailUi = parseScoreDetailForAdminUi({
+      session_id: s.session_id ?? s.id,
+      scores: s.scores,
+    });
+  } else if (normalized?.session) {
+    scoreDetailUi = parseScoreDetailForAdminUi(normalized);
+  } else {
+    scoreDetailUi = parseScoreDetailForAdminUi({});
+  }
+
+  const warnings = [];
+  if (!scoreRes.ok && !scoreRes.unauthorized) {
+    warnings.push(scoreRes.message || `score (${scoreRes.status ?? "—"})`);
+  }
+  if (!detailRes.ok && !detailRes.unauthorized) {
+    warnings.push(detailRes.message || `сессия (${detailRes.status ?? "—"})`);
+  }
+  const scoreMetaError = warnings.filter(Boolean).join(" · ");
+
+  return { mergedBands, scoreDetailUi, scoreMetaError };
+}
 
 function formatBoolRu(v) {
   return v ? "да" : "нет";
@@ -50,7 +191,6 @@ function formatCorrectAnswersText(correctAnswers) {
 }
 
 function normalizeSavedAnswersPayload(raw) {
-  // Backend может отдавать структуру как `{ session: {...} }` или как `{ session_id, reading, ... }`.
   const session =
     raw && typeof raw === "object" && raw.session && typeof raw.session === "object"
       ? raw.session
@@ -69,6 +209,15 @@ function normalizeSavedAnswersPayload(raw) {
     session,
     root: raw ?? {},
   };
+}
+
+/** Сессия считается активной (экзамен идёт) — как на странице результатов админки. */
+function isSessionProbablyActive(session) {
+  if (!session || typeof session !== "object") return false;
+  if (session.is_active === true || session.session_active === true) return true;
+  if (session.is_active === false || session.session_active === false) return false;
+  const st = String(session.status ?? session.state ?? "").trim().toLowerCase();
+  return ACTIVE_STATUS_HINTS.has(st);
 }
 
 function AnswerCorrectnessBadge({ isCorrect }) {
@@ -244,6 +393,97 @@ function SessionWritingTasks({ writing }) {
   );
 }
 
+function ScoreBoardBlock({
+  scoreDetailUi,
+  mergedBands,
+  sessionIdLabel,
+  classNameExtra,
+}) {
+  const boardClass = ["admin-dashboard__score-board", classNameExtra].filter(Boolean).join(" ");
+  return (
+    <div className={boardClass} aria-label="Баллы сессии">
+      {sessionIdLabel ? (
+        <p className="admin-dashboard__score-board-session">
+          <span className="admin-dashboard__score-board-k">session_id</span>
+          <span className="admin-dashboard__score-board-v">{sessionIdLabel}</span>
+        </p>
+      ) : null}
+      <div className="admin-dashboard__score-overall-pill">
+        <span className="admin-dashboard__score-overall-label">Overall</span>
+        <span className="admin-dashboard__score-overall-value" aria-live="polite">
+          {formatBand(scoreDetailUi?.overall ?? mergedBands?.overall)}
+        </span>
+      </div>
+      <div className="admin-dashboard__score-cards">
+        <article className="admin-dashboard__score-card">
+          <h4 className="admin-dashboard__score-card-title">Listening</h4>
+          <dl className="admin-dashboard__score-dl">
+            <div className="admin-dashboard__score-dl-row">
+              <dt>band</dt>
+              <dd>{formatBand(scoreDetailUi?.listening?.band ?? mergedBands?.listening)}</dd>
+            </div>
+            <div className="admin-dashboard__score-dl-row">
+              <dt>correct</dt>
+              <dd>
+                {scoreDetailUi?.listening?.correct != null
+                  ? String(scoreDetailUi.listening.correct)
+                  : "—"}
+              </dd>
+            </div>
+          </dl>
+        </article>
+        <article className="admin-dashboard__score-card">
+          <h4 className="admin-dashboard__score-card-title">Reading</h4>
+          <dl className="admin-dashboard__score-dl">
+            <div className="admin-dashboard__score-dl-row">
+              <dt>band</dt>
+              <dd>{formatBand(scoreDetailUi?.reading?.band ?? mergedBands?.reading)}</dd>
+            </div>
+            <div className="admin-dashboard__score-dl-row">
+              <dt>correct</dt>
+              <dd>
+                {scoreDetailUi?.reading?.correct != null
+                  ? String(scoreDetailUi.reading.correct)
+                  : "—"}
+              </dd>
+            </div>
+          </dl>
+        </article>
+        <article className="admin-dashboard__score-card admin-dashboard__score-card--wide">
+          <h4 className="admin-dashboard__score-card-title">Writing</h4>
+          <dl className="admin-dashboard__score-dl">
+            <div className="admin-dashboard__score-dl-row">
+              <dt>band</dt>
+              <dd>{formatBand(scoreDetailUi?.writing?.band ?? mergedBands?.writing)}</dd>
+            </div>
+            <div className="admin-dashboard__score-writing-block">
+              <span className="admin-dashboard__score-sub">task1</span>
+              <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
+                {formatWritingTaskPreview(scoreDetailUi?.writing?.task1)}
+              </pre>
+            </div>
+            <div className="admin-dashboard__score-writing-block">
+              <span className="admin-dashboard__score-sub">task2</span>
+              <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
+                {formatWritingTaskPreview(scoreDetailUi?.writing?.task2)}
+              </pre>
+            </div>
+          </dl>
+        </article>
+        <article className="admin-dashboard__score-card">
+          <h4 className="admin-dashboard__score-card-title">Speaking</h4>
+          <dl className="admin-dashboard__score-dl">
+            <div className="admin-dashboard__score-dl-row">
+              <dt>band</dt>
+              <dd>{formatBand(scoreDetailUi?.speaking ?? mergedBands?.speaking)}</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSavedAnswersDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -257,21 +497,36 @@ export default function AdminSavedAnswersDetailPage() {
   const [error, setError] = useState("");
   const [data, setData] = useState(null);
 
+  const [detailSession, setDetailSession] = useState(null);
+  const [mergedBands, setMergedBands] = useState(null);
+  const [scoreDetailUi, setScoreDetailUi] = useState(null);
+  const [scoreMetaError, setScoreMetaError] = useState("");
+
+  const [scoresRefreshing, setScoresRefreshing] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+  const [speakingDraft, setSpeakingDraft] = useState("");
+  const [speakingSaving, setSpeakingSaving] = useState(false);
+  const [speakingSaveError, setSpeakingSaveError] = useState("");
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
-    const centerAdminId = localStorage.getItem(CENTER_ADMIN_ID_KEY);
-    const ok =
-      typeof token === "string" &&
-      token.trim().length > 0 &&
-      typeof centerAdminId === "string" &&
-      centerAdminId.trim().length > 0;
-    setIsAuth(ok);
-    setAuthChecked(true);
-    if (!ok) {
-      clearCenterAdminAuthStorage();
-      router.replace("/admin");
-    }
+
+    queueMicrotask(() => {
+      const token = localStorage.getItem(CENTER_ADMIN_ACCESS_TOKEN_KEY);
+      const centerAdminId = localStorage.getItem(CENTER_ADMIN_ID_KEY);
+      const ok =
+        typeof token === "string" &&
+        token.trim().length > 0 &&
+        typeof centerAdminId === "string" &&
+        centerAdminId.trim().length > 0;
+      setIsAuth(ok);
+      setAuthChecked(true);
+      if (!ok) {
+        clearCenterAdminAuthStorage();
+        router.replace("/admin");
+      }
+    });
   }, [router]);
 
   useEffect(() => {
@@ -291,9 +546,41 @@ export default function AdminSavedAnswersDetailPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = localStorage.getItem(ADMIN_THEME_KEY);
-    if (saved === THEME_DARK || saved === THEME_LIGHT) setTheme(saved);
+    queueMicrotask(() => {
+      const saved = localStorage.getItem(ADMIN_THEME_KEY);
+      if (saved === THEME_DARK || saved === THEME_LIGHT) {
+        setTheme(saved);
+      }
+    });
   }, []);
+
+  const refreshScoresOnly = useCallback(async () => {
+    if (!sessionId || !data) return;
+    setScoresRefreshing(true);
+    setSpeakingSaveError("");
+    const [scoreRes, detailRes] = await Promise.all([
+      fetchSessionScore(sessionId),
+      fetchSessionDetail(sessionId),
+    ]);
+    if (scoreRes.unauthorized || detailRes.unauthorized) {
+      setScoresRefreshing(false);
+      return;
+    }
+    if (detailRes.ok && detailRes.data?.session) {
+      setDetailSession(detailRes.data.session);
+    }
+    const { mergedBands: nextBands, scoreDetailUi: nextUi, scoreMetaError: nextErr } =
+      mergeScoreDataFromResponses(data, scoreRes, detailRes);
+    setMergedBands(nextBands);
+    setScoreDetailUi(nextUi);
+    setScoreMetaError(nextErr);
+    setSpeakingDraft(
+      nextBands.speaking != null && Number.isFinite(nextBands.speaking)
+        ? String(nextBands.speaking)
+        : ""
+    );
+    setScoresRefreshing(false);
+  }, [sessionId, data]);
 
   useEffect(() => {
     if (!authChecked || !isAuth) return;
@@ -304,19 +591,46 @@ export default function AdminSavedAnswersDetailPage() {
       setLoading(true);
       setError("");
       setData(null);
-      const res = await fetchSessionSavedAnswers(sessionId);
+      setDetailSession(null);
+      setMergedBands(null);
+      setScoreDetailUi(null);
+      setScoreMetaError("");
+      setSpeakingDraft("");
+      setSpeakingSaveError("");
+
+      const [answersRes, scoreRes, detailRes] = await Promise.all([
+        fetchSessionSavedAnswers(sessionId),
+        fetchSessionScore(sessionId),
+        fetchSessionDetail(sessionId),
+      ]);
       if (!alive) return;
 
-      if (res.unauthorized) {
-        return;
-      }
-      if (!res.ok) {
-        setError(res.message || "Не удалось загрузить подробные ответы");
+      if (answersRes.unauthorized || scoreRes.unauthorized || detailRes.unauthorized) {
         setLoading(false);
         return;
       }
 
-      setData(normalizeSavedAnswersPayload(res.data));
+      if (!answersRes.ok) {
+        setError(answersRes.message || "Не удалось загрузить подробные ответы");
+        setLoading(false);
+        return;
+      }
+
+      const normalized = normalizeSavedAnswersPayload(answersRes.data);
+      setData(normalized);
+
+      if (detailRes.ok && detailRes.data?.session) {
+        setDetailSession(detailRes.data.session);
+      }
+
+      const { mergedBands: bands, scoreDetailUi: ui, scoreMetaError: metaErr } =
+        mergeScoreDataFromResponses(normalized, scoreRes, detailRes);
+      setMergedBands(bands);
+      setScoreDetailUi(ui);
+      setScoreMetaError(metaErr);
+      setSpeakingDraft(
+        bands.speaking != null && Number.isFinite(bands.speaking) ? String(bands.speaking) : ""
+      );
       setLoading(false);
     }
 
@@ -326,11 +640,33 @@ export default function AdminSavedAnswersDetailPage() {
     };
   }, [authChecked, isAuth, sessionId]);
 
+  useEffect(() => {
+    if (!detailModalOpen) return;
+    function handleEscape(e) {
+      if (e.key === "Escape") setDetailModalOpen(false);
+    }
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [detailModalOpen]);
+
   const rootSession = data?.session;
-  const reading = rootSession?.reading ?? {};
-  const listening = rootSession?.listening ?? {};
+  const sessionForTimestamps = useMemo(() => {
+    if (!rootSession) return null;
+    if (detailSession && typeof detailSession === "object") {
+      return { ...rootSession, ...detailSession };
+    }
+    return rootSession;
+  }, [rootSession, detailSession]);
+
+  const { started: testStartedRaw, ended: testEndedRaw } = useMemo(
+    () => pickTestStartedEnded(sessionForTimestamps),
+    [sessionForTimestamps]
+  );
+
+  const reading = useMemo(() => rootSession?.reading ?? {}, [rootSession]);
+  const listening = useMemo(() => rootSession?.listening ?? {}, [rootSession]);
   const writing = rootSession?.writing ?? {};
-  const speaking = rootSession?.speaking ?? null;
+  const speakingSaved = rootSession?.speaking ?? null;
 
   const readingOverall = useMemo(() => {
     let total = 0;
@@ -360,6 +696,45 @@ export default function AdminSavedAnswersDetailPage() {
     return { total, correct, wrong };
   }, [listening]);
 
+  const examActive = isSessionProbablyActive(sessionForTimestamps ?? rootSession);
+  const studentLabel = pickStudentLabel(sessionForTimestamps ?? rootSession);
+  const sidLabel = data?.sessionId ?? sessionId ?? "—";
+
+  async function handleSaveSpeaking() {
+    if (!sessionId || examActive) return;
+    setSpeakingSaveError("");
+    const raw = parseFloat(String(speakingDraft).replace(",", "."));
+    if (!Number.isFinite(raw) || raw < 0 || raw > 9) {
+      setSpeakingSaveError("Введите значение от 0 до 9");
+      return;
+    }
+    const rounded = roundToHalf(raw);
+    if (Math.abs(rounded - raw) > 1e-6) {
+      setSpeakingSaveError("Допустим шаг 0.5 (например 7.5)");
+      return;
+    }
+    setSpeakingSaving(true);
+    const res = await postSessionSpeakingScore(String(sessionId), rounded);
+    if (res.unauthorized) {
+      setSpeakingSaving(false);
+      return;
+    }
+    if (!res.ok) {
+      setSpeakingSaveError(res.message || "Не удалось сохранить");
+      setSpeakingSaving(false);
+      return;
+    }
+    const bands = extractBandsFromScorePayload(res.data);
+    setMergedBands((prev) => mergeScoreBands(bands, prev || {}));
+    setScoreDetailUi(parseScoreDetailForAdminUi(res.data));
+    setSpeakingDraft(
+      bands.speaking != null && Number.isFinite(bands.speaking)
+        ? String(bands.speaking)
+        : String(rounded)
+    );
+    setSpeakingSaving(false);
+  }
+
   if (!authChecked || !isAuth) {
     return (
       <div className="admin-dashboard admin-dashboard--loading">
@@ -372,41 +747,140 @@ export default function AdminSavedAnswersDetailPage() {
     <div className="admin-dashboard" data-theme={theme}>
       <header className="admin-dashboard__header">
         <div className="admin-dashboard__header-inner">
-          <div className="admin-dashboard__title-block">
-            <span className="admin-dashboard__title-icon" aria-hidden="true">
-              <FiCpu />
-            </span>
-            <div className="admin-dashboard__title-text">
-              <h1 className="admin-dashboard__title">Подробный отчёт</h1>
-              <p className="admin-dashboard__title-subtitle">Saved answers и правильность</p>
-            </div>
+          <div className="admin-dashboard__ielts-brand" aria-label="IELTS Mode">
+            <span className="admin-dashboard__ielts-brand-ielts">IELTS</span>
+            <span className="admin-dashboard__ielts-brand-mode">MODE</span>
           </div>
-
-          <div className="admin-dashboard__actions">
-            <button
-              type="button"
-              className="admin-dashboard__btn-secondary"
-              onClick={() => router.push("/admin/user")}
-              aria-label="Назад к списку"
-            >
-              <FiArrowLeft aria-hidden="true" />
-              Назад
-            </button>
+          <div className="admin-dashboard__header-main">
+            <div className="admin-dashboard__title-block">
+              <div className="admin-dashboard__title-text">
+                <h1 className="admin-dashboard__title">Подробный отчёт</h1>
+                <p className="admin-dashboard__title-subtitle">
+                  {studentLabel} · Saved answers и правильность
+                </p>
+              </div>
+            </div>
+            <div className="admin-dashboard__actions">
+              <button
+                type="button"
+                className="admin-dashboard__btn-secondary"
+                onClick={() => router.push("/admin/user")}
+                aria-label="Назад к списку"
+              >
+                <FiArrowLeft aria-hidden="true" />
+                Назад
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="admin-dashboard__main">
-        <section className="admin-dashboard__section" aria-label="Сводка">
+        <section className="admin-dashboard__section" aria-label="Сводка и баллы">
           <h2 className="admin-dashboard__section-title">Сессия</h2>
+
+          {!loading && !error && data && (
+            <>
+              {scoreMetaError ? (
+                <p className="admin-dashboard__detail-error" role="status">
+                  {scoreMetaError}
+                </p>
+              ) : null}
+
+              {!examActive && mergedBands && scoreDetailUi ? (
+                <div
+                  className="admin-dashboard__score-board admin-dashboard__score-board--saved-summary"
+                  aria-label="Краткая сводка баллов"
+                >
+                  <div className="admin-dashboard__score-overall-pill">
+                    <span className="admin-dashboard__score-overall-label">Overall</span>
+                    <span className="admin-dashboard__score-overall-value" aria-live="polite">
+                      {formatBand(scoreDetailUi.overall ?? mergedBands.overall)}
+                    </span>
+                  </div>
+                  <div className="admin-dashboard__score-cards admin-dashboard__score-cards--saved-summary">
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Listening</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>
+                            {formatBand(scoreDetailUi.listening?.band ?? mergedBands.listening)}
+                          </dd>
+                        </div>
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>correct</dt>
+                          <dd>
+                            {scoreDetailUi.listening?.correct != null
+                              ? String(scoreDetailUi.listening.correct)
+                              : "—"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Reading</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>
+                            {formatBand(scoreDetailUi.reading?.band ?? mergedBands.reading)}
+                          </dd>
+                        </div>
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>correct</dt>
+                          <dd>
+                            {scoreDetailUi.reading?.correct != null
+                              ? String(scoreDetailUi.reading.correct)
+                              : "—"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Writing</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>
+                            {formatBand(scoreDetailUi.writing?.band ?? mergedBands.writing)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Speaking</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>
+                            {formatBand(scoreDetailUi.speaking ?? mergedBands.speaking)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                  </div>
+                </div>
+              ) : null}
+
+              {examActive && (
+                <p className="admin-dashboard__placeholder">
+                  Полные баллы из API будут доступны после завершения экзамена на агенте. Ниже — сводка
+                  по сохранённым ответам (Reading/Listening).
+                </p>
+              )}
+            </>
+          )}
+
           <dl className="admin-dashboard__saved-answers-meta-grid">
             <dt>session_id</dt>
-            <dd>{data?.sessionId ?? sessionId ?? "—"}</dd>
+            <dd>{sidLabel}</dd>
+
+            <dt>Ученик</dt>
+            <dd>{studentLabel}</dd>
 
             <dt>is_active</dt>
-            <dd>
-              {formatBoolRu(Boolean(rootSession?.is_active ?? rootSession?.isActive))}
-            </dd>
+            <dd>{formatBoolRu(Boolean(rootSession?.is_active ?? rootSession?.isActive))}</dd>
 
             <dt>created_at</dt>
             <dd>{formatIsoDateRu(rootSession?.created_at)}</dd>
@@ -414,6 +888,42 @@ export default function AdminSavedAnswersDetailPage() {
             <dt>updated</dt>
             <dd>{formatIsoDateRu(rootSession?.updated_at)}</dd>
           </dl>
+
+          <div className="admin-dashboard__subsection" aria-label="Время теста">
+            <h3 className="admin-dashboard__subsection-title">Период теста</h3>
+            <div className="admin-dashboard__table-wrap">
+              <table className="admin-dashboard__table">
+                <thead>
+                  <tr>
+                    <th scope="col" className="admin-dashboard__th">
+                      Начало теста
+                    </th>
+                    <th scope="col" className="admin-dashboard__th">
+                      Окончание теста
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="admin-dashboard__td">{formatIsoDateRu(testStartedRaw)}</td>
+                    <td className="admin-dashboard__td">{formatIsoDateRu(testEndedRaw)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {!loading && !error && data && (
+            <div className="admin-dashboard__saved-answers-toolbar">
+              <button
+                type="button"
+                className="admin-dashboard__btn-secondary"
+                onClick={() => setDetailModalOpen(true)}
+              >
+                Баллы и Speaking (подробно)
+              </button>
+            </div>
+          )}
 
           <div className="admin-dashboard__scores-grid" aria-label="Итого по чтению/аудированию">
             <div className="admin-dashboard__scores-item">
@@ -464,7 +974,11 @@ export default function AdminSavedAnswersDetailPage() {
                 <dl className="admin-dashboard__score-dl">
                   <div className="admin-dashboard__score-dl-row">
                     <dt>band</dt>
-                    <dd>{speaking == null || speaking === "" ? "—" : String(speaking)}</dd>
+                    <dd>
+                      {speakingSaved == null || speakingSaved === ""
+                        ? "—"
+                        : String(speakingSaved)}
+                    </dd>
                   </div>
                 </dl>
               </article>
@@ -472,7 +986,127 @@ export default function AdminSavedAnswersDetailPage() {
           </>
         )}
       </main>
+
+      {detailModalOpen && data && (
+        <div
+          className="admin-dashboard__modal-backdrop"
+          onClick={() => setDetailModalOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="admin-dashboard__modal admin-dashboard__modal--detail"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="saved-answers-score-modal-title"
+          >
+            <h2 id="saved-answers-score-modal-title" className="admin-dashboard__modal-title">
+              Баллы и Speaking
+            </h2>
+            <p className="admin-dashboard__modal-sub">
+              <code>
+                {`GET …/sessions/${String(sidLabel)}/score/`} ·{" "}
+                {`GET …/sessions/${String(sidLabel)}/`}
+              </code>
+            </p>
+
+            <div className="admin-dashboard__results-form admin-dashboard__results-form--modal">
+              <div className="admin-dashboard__results-aside-head">
+                <h3 className="admin-dashboard__subsection-title">Детализация</h3>
+                <button
+                  type="button"
+                  className="admin-dashboard__refresh-btn admin-dashboard__refresh-btn--compact"
+                  onClick={() => refreshScoresOnly()}
+                  disabled={scoresRefreshing}
+                  aria-label="Обновить баллы сессии"
+                >
+                  <FiRefreshCw
+                    aria-hidden="true"
+                    className={scoresRefreshing ? "admin-dashboard__refresh-icon--spin" : ""}
+                  />
+                  <span>{scoresRefreshing ? "…" : "Обновить баллы"}</span>
+                </button>
+              </div>
+              <p className="admin-dashboard__results-form-meta">
+                {studentLabel} · {sidLabel}
+              </p>
+              <p className="admin-dashboard__session-details-row">
+                <span>Статус</span>
+                <strong>{examActive ? "Активна" : "Завершена"}</strong>
+              </p>
+
+              {scoresRefreshing && (
+                <p className="admin-dashboard__detail-status">Обновление баллов…</p>
+              )}
+              {scoreMetaError ? (
+                <p className="admin-dashboard__detail-error" role="status">
+                  {scoreMetaError}
+                </p>
+              ) : null}
+
+              {!examActive && mergedBands && scoreDetailUi ? (
+                <ScoreBoardBlock
+                  scoreDetailUi={scoreDetailUi}
+                  mergedBands={mergedBands}
+                  sessionIdLabel={scoreDetailUi.sessionId ?? sidLabel}
+                  classNameExtra="admin-dashboard__score-board--modal"
+                />
+              ) : (
+                <div className="admin-dashboard__placeholder">
+                  Полные карточки баллов из API недоступны, пока сессия активна.
+                </div>
+              )}
+
+              {!examActive && (
+                <div className="admin-dashboard__speaking-form">
+                  <label className="admin-dashboard__speaking-label" htmlFor="speaking-band-modal">
+                    Speaking (IELTS band, ввод вручную после очной оценки)
+                  </label>
+                  <div className="admin-dashboard__speaking-row">
+                    <input
+                      id="speaking-band-modal"
+                      type="number"
+                      min={0}
+                      max={9}
+                      step={0.5}
+                      value={speakingDraft}
+                      onChange={(e) => setSpeakingDraft(e.target.value)}
+                      className="admin-dashboard__speaking-input"
+                      disabled={speakingSaving || scoresRefreshing}
+                      aria-describedby="speaking-hint-modal"
+                    />
+                    <button
+                      type="button"
+                      className="admin-dashboard__btn-primary admin-dashboard__speaking-save"
+                      onClick={() => handleSaveSpeaking()}
+                      disabled={speakingSaving || scoresRefreshing}
+                    >
+                      {speakingSaving ? "Сохранение…" : "Сохранить Speaking"}
+                    </button>
+                  </div>
+                  <p id="speaking-hint-modal" className="admin-dashboard__speaking-hint">
+                    Шаг 0.5, диапазон 0–9. Сохранение пересчитывает overall, когда все секции заполнены.
+                  </p>
+                  {speakingSaveError && (
+                    <p className="admin-dashboard__detail-error" role="alert">
+                      {speakingSaveError}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="admin-dashboard__modal-close"
+              onClick={() => setDetailModalOpen(false)}
+              aria-label="Закрыть окно баллов"
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

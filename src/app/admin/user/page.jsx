@@ -4,11 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FiBarChart2,
-  FiCpu,
   FiFilter,
   FiLayers,
   FiLogOut,
   FiMonitor,
+  FiPieChart,
   FiRefreshCw,
   FiSearch,
   FiSettings,
@@ -45,6 +45,7 @@ import "../styles/style_admin.scss";
 const NAV_MACHINES = "machines";
 const NAV_SESSIONS = "sessions";
 const NAV_RESULTS = "results";
+const NAV_ANALYTICS = "analytics";
 
 const THEME_LIGHT = "light";
 const THEME_DARK = "dark";
@@ -860,6 +861,27 @@ export default function AdminUserPage() {
     [finishedSessions, scoresBySessionId]
   );
 
+  const apiStatusDistribution = useMemo(() => {
+    const counts = new Map();
+    for (const s of sessionsWithResults) {
+      let k = normalizeApiStatusKey(s);
+      if (!k || k === "—") k = "__unknown__";
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const rows = Array.from(counts.entries()).map(([key, count]) => ({
+      key,
+      label: key === "__unknown__" ? "Не указан" : key,
+      count,
+    }));
+    rows.sort((a, b) => b.count - a.count);
+    return rows;
+  }, [sessionsWithResults]);
+
+  const maxApiStatusCount = apiStatusDistribution.reduce(
+    (max, item) => (item.count > max ? item.count : max),
+    0
+  );
+
   function handleThemeChange(newTheme) {
     setTheme(newTheme);
     if (typeof window !== "undefined") {
@@ -924,6 +946,15 @@ export default function AdminUserPage() {
     setSavedAnswersModalOpen(false);
   }, [selectedSessionId]);
 
+  useEffect(() => {
+    if (activeNav !== NAV_RESULTS || selectedSessionId == null) return;
+    function handleEscape(e) {
+      if (e.key === "Escape") setSelectedSessionId(null);
+    }
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [activeNav, selectedSessionId]);
+
   async function handleSaveSpeaking() {
     if (!selectedSessionId || isSelectedActive) return;
     setSpeakingSaveError("");
@@ -980,45 +1011,48 @@ export default function AdminUserPage() {
     <div className="admin-dashboard" data-theme={theme}>
       <header className="admin-dashboard__header">
         <div className="admin-dashboard__header-inner">
-          <div className="admin-dashboard__title-block">
-            <span className="admin-dashboard__title-icon" aria-hidden="true">
-              <FiCpu />
-            </span>
-            <div className="admin-dashboard__title-text">
-              <h1 className="admin-dashboard__title">Админ-панель</h1>
-              <p className="admin-dashboard__title-subtitle">
-                Управление компьютерами и сессиями тестов
-              </p>
-              {centerAdminIdDisplay ? (
-                <p className="admin-dashboard__header-greeting-sub">
-                  Здравствуйте · ID администратора:{" "}
-                  <span className="admin-dashboard__header-admin-id">{centerAdminIdDisplay}</span>
-                </p>
-              ) : null}
-            </div>
+          <div className="admin-dashboard__ielts-brand" aria-label="IELTS Mode">
+            <span className="admin-dashboard__ielts-brand-ielts">IELTS</span>
+            <span className="admin-dashboard__ielts-brand-mode">MODE</span>
           </div>
-          <div className="admin-dashboard__actions">
-            <button
-              type="button"
-              className="admin-dashboard__settings-btn"
-              onClick={() => setSettingsModalOpen(true)}
-              aria-label="Открыть настройки панели"
-            >
-              <FiSettings aria-hidden="true" />
-              <span>Настройки</span>
-            </button>
-            <button
-              type="button"
-              className="admin-dashboard__logout"
-              onClick={() => {
-                setLogoutError("");
-                setExitConfirmModalOpen(true);
-              }}
-              aria-label="Выйти из админ-панели"
-            >
-              <FiLogOut aria-hidden="true" />
-              <span>Выйти</span>
-            </button>
+          <div className="admin-dashboard__header-main">
+            <div className="admin-dashboard__title-block">
+              <div className="admin-dashboard__title-text">
+                <h1 className="admin-dashboard__title">Админ-панель</h1>
+                <p className="admin-dashboard__title-subtitle">
+                  Управление компьютерами и сессиями тестов
+                </p>
+                {centerAdminIdDisplay ? (
+                  <p className="admin-dashboard__header-greeting-sub">
+                    Здравствуйте · ID администратора:{" "}
+                    <span className="admin-dashboard__header-admin-id">{centerAdminIdDisplay}</span>
+                  </p>
+                ) : null}
+              </div>
+            </div>
+            <div className="admin-dashboard__actions">
+              <button
+                type="button"
+                className="admin-dashboard__settings-btn"
+                onClick={() => setSettingsModalOpen(true)}
+                aria-label="Открыть настройки панели"
+              >
+                <FiSettings aria-hidden="true" />
+                <span>Настройки</span>
+              </button>
+              <button
+                type="button"
+                className="admin-dashboard__logout"
+                onClick={() => {
+                  setLogoutError("");
+                  setExitConfirmModalOpen(true);
+                }}
+                aria-label="Выйти из админ-панели"
+              >
+                <FiLogOut aria-hidden="true" />
+                <span>Выйти</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -1250,6 +1284,221 @@ export default function AdminUserPage() {
         </div>
       )}
 
+      {activeNav === NAV_RESULTS && selectedSession && (
+        <div
+          className="admin-dashboard__modal-backdrop"
+          role="presentation"
+          onClick={() => setSelectedSessionId(null)}
+        >
+          <div
+            className="admin-dashboard__modal admin-dashboard__modal--detail"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="results-session-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="results-session-modal-title" className="admin-dashboard__modal-title">
+              Сводка по сессии
+            </h2>
+            <div className="admin-dashboard__results-form admin-dashboard__results-form--modal">
+              <div className="admin-dashboard__results-aside-head">
+                <h3 className="admin-dashboard__subsection-title">Баллы</h3>
+                <button
+                  type="button"
+                  className="admin-dashboard__refresh-btn admin-dashboard__refresh-btn--compact"
+                  onClick={() => loadSessionScores()}
+                  disabled={detailLoading}
+                  aria-label="Обновить баллы по выбранной сессии"
+                >
+                  <FiRefreshCw
+                    aria-hidden="true"
+                    className={detailLoading ? "admin-dashboard__refresh-icon--spin" : ""}
+                  />
+                  <span>{detailLoading ? "…" : "Обновить баллы"}</span>
+                </button>
+              </div>
+              <p className="admin-dashboard__results-form-meta">
+                {selectedSession.studentName} · {selectedSession.id}
+              </p>
+              <p className="admin-dashboard__session-details-row">
+                <span>Статус</span>
+                <strong>{isSelectedActive ? "Активна" : "Завершена"}</strong>
+              </p>
+
+              {detailLoading && (
+                <p className="admin-dashboard__detail-status">Загрузка баллов…</p>
+              )}
+              {detailError && (
+                <p className="admin-dashboard__detail-error" role="status">
+                  {detailError}
+                </p>
+              )}
+
+              {!detailLoading && !isSelectedActive && (
+                <div
+                  className="admin-dashboard__score-board"
+                  aria-label="Баллы из API /score/"
+                >
+                  {selectedScoreDetail?.sessionId && (
+                    <p className="admin-dashboard__score-board-session">
+                      <span className="admin-dashboard__score-board-k">session_id</span>
+                      <span className="admin-dashboard__score-board-v">{selectedScoreDetail.sessionId}</span>
+                    </p>
+                  )}
+                  <div className="admin-dashboard__score-overall-pill">
+                    <span className="admin-dashboard__score-overall-label">Overall</span>
+                    <span className="admin-dashboard__score-overall-value" aria-live="polite">
+                      {formatBand(selectedScoreDetail?.overall ?? selectedBands?.overall)}
+                    </span>
+                  </div>
+                  <div className="admin-dashboard__score-cards">
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Listening</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>{formatBand(selectedScoreDetail?.listening?.band ?? selectedBands?.listening)}</dd>
+                        </div>
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>correct</dt>
+                          <dd>
+                            {selectedScoreDetail?.listening?.correct != null
+                              ? String(selectedScoreDetail.listening.correct)
+                              : "—"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Reading</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>{formatBand(selectedScoreDetail?.reading?.band ?? selectedBands?.reading)}</dd>
+                        </div>
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>correct</dt>
+                          <dd>
+                            {selectedScoreDetail?.reading?.correct != null
+                              ? String(selectedScoreDetail.reading.correct)
+                              : "—"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card admin-dashboard__score-card--wide">
+                      <h4 className="admin-dashboard__score-card-title">Writing</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>{formatBand(selectedScoreDetail?.writing?.band ?? selectedBands?.writing)}</dd>
+                        </div>
+                        <div className="admin-dashboard__score-writing-block">
+                          <span className="admin-dashboard__score-sub">task1</span>
+                          <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
+                            {formatWritingTaskPreview(selectedScoreDetail?.writing?.task1)}
+                          </pre>
+                        </div>
+                        <div className="admin-dashboard__score-writing-block">
+                          <span className="admin-dashboard__score-sub">task2</span>
+                          <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
+                            {formatWritingTaskPreview(selectedScoreDetail?.writing?.task2)}
+                          </pre>
+                        </div>
+                      </dl>
+                    </article>
+                    <article className="admin-dashboard__score-card">
+                      <h4 className="admin-dashboard__score-card-title">Speaking</h4>
+                      <dl className="admin-dashboard__score-dl">
+                        <div className="admin-dashboard__score-dl-row">
+                          <dt>band</dt>
+                          <dd>{formatBand(selectedScoreDetail?.speaking ?? selectedBands?.speaking)}</dd>
+                        </div>
+                      </dl>
+                    </article>
+                  </div>
+                </div>
+              )}
+
+              {isSelectedActive && (
+                <div className="admin-dashboard__placeholder">
+                  Полные баллы будут доступны после завершения экзамена на агенте.
+                </div>
+              )}
+
+              {!isSelectedActive && (
+                <div className="admin-dashboard__speaking-form">
+                  <label className="admin-dashboard__speaking-label" htmlFor="speaking-band">
+                    Speaking (IELTS band, ввод вручную после очной оценки)
+                  </label>
+                  <div className="admin-dashboard__speaking-row">
+                    <input
+                      id="speaking-band"
+                      type="number"
+                      min={0}
+                      max={9}
+                      step={0.5}
+                      value={speakingDraft}
+                      onChange={(e) => setSpeakingDraft(e.target.value)}
+                      className="admin-dashboard__speaking-input"
+                      disabled={speakingSaving || detailLoading}
+                      aria-describedby="speaking-hint"
+                    />
+                    <button
+                      type="button"
+                      className="admin-dashboard__btn-primary admin-dashboard__speaking-save"
+                      onClick={() => handleSaveSpeaking()}
+                      disabled={speakingSaving || detailLoading}
+                    >
+                      {speakingSaving ? "Сохранение…" : "Сохранить Speaking"}
+                    </button>
+                  </div>
+                  <p id="speaking-hint" className="admin-dashboard__speaking-hint">
+                    Шаг 0.5, диапазон 0–9. Сохранение пересчитывает overall, когда все секции
+                    заполнены.
+                  </p>
+                  {speakingSaveError && (
+                    <p className="admin-dashboard__detail-error" role="alert">
+                      {speakingSaveError}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="admin-dashboard__saved-answers-block">
+                <button
+                  type="button"
+                  className="admin-dashboard__btn-secondary"
+                  onClick={() => handleViewSavedAnswersDetail()}
+                  disabled={!selectedSessionId}
+                >
+                  Увидеть подробнее
+                </button>
+                <p className="admin-dashboard__saved-answers-hint">
+                  Данные:{" "}
+                  <code>
+                    {`GET /api/v1/auth/center-admin/sessions/<session_id>/saved-answers/`}
+                  </code>
+                </p>
+                {savedAnswersError && (
+                  <p className="admin-dashboard__detail-error" role="alert">
+                    {savedAnswersError}
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              className="admin-dashboard__modal-close"
+              onClick={() => setSelectedSessionId(null)}
+              aria-label="Закрыть сводку по сессии"
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="admin-dashboard__body">
         <nav className="admin-dashboard__nav" aria-label="Разделы панели">
           <ul className="admin-dashboard__nav-list">
@@ -1294,6 +1543,21 @@ export default function AdminUserPage() {
                   <FiBarChart2 />
                 </span>
                 <span className="admin-dashboard__nav-label">Результаты</span>
+              </button>
+            </li>
+            <li className="admin-dashboard__nav-item">
+              <button
+                type="button"
+                className={`admin-dashboard__nav-btn ${
+                  activeNav === NAV_ANALYTICS ? "admin-dashboard__nav-btn--active" : ""
+                }`}
+                onClick={() => setActiveNav(NAV_ANALYTICS)}
+                aria-current={activeNav === NAV_ANALYTICS ? "true" : undefined}
+              >
+                <span className="admin-dashboard__nav-icon">
+                  <FiPieChart />
+                </span>
+                <span className="admin-dashboard__nav-label">Аналитика</span>
               </button>
             </li>
           </ul>
@@ -1922,6 +2186,132 @@ export default function AdminUserPage() {
             </section>
           )}
 
+          {activeNav === NAV_ANALYTICS && (
+            <section className="admin-dashboard__section" aria-labelledby="analytics-title">
+              <h2 id="analytics-title" className="admin-dashboard__section-title">
+                Аналитика
+              </h2>
+              <p className="admin-dashboard__results-api-placeholder">
+                Распределение сессий по статусу API (как на бэкенде: finished, terminated, idle и
+                т.д.) и сводка по попыткам. Средний Overall и диаграмма по диапазонам считаются по
+                завершённым сессиям, для которых уже загружены баллы в этой вкладке браузера.
+              </p>
+              <div className="admin-dashboard__machines-header admin-dashboard__machines-header--sessions">
+                <p className="admin-dashboard__machines-meta">
+                  Всего сессий: <strong>{totalSessionsCount}</strong>
+                </p>
+                <div className="admin-dashboard__machines-toolbar">
+                  <button
+                    type="button"
+                    className="admin-dashboard__refresh-btn"
+                    onClick={() => loadDashboardData()}
+                    disabled={listLoading}
+                    aria-label="Обновить данные аналитики"
+                  >
+                    <FiRefreshCw
+                      aria-hidden="true"
+                      className={listLoading ? "admin-dashboard__refresh-icon--spin" : ""}
+                    />
+                    <span>{listLoading ? "Обновление…" : "Обновить"}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-dashboard__analytics-layout">
+                <div className="admin-dashboard__subsection">
+                  <h3 className="admin-dashboard__subsection-title">
+                    Распределение по статусу API
+                  </h3>
+                  {listLoading && sessionsWithResults.length === 0 ? (
+                    <p className="admin-dashboard__bars-placeholder-text">Загрузка…</p>
+                  ) : apiStatusDistribution.length === 0 ? (
+                    <p className="admin-dashboard__bars-placeholder-text">Нет сессий для отчёта</p>
+                  ) : (
+                    <div className="admin-dashboard__bars">
+                      {apiStatusDistribution.map((item) => (
+                        <div
+                          key={item.key}
+                          className="admin-dashboard__bar-row admin-dashboard__bar-row--api-status"
+                        >
+                          <span className="admin-dashboard__bar-label" title={item.label}>
+                            {item.label}
+                          </span>
+                          <div className="admin-dashboard__bar-track">
+                            <div
+                              className="admin-dashboard__bar-fill"
+                              style={{
+                                width:
+                                  maxApiStatusCount === 0
+                                    ? "0%"
+                                    : `${(item.count / maxApiStatusCount) * 100}%`,
+                              }}
+                            />
+                          </div>
+                          <span className="admin-dashboard__bar-count">{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="admin-dashboard__subsection">
+                  <h3 className="admin-dashboard__subsection-title">
+                    Средний Overall и распределение по диапазонам
+                  </h3>
+                  <div className="admin-dashboard__results-stats admin-dashboard__results-stats--nested">
+                    <div className="admin-dashboard__stats">
+                      <div className="admin-dashboard__stats-item">
+                        <span className="admin-dashboard__stats-label">Всего попыток</span>
+                        <span className="admin-dashboard__stats-value">{totalSessionsCount}</span>
+                      </div>
+                      <div className="admin-dashboard__stats-item">
+                        <span className="admin-dashboard__stats-label">Активных сейчас</span>
+                        <span className="admin-dashboard__stats-value">{activeCount}</span>
+                      </div>
+                      <div className="admin-dashboard__stats-item">
+                        <span className="admin-dashboard__stats-label">Завершённых</span>
+                        <span className="admin-dashboard__stats-value">{finishedCount}</span>
+                      </div>
+                      <div className="admin-dashboard__stats-item">
+                        <span className="admin-dashboard__stats-label">Средний Overall</span>
+                        <span className="admin-dashboard__stats-value">{averageOverall}</span>
+                      </div>
+                    </div>
+
+                    {hasCachedDistribution ? (
+                      <div className="admin-dashboard__bars">
+                        {distribution.map((item) => (
+                          <div key={item.label} className="admin-dashboard__bar-row">
+                            <span className="admin-dashboard__bar-label">{item.label}</span>
+                            <div className="admin-dashboard__bar-track">
+                              <div
+                                className="admin-dashboard__bar-fill"
+                                style={{
+                                  width:
+                                    maxDistributionCount === 0
+                                      ? "0%"
+                                      : `${(item.count / maxDistributionCount) * 100}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="admin-dashboard__bar-count">{item.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="admin-dashboard__bars admin-dashboard__bars--placeholder">
+                        <p className="admin-dashboard__bars-placeholder-text">
+                          Откройте вкладку «Результаты» и выберите завершённые сессии в таблице, чтобы
+                          подтянуть Overall и увидеть распределение.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
           {activeNav === NAV_RESULTS && (
             <section
               className="admin-dashboard__section"
@@ -1931,9 +2321,8 @@ export default function AdminUserPage() {
                 Результаты по секциям
               </h2>
               <p className="admin-dashboard__results-api-placeholder">
-                Баллы подгружаются при выборе строки (GET score и детали сессии). Средний Overall и
-                диаграмма считаются по сессиям, для которых уже загружены баллы в этой сессии
-                браузера.
+                Баллы подгружаются при выборе строки (GET score и детали сессии). Сводные графики и
+                средний Overall — во вкладке «Аналитика».
               </p>
               <div className="admin-dashboard__machines-header admin-dashboard__machines-header--sessions">
                 <p className="admin-dashboard__machines-meta">
@@ -1954,56 +2343,6 @@ export default function AdminUserPage() {
                     <span>{listLoading ? "Обновление…" : "Обновить"}</span>
                   </button>
                 </div>
-              </div>
-
-              <div className="admin-dashboard__results-stats">
-                <div className="admin-dashboard__stats">
-                  <div className="admin-dashboard__stats-item">
-                    <span className="admin-dashboard__stats-label">Всего попыток</span>
-                    <span className="admin-dashboard__stats-value">{totalSessionsCount}</span>
-                  </div>
-                  <div className="admin-dashboard__stats-item">
-                    <span className="admin-dashboard__stats-label">Активных сейчас</span>
-                    <span className="admin-dashboard__stats-value">{activeCount}</span>
-                  </div>
-                  <div className="admin-dashboard__stats-item">
-                    <span className="admin-dashboard__stats-label">Завершённых</span>
-                    <span className="admin-dashboard__stats-value">{finishedCount}</span>
-                  </div>
-                  <div className="admin-dashboard__stats-item">
-                    <span className="admin-dashboard__stats-label">Средний Overall</span>
-                    <span className="admin-dashboard__stats-value">{averageOverall}</span>
-                  </div>
-                </div>
-
-                {hasCachedDistribution ? (
-                  <div className="admin-dashboard__bars">
-                    {distribution.map((item) => (
-                      <div key={item.label} className="admin-dashboard__bar-row">
-                        <span className="admin-dashboard__bar-label">{item.label}</span>
-                        <div className="admin-dashboard__bar-track">
-                          <div
-                            className="admin-dashboard__bar-fill"
-                            style={{
-                              width:
-                                maxDistributionCount === 0
-                                  ? "0%"
-                                  : `${(item.count / maxDistributionCount) * 100}%`,
-                            }}
-                          />
-                        </div>
-                        <span className="admin-dashboard__bar-count">{item.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="admin-dashboard__bars admin-dashboard__bars--placeholder">
-                    <p className="admin-dashboard__bars-placeholder-text">
-                      Выберите завершённые сессии в таблице, чтобы подтянуть Overall и увидеть
-                      распределение.
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="admin-dashboard__results-layout">
@@ -2062,13 +2401,16 @@ export default function AdminUserPage() {
                           <th scope="col" className="admin-dashboard__th">
                             Overall
                           </th>
+                          <th scope="col" className="admin-dashboard__th">
+                            Подробнее
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {listLoading && sessionsWithResults.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={9}
+                              colSpan={10}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               <span className="admin-dashboard__table-loading">Загрузка…</span>
@@ -2077,7 +2419,7 @@ export default function AdminUserPage() {
                         ) : sessionsWithResults.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={9}
+                              colSpan={10}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               Пока нет сессий
@@ -2086,7 +2428,7 @@ export default function AdminUserPage() {
                         ) : filteredSessionsForResults.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={9}
+                              colSpan={10}
                               className="admin-dashboard__td admin-dashboard__td--empty"
                             >
                               Ничего не найдено по запросу
@@ -2128,6 +2470,20 @@ export default function AdminUserPage() {
                                 <td className="admin-dashboard__td">
                                   {formatBand(r?.overall)}
                                 </td>
+                                <td
+                                  className="admin-dashboard__td admin-dashboard__td--actions-narrow"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <button
+                                    type="button"
+                                    className="admin-dashboard__btn-secondary admin-dashboard__btn-secondary--table-cell"
+                                    onClick={() =>
+                                      router.push(`/admin/user/${String(session.id)}/saved-answers`)
+                                    }
+                                  >
+                                    Подробнее
+                                  </button>
+                                </td>
                               </tr>
                             );
                           })
@@ -2136,196 +2492,6 @@ export default function AdminUserPage() {
                     </table>
                   </div>
                 </div>
-
-                {selectedSession && (
-                  <aside className="admin-dashboard__results-form">
-                    <div className="admin-dashboard__results-aside-head">
-                      <h3 className="admin-dashboard__subsection-title">Сводка по сессии</h3>
-                      <button
-                        type="button"
-                        className="admin-dashboard__refresh-btn admin-dashboard__refresh-btn--compact"
-                        onClick={() => loadSessionScores()}
-                        disabled={detailLoading}
-                        aria-label="Обновить баллы по выбранной сессии"
-                      >
-                        <FiRefreshCw
-                          aria-hidden="true"
-                          className={detailLoading ? "admin-dashboard__refresh-icon--spin" : ""}
-                        />
-                        <span>{detailLoading ? "…" : "Обновить баллы"}</span>
-                      </button>
-                    </div>
-                    <p className="admin-dashboard__results-form-meta">
-                      {selectedSession.studentName} · {selectedSession.id}
-                    </p>
-                    <p className="admin-dashboard__session-details-row">
-                      <span>Статус</span>
-                      <strong>{isSelectedActive ? "Активна" : "Завершена"}</strong>
-                    </p>
-
-                    {detailLoading && (
-                      <p className="admin-dashboard__detail-status">Загрузка баллов…</p>
-                    )}
-                    {detailError && (
-                      <p className="admin-dashboard__detail-error" role="status">
-                        {detailError}
-                      </p>
-                    )}
-
-                    {!detailLoading && !isSelectedActive && (
-                      <div
-                        className="admin-dashboard__score-board"
-                        aria-label="Баллы из API /score/"
-                      >
-                        {selectedScoreDetail?.sessionId && (
-                          <p className="admin-dashboard__score-board-session">
-                            <span className="admin-dashboard__score-board-k">session_id</span>
-                            <span className="admin-dashboard__score-board-v">{selectedScoreDetail.sessionId}</span>
-                          </p>
-                        )}
-                        <div className="admin-dashboard__score-overall-pill">
-                          <span className="admin-dashboard__score-overall-label">Overall</span>
-                          <span className="admin-dashboard__score-overall-value" aria-live="polite">
-                            {formatBand(selectedScoreDetail?.overall ?? selectedBands?.overall)}
-                          </span>
-                        </div>
-                        <div className="admin-dashboard__score-cards">
-                          <article className="admin-dashboard__score-card">
-                            <h4 className="admin-dashboard__score-card-title">Listening</h4>
-                            <dl className="admin-dashboard__score-dl">
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>band</dt>
-                                <dd>{formatBand(selectedScoreDetail?.listening?.band ?? selectedBands?.listening)}</dd>
-                              </div>
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>correct</dt>
-                                <dd>
-                                  {selectedScoreDetail?.listening?.correct != null
-                                    ? String(selectedScoreDetail.listening.correct)
-                                    : "—"}
-                                </dd>
-                              </div>
-                            </dl>
-                          </article>
-                          <article className="admin-dashboard__score-card">
-                            <h4 className="admin-dashboard__score-card-title">Reading</h4>
-                            <dl className="admin-dashboard__score-dl">
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>band</dt>
-                                <dd>{formatBand(selectedScoreDetail?.reading?.band ?? selectedBands?.reading)}</dd>
-                              </div>
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>correct</dt>
-                                <dd>
-                                  {selectedScoreDetail?.reading?.correct != null
-                                    ? String(selectedScoreDetail.reading.correct)
-                                    : "—"}
-                                </dd>
-                              </div>
-                            </dl>
-                          </article>
-                          <article className="admin-dashboard__score-card admin-dashboard__score-card--wide">
-                            <h4 className="admin-dashboard__score-card-title">Writing</h4>
-                            <dl className="admin-dashboard__score-dl">
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>band</dt>
-                                <dd>{formatBand(selectedScoreDetail?.writing?.band ?? selectedBands?.writing)}</dd>
-                              </div>
-                              <div className="admin-dashboard__score-writing-block">
-                                <span className="admin-dashboard__score-sub">task1</span>
-                                <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
-                                  {formatWritingTaskPreview(selectedScoreDetail?.writing?.task1)}
-                                </pre>
-                              </div>
-                              <div className="admin-dashboard__score-writing-block">
-                                <span className="admin-dashboard__score-sub">task2</span>
-                                <pre className="admin-dashboard__score-task-pre" tabIndex={0}>
-                                  {formatWritingTaskPreview(selectedScoreDetail?.writing?.task2)}
-                                </pre>
-                              </div>
-                            </dl>
-                          </article>
-                          <article className="admin-dashboard__score-card">
-                            <h4 className="admin-dashboard__score-card-title">Speaking</h4>
-                            <dl className="admin-dashboard__score-dl">
-                              <div className="admin-dashboard__score-dl-row">
-                                <dt>band</dt>
-                                <dd>{formatBand(selectedScoreDetail?.speaking ?? selectedBands?.speaking)}</dd>
-                              </div>
-                            </dl>
-                          </article>
-                        </div>
-                      </div>
-                    )}
-
-                    {isSelectedActive && (
-                      <div className="admin-dashboard__placeholder">
-                        Полные баллы будут доступны после завершения экзамена на агенте.
-                      </div>
-                    )}
-
-                    {!isSelectedActive && (
-                      <div className="admin-dashboard__speaking-form">
-                        <label className="admin-dashboard__speaking-label" htmlFor="speaking-band">
-                          Speaking (IELTS band, ввод вручную после очной оценки)
-                        </label>
-                        <div className="admin-dashboard__speaking-row">
-                          <input
-                            id="speaking-band"
-                            type="number"
-                            min={0}
-                            max={9}
-                            step={0.5}
-                            value={speakingDraft}
-                            onChange={(e) => setSpeakingDraft(e.target.value)}
-                            className="admin-dashboard__speaking-input"
-                            disabled={speakingSaving || detailLoading}
-                            aria-describedby="speaking-hint"
-                          />
-                          <button
-                            type="button"
-                            className="admin-dashboard__btn-primary admin-dashboard__speaking-save"
-                            onClick={() => handleSaveSpeaking()}
-                            disabled={speakingSaving || detailLoading}
-                          >
-                            {speakingSaving ? "Сохранение…" : "Сохранить Speaking"}
-                          </button>
-                        </div>
-                        <p id="speaking-hint" className="admin-dashboard__speaking-hint">
-                          Шаг 0.5, диапазон 0–9. Сохранение пересчитывает overall, когда все секции
-                          заполнены.
-                        </p>
-                        {speakingSaveError && (
-                          <p className="admin-dashboard__detail-error" role="alert">
-                            {speakingSaveError}
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="admin-dashboard__saved-answers-block">
-                      <button
-                        type="button"
-                        className="admin-dashboard__btn-secondary"
-                        onClick={() => handleViewSavedAnswersDetail()}
-                        disabled={!selectedSessionId}
-                      >
-                        Увидеть подробнее
-                      </button>
-                      <p className="admin-dashboard__saved-answers-hint">
-                        Данные:{" "}
-                        <code>
-                          {`GET /api/v1/auth/center-admin/sessions/<session_id>/saved-answers/`}
-                        </code>
-                      </p>
-                      {savedAnswersError && (
-                        <p className="admin-dashboard__detail-error" role="alert">
-                          {savedAnswersError}
-                        </p>
-                      )}
-                    </div>
-                  </aside>
-                )}
               </div>
             </section>
           )}
