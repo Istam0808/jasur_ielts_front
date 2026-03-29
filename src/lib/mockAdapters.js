@@ -240,7 +240,7 @@ export function adaptListeningMockToUi(mockDetail) {
     if (!part) return null;
 
     const startNumber = questionNumber;
-    const sections = asArray(part.sections).map((section) => {
+    const sections = asArray(part.sections).map((section, sectionIndex) => {
       const sectionTypeRaw = section?.section_type != null ? String(section.section_type) : "";
       const isRawHtmlSection = sectionTypeRaw.toLowerCase().includes("raw_html");
       const rawHtmlContent = isRawHtmlSection
@@ -254,6 +254,8 @@ export function adaptListeningMockToUi(mockDetail) {
       const isDragAndDropSection = sectionTypeRaw
         .toLowerCase()
         .includes("drag_and_drop");
+
+      let resolvedInstruction = section?.instructions || "Answer the questions below.";
 
       if (isDragAndDropSection) {
         const sourceQuestions = asArray(section?.questions)
@@ -310,10 +312,12 @@ export function adaptListeningMockToUi(mockDetail) {
           ? promptRaw.trim()
           : (section?.instructions || `Choose answers for questions ${sectionStart}-${sectionEnd}.`);
 
+        // Prompt is shown once as section instruction (HTML ok); avoid duplicate under Part title in MultipleChoiceTwo.
+        resolvedInstruction = prompt;
         questions = [{
           number: sectionStart === sectionEnd ? sectionStart : `${sectionStart}-${sectionEnd}`,
           type: "multiple_choice_two",
-          text: prompt,
+          text: ".",
           options: asArray(section?.list_selections).map(toOptionData),
         }];
       } else {
@@ -362,8 +366,8 @@ export function adaptListeningMockToUi(mockDetail) {
 
       return {
         questionRange: `${start}-${end}`,
-        instruction: section?.instructions || "Answer the questions below.",
-        context: section?.title || `Part ${partIndex + 1}`,
+        instruction: resolvedInstruction,
+        context: section?.title || (sectionIndex === 0 ? `Part ${partIndex + 1}` : ""),
         options_box: asArray(section?.options).map(toOptionData),
         rawHtmlContent,
         questions,

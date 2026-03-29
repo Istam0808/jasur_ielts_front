@@ -122,6 +122,12 @@
     font-family: $body-font-family;
     @include user-select-text;
 
+    .question-text.selectable-content {
+        font-size: $font-size-md;
+        line-height: 1.55;
+        margin-bottom: $spacing-md;
+    }
+
     .page-header {
         margin-bottom: $spacing-xl;
         @include flex(column, $align: flex-start, $gap: $spacing-md);

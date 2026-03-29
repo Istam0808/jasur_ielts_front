@@ -36,8 +36,7 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
     if (item.sections && Array.isArray(item.sections)) {
         return item.sections.map((section, index) => (
             <div key={`${section.questionRange || section.questions}-${index}`} className="question-section">
-                {/* Render context, instruction, image, and options box at the section level */}
-                {section.context && <h4 className="selectable-content">{section.context}</h4>}
+                {/* Instruction before section title (context), matching paper order */}
                 {(() => {
                     const instruction = String(section.instruction ?? '').trim();
                     if (!instruction || instruction === '.') return null;
@@ -48,6 +47,7 @@ const QuestionRenderer = ({ item, userAnswers, onAnswerChange, optionsBox }) => 
                         />
                     );
                 })()}
+                {section.context && <h4 className="selectable-content">{section.context}</h4>}
 
                 {section.rawHtmlContent && String(section.rawHtmlContent).trim() && (
                     <RawHtmlWithInputs

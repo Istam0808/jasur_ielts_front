@@ -111,14 +111,19 @@ const MultipleChoiceTwo = ({ question, userAnswer, onAnswerChange }) => {
 
     const promptText = typeof question?.text === 'string' ? question.text.trim() : '';
     const shouldShowPrompt = promptText && promptText !== '.';
+    const promptLooksLikeHtml = shouldShowPrompt && /<\/?[a-z][\s\S]*>/i.test(promptText);
 
     return (
         <div className="question-multiple-choice-two">
-            {shouldShowPrompt && (
-                <p className="question-text selectable-content">
-                    {promptText}
-                </p>
-            )}
+            {shouldShowPrompt &&
+                (promptLooksLikeHtml ? (
+                    <p
+                        className="question-text selectable-content"
+                        dangerouslySetInnerHTML={{ __html: promptText }}
+                    />
+                ) : (
+                    <p className="question-text selectable-content">{promptText}</p>
+                ))}
             {isRangeQuestion ? (
                 <div className="multiple-choice-checkbox-group">
                     <p className="selection-progress selectable-content">

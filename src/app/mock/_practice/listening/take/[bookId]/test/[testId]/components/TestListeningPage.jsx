@@ -790,6 +790,8 @@ const TestListeningPage = ({
     }
 
     const activePart = testParts[currentPartIndex];
+    const partInstructionRaw = typeof activePart?.instruction === 'string' ? activePart.instruction.trim() : '';
+    const partInstructionIsHtml = partInstructionRaw && /<\/?[a-z][\s\S]*>/i.test(partInstructionRaw);
 
     const shouldShowUnifiedHeader = isMockExam && useUnifiedMockHeader;
     const sessionUsername = getMockSession()?.username;
@@ -891,6 +893,18 @@ const TestListeningPage = ({
                 />
 
                 <div className="part-content-card">
+                    {partInstructionRaw && (
+                        <div className="part-instructions">
+                            {partInstructionIsHtml ? (
+                                <p
+                                    className="instruction-text"
+                                    dangerouslySetInnerHTML={{ __html: partInstructionRaw }}
+                                />
+                            ) : (
+                                <p className="instruction-text">{partInstructionRaw}</p>
+                            )}
+                        </div>
+                    )}
                     <PartHeader partNumber={activePart.part} audioUrl={activePartAudioUrl} />
                     {!shouldShowUnifiedHeader && (
                         <div
@@ -969,14 +983,6 @@ const TestListeningPage = ({
                         storageKey={listeningHighlightStorageKey}
                         restoreVersion={listeningHighlightRestoreVersion}
                     >
-                        {
-                            activePart.instruction && (
-                                <div className="part-instructions">
-                                    <p className="instruction-text">{activePart.instruction}</p>
-                                </div>
-                            )
-                        }
-
                         <div className="questions-area">
                             <QuestionRenderer
                                 item={activePart}
