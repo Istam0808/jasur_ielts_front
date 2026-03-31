@@ -54,6 +54,7 @@ export default function NormalReadingMode({
     passageParagraphs,
     passageIsHtml = false,
     passageTitle,
+    passageSubtopic = '',
     columnWidth,
     onColumnResize,
     handleQuestionClick,
@@ -524,6 +525,11 @@ export default function NormalReadingMode({
 
                         <div className="passage-content highlight-text-root">
                             <h3 className="passage-title" data-highlight-ignore="true">{passageTitle}</h3>
+                            {passageSubtopic ? (
+                                <p className="passage-subtopic" data-highlight-ignore="true">
+                                    {passageSubtopic}
+                                </p>
+                            ) : null}
                             {passageIsHtml && passageParagraphs?.length > 0 ? (
                                 inlineMatchingQuestion ? (
                                     <PassageWithDropzones

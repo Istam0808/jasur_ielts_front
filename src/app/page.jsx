@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Modal from "@/components/common/Modal";
 import {
   BackendApiError,
   getMocksList,
   isInvalidOrInactiveSessionError,
+  isTokenExpiredError,
   loginAgent,
+  logoutAgent,
   MOCK_SESSION_STATUS,
   postMockSessionStatus,
 } from "@/lib/mockApi";
@@ -29,6 +32,7 @@ export default function StudentLoginPage() {
   const [session, setSession] = useState(null);
   const [mocks, setMocks] = useState([]);
   const [sessionRevokedByAdmin, setSessionRevokedByAdmin] = useState(false);
+  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
 
   const loadMocks = useCallback(async (token) => {
     setIsLoadingMocks(true);
@@ -38,6 +42,11 @@ export default function StudentLoginPage() {
       setMocks(listPayload.results);
       setSessionRevokedByAdmin(false);
     } catch (err) {
+      if (isTokenExpiredError(err)) {
+        setError("");
+        setShowTokenExpiredModal(true);
+        return;
+      }
       if (isInvalidOrInactiveSessionError(err)) {
         clearMockSession();
         setSession(null);
@@ -123,6 +132,24 @@ export default function StudentLoginPage() {
     setSessionRevokedByAdmin(false);
     setError("");
     router.refresh();
+  }
+
+  async function handleFinishExpiredSession() {
+    const token = getMockSession()?.accessToken;
+    try {
+      if (token) {
+        await logoutAgent(token);
+      }
+    } catch (err) {
+      console.warn("Logout request failed after token expiration:", err);
+    } finally {
+      clearMockSession();
+      setSession(null);
+      setMocks([]);
+      setError("");
+      setShowTokenExpiredModal(false);
+      router.replace("/");
+    }
   }
 
   return (
@@ -290,6 +317,24 @@ export default function StudentLoginPage() {
           </div>
         )}
       </div>
+
+      {showTokenExpiredModal && (
+        <Modal
+          onClose={() => {}}
+          title="Сессия истекла"
+          description="Ваш токен авторизации истек. Нажмите кнопку ниже, чтобы завершить сессию и войти снова."
+          closeOnClickOutside={false}
+          closeOnEscape={false}
+          showCloseButton={false}
+          buttons={[
+            {
+              text: "Закончить сессию",
+              className: "student-login__btn",
+              onClick: handleFinishExpiredSession,
+            },
+          ]}
+        />
+      )}
     </div>
   );
 }

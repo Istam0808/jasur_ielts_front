@@ -79,6 +79,7 @@ export default function ReadingPage({
         passageParagraphs,
         passageIsHtml,
         passageTitle,
+        passageSubtopic,
         visiblePassages,
 
         // Actions
@@ -380,6 +381,7 @@ export default function ReadingPage({
         passageParagraphs,
         passageIsHtml,
         passageTitle,
+        passageSubtopic,
         totalQuestions,
         columnWidth,
         onColumnResize: setColumnWidth,

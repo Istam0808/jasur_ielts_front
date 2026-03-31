@@ -10,6 +10,7 @@ import InlineGapFilling from '@/components/common/input-types/InlineGapFilling';
 import KeyValueTable from '@/components/common/input-types/KeyValueTable';
 import DiagramLabels from '@/components/common/input-types/DiagramLabels';
 import React from 'react'; // Added missing import for React
+import sanitizeHtml from '@/utils/sanitizeHtml';
 
 const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, readingId, difficulty, reviewMap }) => {
     const { t } = useTranslation('reading');
@@ -204,46 +205,121 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
         );
     };
 
+    const hasHtmlTags = (value) => /<\/?[a-z][\s\S]*>/i.test(String(value || ''));
+
+    const parseTemplateToNodes = (template, renderBlankById) => {
+        const htmlWithBlankNodes = String(template || '').replace(
+            /(?:___(\d+)___|(\d+)\.{2,})/g,
+            (_, firstId, secondId) => `<blank data-blank-id="${firstId || secondId}"></blank>`
+        );
+        const sanitized = sanitizeHtml(htmlWithBlankNodes);
+
+        if (typeof window === 'undefined' || typeof DOMParser === 'undefined') {
+            return sanitized;
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<div>${sanitized}</div>`, 'text/html');
+        const root = doc.body.firstChild;
+
+        const mapNodeToReact = (node, keyPrefix = 'node') => {
+            if (!node) return null;
+            if (node.nodeType === Node.TEXT_NODE) {
+                return node.textContent;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return null;
+
+            const element = node;
+            const tagName = element.tagName.toLowerCase();
+
+            if (tagName === 'blank') {
+                const blankId = element.getAttribute('data-blank-id');
+                return renderBlankById(blankId);
+            }
+
+            const props = { key: `${keyPrefix}-${tagName}` };
+            const className = element.getAttribute('class');
+            if (className) props.className = className;
+            const blankAttr = element.getAttribute('data-blank-id');
+            if (blankAttr) props['data-blank-id'] = blankAttr;
+
+            const children = Array.from(element.childNodes)
+                .map((child, index) => mapNodeToReact(child, `${keyPrefix}-${index}`))
+                .filter((child) => child !== null && child !== undefined);
+
+            return React.createElement(tagName, props, ...children);
+        };
+
+        return Array.from(root.childNodes)
+            .map((child, index) => mapNodeToReact(child, `root-${index}`))
+            .filter((child) => child !== null && child !== undefined);
+    };
+
+    const renderCompletionInstruction = () => {
+        const inst = typeof question.instruction === 'string' ? question.instruction.trim() : '';
+        if (!inst) return null;
+        if (hasHtmlTags(inst)) {
+            return (
+                <div
+                    className="question-instruction"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(inst) }}
+                />
+            );
+        }
+        return <div className="question-instruction">{inst}</div>;
+    };
+
     const renderSummaryCompletion = () => {
         if (!question.summary) {
             return <div>No summary content available</div>;
         }
 
         const summaryTitle = typeof question.title === 'string' ? question.title.trim() : '';
-        
+        const showSummaryTitle = Boolean(summaryTitle) && summaryTitle !== '.';
+
         // Split by blanks first, then handle line breaks within each part
         const summaryParts = question.summary.split(/___\d+___/);
         const blanks = question.summary.match(/___(\d+)___/g) || [];
+        const summaryHasHtml = hasHtmlTags(question.summary);
         
         if (isReviewMode) {
             return (
                 <div className="summary-completion review-mode">
-                    {summaryTitle && (
+                    {showSummaryTitle && (
                         <div className="summary-title">
                             <h4 className="title-text">{summaryTitle}</h4>
                         </div>
                     )}
                     <div className="summary-text">
-                        {summaryParts.map((part, idx) => (
-                            <React.Fragment key={idx}>
-                                {part.split('\n').map((line, lineIdx) => (
-                                    <React.Fragment key={lineIdx}>
-                                        {lineIdx > 0 && <br />}
-                                        {line}
-                                        {idx < blanks.length && lineIdx === part.split('\n').length - 1 && (
-                                            <span className="blank-container">
-                                                {renderSummaryBlankReview(blanks[idx].match(/\d+/)[0])}
-                                            </span>
-                                        )}
-                                    </React.Fragment>
-                                ))}
-                                {idx < blanks.length && part.split('\n').length === 1 && (
-                                    <span className="blank-container">
-                                        {renderSummaryBlankReview(blanks[idx].match(/\d+/)[0])}
+                        {summaryHasHtml
+                            ? parseTemplateToNodes(
+                                question.summary,
+                                (blankId) => (
+                                    <span className="blank-container" key={`summary-review-${blankId}`}>
+                                        {renderSummaryBlankReview(blankId)}
                                     </span>
-                                )}
-                            </React.Fragment>
-                        ))}
+                                )
+                            )
+                            : summaryParts.map((part, idx) => (
+                                <React.Fragment key={idx}>
+                                    {part.split('\n').map((line, lineIdx) => (
+                                        <React.Fragment key={lineIdx}>
+                                            {lineIdx > 0 && <br />}
+                                            {line}
+                                            {idx < blanks.length && lineIdx === part.split('\n').length - 1 && (
+                                                <span className="blank-container">
+                                                    {renderSummaryBlankReview(blanks[idx].match(/\d+/)[0])}
+                                                </span>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                    {idx < blanks.length && part.split('\n').length === 1 && (
+                                        <span className="blank-container">
+                                            {renderSummaryBlankReview(blanks[idx].match(/\d+/)[0])}
+                                        </span>
+                                    )}
+                                </React.Fragment>
+                            ))}
                     </div>
                 </div>
             );
@@ -282,9 +358,31 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
             });
         });
 
+        if (summaryHasHtml) {
+            return (
+                <div className={`summary-completion ${isSummaryFullyAnswered ? 'answered' : 'unanswered'}`}>
+                    {showSummaryTitle && (
+                        <div className="summary-title">
+                            <h4 className="title-text">{summaryTitle}</h4>
+                        </div>
+                    )}
+                    <div className="summary-text">
+                        {parseTemplateToNodes(
+                            question.summary,
+                            (blankId) => (
+                                <span className="blank-container" key={`summary-input-${blankId}`}>
+                                    {renderBlankInput(blankId)}
+                                </span>
+                            )
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className={`summary-completion ${isSummaryFullyAnswered ? 'answered' : 'unanswered'}`}>
-                {summaryTitle && (
+                {showSummaryTitle && (
                     <div className="summary-title">
                         <h4 className="title-text">{summaryTitle}</h4>
                     </div>
@@ -504,6 +602,7 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
                         // Handle both formats: ___NUMBER___ and NUMBER..........
                         const noteParts = note.split(/(?:___\d+___|\d+\.{2,})/);
                         const blanks = note.match(/(?:___(\d+)___|(\d+)\.{2,})/g) || [];
+                        const noteHasHtml = hasHtmlTags(note);
 
                         // Determine if ALL blanks in this note have been answered (non-empty)
                         const isNoteFullyAnswered =
@@ -517,24 +616,35 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
                         return (
                             <div key={noteIndex} className={`note-item ${isNoteFullyAnswered ? 'answered' : 'unanswered'}`}>
                                 <div className="note-content">
-                                    {noteParts.map((part, partIndex) => (
-                                        <React.Fragment key={partIndex}>
-                                            {part.split('\n').map((line, lineIdx) => (
-                                                <React.Fragment key={lineIdx}>
-                                                    {lineIdx > 0 && <br />}
-                                                    {line}
-                                                </React.Fragment>
-                                            ))}
-                                            {partIndex < blanks.length && (
-                                                <span className="blank-container">
-                                                    {isReviewMode ? 
-                                                        renderNoteBlankReview(blanks[partIndex].match(/\d+/)[0]) :
-                                                        renderBlankInput(blanks[partIndex].match(/\d+/)[0])
-                                                    }
+                                    {noteHasHtml
+                                        ? parseTemplateToNodes(
+                                            note,
+                                            (blankId) => (
+                                                <span className="blank-container" key={`note-${noteIndex}-${blankId}`}>
+                                                    {isReviewMode
+                                                        ? renderNoteBlankReview(blankId)
+                                                        : renderBlankInput(blankId)}
                                                 </span>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
+                                            )
+                                        )
+                                        : noteParts.map((part, partIndex) => (
+                                            <React.Fragment key={partIndex}>
+                                                {part.split('\n').map((line, lineIdx) => (
+                                                    <React.Fragment key={lineIdx}>
+                                                        {lineIdx > 0 && <br />}
+                                                        {line}
+                                                    </React.Fragment>
+                                                ))}
+                                                {partIndex < blanks.length && (
+                                                    <span className="blank-container">
+                                                        {isReviewMode ? 
+                                                            renderNoteBlankReview(blanks[partIndex].match(/\d+/)[0]) :
+                                                            renderBlankInput(blanks[partIndex].match(/\d+/)[0])
+                                                        }
+                                                    </span>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
                                 </div>
                             </div>
                         );
@@ -682,6 +792,7 @@ const CompletionQuestion = ({ question, answer, onAnswerChange, isReviewMode, re
 
     return (
         <div className="completion-question-container">
+            {renderCompletionInstruction()}
             {renderContent()}
         </div>
     );

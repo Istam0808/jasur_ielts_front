@@ -3,10 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Spinner from "@/components/common/spinner";
+import Modal from "@/components/common/Modal";
 import TestListeningPage from "@/app/mock/_components/TestListeningPage";
-import { getMockById } from "@/lib/mockApi";
+import { getMockById, isTokenExpiredError, logoutAgent } from "@/lib/mockApi";
 import { adaptListeningMockToUi } from "@/lib/mockAdapters";
-import { getMockAccessToken, setMockPayload } from "@/lib/mockSession";
+import {
+  clearMockSession,
+  getMockAccessToken,
+  getMockSession,
+  setMockPayload,
+} from "@/lib/mockSession";
 import MockPreloadScreen from "@/components/MockPreloadScreen";
 import { useMockPreloader } from "@/hooks/useMockPreloader";
 
@@ -17,6 +23,7 @@ export default function MockListeningByIdPage() {
   const [mockDetail, setMockDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showTokenExpiredModal, setShowTokenExpiredModal] = useState(false);
   const {
     percent,
     status,
@@ -55,6 +62,10 @@ export default function MockListeningByIdPage() {
         setMockPayload(mockId, detail);
         setMockDetail(detail);
       } catch (err) {
+        if (isTokenExpiredError(err)) {
+          setShowTokenExpiredModal(true);
+          return;
+        }
         setError(err?.message || "Не удалось загрузить listening mock.");
       } finally {
         setLoading(false);
@@ -69,6 +80,21 @@ export default function MockListeningByIdPage() {
       console.warn("[mock-preloader] some assets failed to preload:", errors);
     }
   }, [errors, status]);
+
+  const handleFinishSession = async () => {
+    const token = getMockSession()?.accessToken;
+    try {
+      if (token) {
+        await logoutAgent(token);
+      }
+    } catch (err) {
+      console.warn("Logout request failed after token expiration:", err);
+    } finally {
+      clearMockSession();
+      setShowTokenExpiredModal(false);
+      router.replace("/");
+    }
+  };
 
   if (loading && !mockDetail) {
     return (
@@ -111,16 +137,36 @@ export default function MockListeningByIdPage() {
   }
 
   return (
-    <TestListeningPage
-      bookData={preparedPayload.bookData}
-      answersData={preparedPayload.answersData}
-      bookId={preparedPayload.bookId}
-      testId={preparedPayload.testId}
-      testTitle={preparedPayload.testTitle}
-      nextHref={`/mock/${mockId}/reading`}
-      isMockExam={true}
-      mockId={Number(mockId)}
-      useUnifiedMockHeader={true}
-    />
+    <>
+      <TestListeningPage
+        bookData={preparedPayload.bookData}
+        answersData={preparedPayload.answersData}
+        bookId={preparedPayload.bookId}
+        testId={preparedPayload.testId}
+        testTitle={preparedPayload.testTitle}
+        nextHref={`/mock/${mockId}/reading`}
+        isMockExam={true}
+        mockId={Number(mockId)}
+        useUnifiedMockHeader={true}
+      />
+
+      {showTokenExpiredModal && (
+        <Modal
+          onClose={() => {}}
+          title="Сессия истекла"
+          description="Ваш токен авторизации истек. Чтобы продолжить работу, завершите текущую сессию и войдите снова."
+          closeOnClickOutside={false}
+          closeOnEscape={false}
+          showCloseButton={false}
+          buttons={[
+            {
+              text: "Закончить сессию",
+              className: "btn btn-primary",
+              onClick: handleFinishSession,
+            },
+          ]}
+        />
+      )}
+    </>
   );
 }

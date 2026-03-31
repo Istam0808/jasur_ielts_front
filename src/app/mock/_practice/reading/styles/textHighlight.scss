@@ -62,6 +62,7 @@
 
     // CRITICAL FIX: Prevent highlighting in structural elements
     &.passage-title,
+    &.passage-subtopic,
     &.section-header,
     &.header-left,
     &.header-right,
@@ -84,6 +85,7 @@
 
 // Prevent highlighting in passage titles and structural elements
 .passage-title,
+.passage-subtopic,
 .section-header,
 .header-left,
 .header-right,

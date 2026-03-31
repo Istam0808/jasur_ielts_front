@@ -55,6 +55,17 @@
             position: relative;
             z-index: 1;
 
+            ul,
+            ol {
+                list-style: none;
+                margin: 0.5rem 0;
+            }
+
+            li {
+                list-style: none;
+                margin: 0.35rem 0;
+            }
+
             // Enhanced typography for better readability
             &::selection {
                 background: color.adjust($primary-color, $alpha: -0.8);
@@ -1642,6 +1653,18 @@
                 text-align: left;
                 position: relative;
                 z-index: 1;
+
+                ul,
+                ol {
+                    list-style: none;
+                    margin: 0.5rem 0;
+                    padding-left: 1.25rem;
+                }
+
+                li {
+                    list-style: none;
+                    margin: 0.35rem 0;
+                }
 
 
                 .blank-container {

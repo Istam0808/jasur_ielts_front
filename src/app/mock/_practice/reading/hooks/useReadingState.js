@@ -673,6 +673,10 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
             ...baseData,
             passage: readingExercise.passage,
             questions: readingExercise.questions,
+            subtopic:
+                readingExercise.subtopic ??
+                readingExercise.passages?.[0]?.subtopic ??
+                '',
             isMultiPassage: false
         };
     }, [id, difficulty, readingExercise, isMultiPassage]);
@@ -842,12 +846,19 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         const title = readingData?.isMultiPassage
             ? (currentPassage?.title || readingData.title)
             : readingData?.title;
+        const subtopicRaw = readingData?.isMultiPassage
+            ? currentPassage?.subtopic
+            : readingData?.subtopic;
+        const subtopicTrimmed =
+            subtopicRaw != null && String(subtopicRaw).trim() ? String(subtopicRaw).trim() : '';
+        const subtopic = subtopicTrimmed === '---' ? '' : subtopicTrimmed;
 
         const isHtml = typeof text === 'string' && /<\s*\/?\s*(p|b|i|strong|em|br|span)\s*\/?>/i.test(text);
 
         return {
             text,
             title,
+            subtopic,
             isHtml: !!isHtml,
             paragraphs: isHtml ? (text ? [text] : []) : (text?.split('\n\n') || [])
         };
@@ -1575,6 +1586,7 @@ export const useReadingState = (readingExercise, difficulty, id, externalStartTi
         passageParagraphs: passageContent.paragraphs,
         passageIsHtml: passageContent.isHtml,
         passageTitle: passageContent.title,
+        passageSubtopic: passageContent.subtopic,
 
         // Actions
         loadReadingData,

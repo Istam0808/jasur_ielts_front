@@ -225,6 +225,53 @@ function parseQuestionNumberRange(questionNumber) {
   return numbers;
 }
 
+function extractPassageParagraphLetters(passageText) {
+  const source = typeof passageText === "string" ? passageText : "";
+  if (!source.trim()) return [];
+
+  const fromHtml = Array.from(source.matchAll(/<b>\s*([A-Za-z])\s*<\/b>/g))
+    .map((m) => String(m[1] || "").toUpperCase())
+    .filter(Boolean);
+  if (fromHtml.length) {
+    return Array.from(new Set(fromHtml));
+  }
+
+  const fromPlain = Array.from(source.matchAll(/(?:^|\n)\s*([A-Za-z])\s{1,3}/g))
+    .map((m) => String(m[1] || "").toUpperCase())
+    .filter(Boolean);
+
+  return Array.from(new Set(fromPlain));
+}
+
+function buildMatchingInformationOptions(section, passageText) {
+  const fromSelections = asArray(section?.list_selections)
+    .map((selection, index) => toOptionData(selection, index))
+    .filter(Boolean);
+  if (fromSelections.length) return fromSelections;
+
+  const fromQuestionOptions = asArray(section?.questions)
+    .flatMap((q) => asArray(q?.options))
+    .map((option, index) => toOptionData(option, index))
+    .filter(Boolean);
+  if (fromQuestionOptions.length) {
+    // De-duplicate by label/value to avoid repeated options coming from each question.
+    const seen = new Set();
+    return fromQuestionOptions.filter((opt) => {
+      const key = String(opt?.value || opt?.label || "").toUpperCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  const letters = extractPassageParagraphLetters(passageText);
+  if (letters.length) {
+    return letters.map((letter, index) => toOptionData({ label: letter, text: letter }, index));
+  }
+
+  return [];
+}
+
 export function adaptListening(mockDetail) {
   const adapted = adaptListeningMockToUi(mockDetail);
   return adapted?.bookData?.tests?.[0] ?? null;
@@ -509,14 +556,23 @@ export function adaptReadingMockToUi(mockDetail) {
       }
 
       if (type === "matching_information") {
+        const sortedQuestions = sourceQuestions
+          .slice()
+          .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+        const options = buildMatchingInformationOptions(section, passage?.text);
+
         return [{
           id: questionId++,
           type,
           instruction: section?.instructions || "Match information.",
-          information: sourceQuestions.map((q, idx) => `${idx + 1}. ${q?.question_text || `Information ${idx + 1}`}`),
-          options: sourceQuestions[0]?.options?.length
-            ? sourceQuestions[0].options.map(toOptionData)
-            : [],
+          information: sortedQuestions.map((q, idx) => {
+            const resolvedOrder = Number.isFinite(Number(q?.order))
+              ? Number(q.order)
+              : (idx + 1);
+            const text = q?.question_text || `Information ${resolvedOrder}`;
+            return `${resolvedOrder}. ${text}`;
+          }),
+          options,
         }];
       }
 
@@ -598,10 +654,17 @@ export function adaptReadingMockToUi(mockDetail) {
       }];
     });
 
+    const subtopicRaw =
+      passage?.subtopic != null && String(passage.subtopic).trim()
+        ? String(passage.subtopic).trim()
+        : "";
+    const subtopic = subtopicRaw === "---" ? "" : subtopicRaw;
+
     return {
       passage_id: passageIndex + 1,
       title: passage?.title || `Reading passage ${passageIndex + 1}`,
       topic: passage?.topic || "",
+      subtopic,
       text: passage?.text || "",
       question_range: "",
       questions,

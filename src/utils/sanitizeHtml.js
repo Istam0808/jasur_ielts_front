@@ -5,8 +5,14 @@
 
 import DOMPurify from 'isomorphic-dompurify';
 
-const ALLOWED_TAGS = ['p', 'b', 'i', 'em', 'strong', 'br', 'span'];
-const ALLOWED_ATTR = ['class'];
+const ALLOWED_TAGS = [
+    'p', 'b', 'i', 'em', 'strong', 'br', 'span',
+    'ul', 'ol', 'li', 'div',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'u', 'sub', 'sup', 'small',
+    'blank'
+];
+const ALLOWED_ATTR = ['class', 'data-blank-id'];
 
 function sanitizeHtml(html) {
     if (html == null || typeof html !== 'string') return '';

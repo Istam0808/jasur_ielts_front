@@ -343,4 +343,24 @@ export function isInvalidOrInactiveSessionError(error) {
   return isInvalidOrInactiveSessionPayload(error.payload);
 }
 
+/** JWT истёк или невалиден (по тексту ошибки, не только 401). */
+export function isTokenExpiredError(error) {
+  if (!(error instanceof BackendApiError)) return false;
+
+  const detail =
+    typeof error?.payload?.detail === "string" ? error.payload.detail : "";
+  const messageFromPayload =
+    typeof error?.payload?.message === "string" ? error.payload.message : "";
+  const message = typeof error?.message === "string" ? error.message : "";
+
+  const normalized = `${detail} ${messageFromPayload} ${message}`.toLowerCase();
+  const hasTokenWord = normalized.includes("token") || normalized.includes("jwt");
+  const hasExpiredWord =
+    normalized.includes("expired") ||
+    normalized.includes("истек") ||
+    normalized.includes("истёк");
+  const hasInvalidWord = normalized.includes("not valid") || normalized.includes("invalid");
+  return hasTokenWord && (hasExpiredWord || hasInvalidWord);
+}
+
 export { BackendApiError };

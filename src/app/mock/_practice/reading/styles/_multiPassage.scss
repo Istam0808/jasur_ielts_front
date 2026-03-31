@@ -25,6 +25,12 @@
             border-bottom: 2px solid $border-light;
             margin-bottom: $spacing-lg;
         }
+
+        &:has(.passage-subtopic) .passage-title {
+            border-bottom: none;
+            margin-bottom: $spacing-sm;
+            padding-bottom: $spacing-sm;
+        }
     }
 }
 

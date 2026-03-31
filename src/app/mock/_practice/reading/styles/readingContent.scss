@@ -222,6 +222,30 @@
             }
         }
 
+        &:has(.passage-subtopic) .passage-title {
+            margin-bottom: $spacing-sm;
+            padding-bottom: $spacing-sm;
+            border-bottom: none;
+        }
+
+        .passage-subtopic {
+            font-size: $font-size-base;
+            font-weight: $font-weight-normal;
+            font-style: italic;
+            color: $text-secondary;
+            line-height: 1.55;
+            text-align: center;
+            margin: 0 0 $spacing-xl;
+            padding-bottom: $spacing-lg;
+            border-bottom: 2px solid $border-light;
+
+            @include respond-down('sm') {
+                font-size: $font-size-sm;
+                margin-bottom: $spacing-lg;
+                padding-bottom: $spacing-md;
+            }
+        }
+
         .passage-paragraph {
             margin-bottom: $spacing-lg;
             font-size: $font-size-base;

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import styles from '../../styles/MatchingQuestion.module.scss';
 import SelectOption from '@/components/common/input-types/SelectOption';
 import CorrectAnswerInfo from '@/components/common/CorrectAnswerInfo';
+import sanitizeHtml from '@/utils/sanitizeHtml';
 
 const splitOptionLabelAndText = (value) => {
     const source = String(value || '').trim();
@@ -32,6 +33,24 @@ const getOptionText = (option) => {
     const parsed = splitOptionLabelAndText(option);
     return parsed.text || String(option || '').trim();
 };
+
+const parseIndexedPrompt = (value, fallbackIndex = 0) => {
+    const source = String(value || '').trim();
+    const match = source.match(/^(\d+)\.\s*(.+)$/);
+    if (match) {
+        return {
+            number: String(match[1]).trim(),
+            text: String(match[2] || '').trim()
+        };
+    }
+
+    return {
+        number: String(fallbackIndex + 1),
+        text: source
+    };
+};
+
+const hasHtmlTags = (value) => /<\/?[a-z][\s\S]*>/i.test(String(value || ''));
 
 const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, readingId, reviewMap, difficulty }) => {
     const { t } = useTranslation('reading');
@@ -163,9 +182,9 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
         let isCorrect = false;
         if (correctAnswer && userResponse) {
             if (question.type === 'matching_information') {
-                // Extract letter from user response (e.g., "Paragraph A" -> "A")
-                const userLetter = userResponse.match(/[A-Z]$/)?.[0];
-                isCorrect = userLetter === correctAnswer;
+                // User answer is expected to be a letter ("A"), but keep tolerant extraction for legacy values.
+                const userLetter = String(userResponse).trim().match(/[A-Za-z]$/)?.[0]?.toUpperCase();
+                isCorrect = userLetter === String(correctAnswer).trim().toUpperCase();
             } else if (question.type === 'matching_headings') {
                 // The correct answer may be a short token (e.g., "iv" or "A") while the userResponse
                 // contains the full heading text possibly including the token. Try to extract a comparable token.
@@ -296,61 +315,82 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
     };
 
     const renderMatchingInformation = () => {
-        // In the new structure, options are directly provided as an array
         const options = question.options || [];
         const information = question.information || [];
+        const letterColumns = options
+            .map((opt, idx) => String(getOptionValue(opt, idx) || '').trim().toUpperCase())
+            .filter((val, idx, arr) => val && arr.indexOf(val) === idx);
 
         if (!information || information.length === 0) {
             return <div className={styles.errorMessage}>{t('matching.noInformationItems')}</div>;
         }
 
+        if (!letterColumns.length) {
+            return <div className={styles.errorMessage}>{t('matching.noItemsAvailable')}</div>;
+        }
+
         return (
             <div className={styles.matchingInformation}>
-                <div className={styles.informationItems}>
-                    {information.map((info, idx) => {
-                        // Handle both old structure (object with info property) and new structure (simple string)
-                        const infoValue = typeof info === 'object' ? info.info : info;
-                        const itemStatus = getItemStatus(infoValue);
-                        const selectedOption = userAnswers[infoValue];
+                <div className={styles.matchingInfoTableWrap}>
+                    <table className={styles.matchingInfoTable}>
+                        <thead>
+                            <tr>
+                                <th className={styles.colNumber}>#</th>
+                                <th className={styles.colQuestion}>Question</th>
+                                {letterColumns.map((letter) => (
+                                    <th key={letter} className={styles.colOption}>{letter}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {information.map((info, idx) => {
+                                const infoValue = typeof info === 'object' ? info.info : info;
+                                const itemStatus = getItemStatus(infoValue);
+                                const selectedOption = String(userAnswers[infoValue] || '').trim().toUpperCase();
+                                const { number, text } = parseIndexedPrompt(infoValue, idx);
 
-                        return (
-                            <div
-                                key={idx}
-                                className={`${styles.matchingItem} ${itemStatus.isAnswered ? styles.answered : styles.unanswered} ${itemStatus.showFeedback ? (itemStatus.isCorrect ? styles.correct : styles.incorrect) : ''
-                                    } ${isReviewMode ? styles.reviewMode : ''}`}
-                            >
-                                <div className={styles.itemContent}>
-                                    <span className={styles.itemNumber}>{infoValue.slice(0, infoValue.indexOf("."))}.</span>
-                                    <span className={styles.itemText}>{infoValue.slice(infoValue.indexOf(".")+1)}</span>
-                                    {itemStatus.showFeedback && (
-                                        <span className={`${styles.feedbackIcon} ${itemStatus.isCorrect ? styles.correct : styles.incorrect}`}>
-                                            {itemStatus.isCorrect ? '✓' : '✗'}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className={styles.answerSelector}>
-                                    <SelectOption
-                                      options={options.map((o) => ({ 
-                                        value: getOptionValue(o), 
-                                        label: getOptionText(o),
-                                        disabled: String(getOptionText(o)).startsWith('EXAMPLE')
-                                      }))}
-                                      value={selectedOption || null}
-                                      onChange={(val) => handleAnswerChange(infoValue, val || '')}
-                                      placeholder={t('selectOption')}
-                                      disabled={isReviewMode}
-                                    />
-                                    {itemStatus.showFeedback && !itemStatus.isCorrect && itemStatus.correctAnswer && (
-                                        <CorrectAnswerInfo
-                                          label={t('correctAnswer') + ':'}
-                                          value={itemStatus.correctAnswer}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                                return (
+                                    <tr
+                                        key={idx}
+                                        className={`${styles.infoRow} ${itemStatus.isAnswered ? styles.answered : styles.unanswered} ${itemStatus.showFeedback ? (itemStatus.isCorrect ? styles.correct : styles.incorrect) : ''}`}
+                                    >
+                                        <td className={styles.numberCell}>{number}</td>
+                                        <td className={styles.questionCell}>
+                                            <span>{text}</span>
+                                            {itemStatus.showFeedback && (
+                                                <span className={`${styles.feedbackIcon} ${itemStatus.isCorrect ? styles.correct : styles.incorrect}`}>
+                                                    {itemStatus.isCorrect ? '✓' : '✗'}
+                                                </span>
+                                            )}
+                                            {itemStatus.showFeedback && !itemStatus.isCorrect && itemStatus.correctAnswer && (
+                                                <CorrectAnswerInfo
+                                                    label={t('correctAnswer') + ':'}
+                                                    value={itemStatus.correctAnswer}
+                                                />
+                                            )}
+                                        </td>
+                                        {letterColumns.map((letter) => {
+                                            const checked = selectedOption === letter;
+                                            return (
+                                                <td key={`${idx}-${letter}`} className={styles.optionCell}>
+                                                    <button
+                                                        type="button"
+                                                        className={`${styles.optionButton} ${checked ? styles.selected : ''}`}
+                                                        onClick={() => handleAnswerChange(infoValue, letter)}
+                                                        disabled={isReviewMode}
+                                                        aria-pressed={checked}
+                                                        aria-label={`${number}: ${letter}`}
+                                                    >
+                                                        {checked ? '●' : ''}
+                                                    </button>
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         );
@@ -513,8 +553,25 @@ const MatchingQuestion = ({ question, answer, onAnswerChange, isReviewMode, read
         }
     };
 
+    const renderInstruction = () => {
+        const inst = typeof question?.instruction === 'string' ? question.instruction.trim() : '';
+        if (!inst || inst === '.') return null;
+
+        if (hasHtmlTags(inst)) {
+            return (
+                <div
+                    className={`${styles.questionInstruction} question-instruction`}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(inst) }}
+                />
+            );
+        }
+
+        return <div className={`${styles.questionInstruction} question-instruction`}>{inst}</div>;
+    };
+
     return (
         <div className={styles.matchingQuestionContainer}>
+            {renderInstruction()}
             {renderContent()}
         </div>
     );

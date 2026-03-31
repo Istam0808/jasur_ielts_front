@@ -8,6 +8,19 @@
 
 .questionInstruction {
     @include question-instruction-style;
+
+    ul,
+    ol {
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+    }
+
+    li {
+        list-style: none;
+        margin: 0 0 $spacing-xs 0;
+        padding-left: 0;
+    }
 }
 
 .matchingInformation,
@@ -277,6 +290,124 @@
 
 .answerSelector {
     @include flex(column, flex-start, stretch, nowrap, $spacing-sm);
+}
+
+.matchingInfoTableWrap {
+    overflow-x: auto;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    background: $background-primary;
+}
+
+.matchingInfoTable {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+
+    th,
+    td {
+        border-bottom: 1px solid $border-light;
+        padding: $spacing-sm;
+        vertical-align: middle;
+    }
+
+    thead th {
+        background: $background-light;
+        color: $text-primary;
+        font-weight: $font-weight-semibold;
+        text-align: center;
+        @include font-size($font-size-sm, $line-height-normal);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.colNumber {
+    width: 64px;
+}
+
+.colQuestion {
+    text-align: left !important;
+    min-width: 320px;
+}
+
+.colOption {
+    width: 54px;
+}
+
+.infoRow {
+    &.answered {
+        background: color.adjust($primary-color, $lightness: 52%);
+    }
+
+    &.correct {
+        background: color.adjust($success-color, $lightness: 50%);
+    }
+
+    &.incorrect {
+        background: color.adjust($danger-color, $lightness: 50%);
+    }
+}
+
+.numberCell {
+    text-align: center;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    @include font-size($font-size-sm, $line-height-normal);
+}
+
+.questionCell {
+    color: $text-primary;
+    @include font-size($font-size-sm, $line-height-relaxed);
+
+    .feedbackIcon {
+        margin-left: $spacing-sm;
+    }
+
+    .correctAnswer {
+        margin-top: $spacing-xs;
+    }
+}
+
+.optionCell {
+    text-align: center;
+}
+
+.optionButton {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid $border-light;
+    background: $background-primary;
+    color: transparent;
+    cursor: pointer;
+    transition: $transition-fast;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+        border-color: $primary-color;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.75;
+    }
+
+    &.selected {
+        border-color: $primary-color;
+        color: $primary-color;
+    }
+
+    @include focus-visible {
+        outline: none;
+        border-color: $primary-color;
+        @include box-shadow(0, 0, 0, 3px, rgba($primary-color, 0.12));
+    }
 }
 
 .optionSelect,
