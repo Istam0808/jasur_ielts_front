@@ -87,6 +87,7 @@ function mapReadingType(sectionType) {
 
   if (normalized.includes("matching_headings")) return "matching_headings";
   if (normalized.includes("matching_information")) return "matching_information";
+  if (normalized.includes("matching_people")) return "matching_people";
   if (normalized.includes("matching_features")) return "matching_features";
   if (normalized.includes("matching_sentences")) return "matching_sentences";
   if (normalized.includes("sentence_completion")) return "sentence_completion";
@@ -573,6 +574,49 @@ export function adaptReadingMockToUi(mockDetail) {
             return `${resolvedOrder}. ${text}`;
           }),
           options,
+        }];
+      }
+
+      if (type === "matching_people") {
+        const sortedQuestions = sourceQuestions
+          .slice()
+          .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+        const options = asArray(section?.list_selections).map((selection, index) =>
+          toOptionData(selection, index)
+        );
+
+        const statements = sortedQuestions.map((q, idx) => {
+          const resolvedOrder = Number.isFinite(Number(q?.order))
+            ? Number(q.order)
+            : (idx + 1);
+          const text = q?.question_text || `Statement ${resolvedOrder}`;
+          return `${resolvedOrder}. ${text}`;
+        });
+
+        const answers = sortedQuestions
+          .map((q, idx) => {
+            const resolvedOrder = Number.isFinite(Number(q?.order))
+              ? Number(q.order)
+              : (idx + 1);
+            const text = q?.question_text || `Statement ${resolvedOrder}`;
+            const statement = `${resolvedOrder}. ${text}`;
+            const answerValue = q?.correct_answer ?? q?.answer ?? q?.correct ?? null;
+            if (answerValue == null || String(answerValue).trim() === "") return null;
+            return {
+              statement,
+              answer: String(answerValue).trim().toUpperCase(),
+            };
+          })
+          .filter(Boolean);
+
+        return [{
+          id: questionId++,
+          type,
+          instruction: section?.instructions || "Match each statement with the correct person.",
+          statements,
+          options,
+          people: options,
+          answers,
         }];
       }
 

@@ -104,12 +104,13 @@ export function getCorrectAnswerTextForScoring(question, _readingId) {
 
     case 'matching_headings':
     case 'matching_information':
+    case 'matching_people':
     case 'matching_features':
     case 'sentence_completion': {
       const map = {};
       if (answers && Array.isArray(answers)) {
         answers.forEach((a) => {
-          const key = a.section ?? a.info ?? a.feature ?? a.sentence ?? a.blank ?? a.id;
+          const key = a.section ?? a.info ?? a.statement ?? a.feature ?? a.sentence ?? a.blank ?? a.id;
           if (key != null) map[key] = a.answer ?? a.correct ?? a.value;
         });
       }

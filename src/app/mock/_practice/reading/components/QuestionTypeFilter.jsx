@@ -116,6 +116,12 @@ const QuestionTypeFilter = ({
             color: '#3B82F6',
             category: 'matching'
         },
+        matching_people: {
+            icon: BsArrowLeftRight,
+            displayName: t('questionTypes.matchingPeople', 'Matching People'),
+            color: '#2563EB',
+            category: 'matching'
+        },
         matching_features: {
             icon: BsArrowsAngleExpand,
             displayName: t('questionTypes.matchingFeatures'),

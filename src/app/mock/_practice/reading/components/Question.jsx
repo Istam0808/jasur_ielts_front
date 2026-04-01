@@ -14,6 +14,7 @@ import TrueFalseNotGiven from './question-types/TrueFalseNotGiven';
 import MatchingHeadings from './question-types/MatchingHeadings';
 import MatchingHeadingsDragBank from './question-types/MatchingHeadingsDragBank';
 import MatchingQuestion from './question-types/MatchingQuestion';
+import MatchingPeopleQuestion from './question-types/MatchingPeopleQuestion';
 import MatchingSentences from './question-types/MatchingSentences';
 import CompletionQuestion from './question-types/CompletionQuestion';
 import AdvancedShortAnswer from './question-types/AdvancedShortAnswer';
@@ -264,6 +265,13 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
                 return answeredItems === requiredItems;
             }
             return false;
+        } else if (question.type === 'matching_people') {
+            if (typeof answer === 'object' && answer !== null && question.statements) {
+                const requiredItems = question.statements.length;
+                const answeredItems = Object.values(answer).filter(val => val && val !== '').length;
+                return answeredItems === requiredItems;
+            }
+            return false;
         } else if (question.type === 'matching_features') {
             // For matching features, check if ALL features have been answered
             if (typeof answer === 'object' && answer !== null && question.features) {
@@ -362,6 +370,7 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
             'yes_no_not_given',         // Shows question.statement  
             'matching_headings',        // Shows question.instruction
             'matching_information',     // Shows question.instruction
+            'matching_people',          // Shows question.instruction
             'matching_features',        // Shows question.instruction
             'matching_sentences',       // Shows its own item content
             'sentence_completion',      // Shows question.instruction
@@ -498,6 +507,17 @@ const QuestionComponent = memo(({ question, answer, onAnswerChange, isReviewMode
                         onAnswerChange={onAnswerChange}
                         isReviewMode={isReviewMode}
                         readingId={readingId}
+                        reviewMap={reviewMap}
+                    />
+                );
+
+            case 'matching_people':
+                return (
+                    <MatchingPeopleQuestion
+                        question={question}
+                        answer={answer}
+                        onAnswerChange={onAnswerChange}
+                        isReviewMode={isReviewMode}
                         reviewMap={reviewMap}
                     />
                 );

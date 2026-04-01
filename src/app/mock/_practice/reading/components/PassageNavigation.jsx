@@ -86,6 +86,13 @@ const hasValidAnswer = (answer, question) => {
             return answeredItems === requiredItems;
         }
         return false;
+    } else if (question.type === 'matching_people') {
+        if (typeof answer === 'object' && answer !== null && question.statements) {
+            const requiredItems = question.statements.length;
+            const answeredItems = Object.values(answer).filter(val => val && val !== '').length;
+            return answeredItems === requiredItems;
+        }
+        return false;
     } else if (question.type === 'matching_features') {
         // For matching features, check if ALL features have been answered
         if (typeof answer === 'object' && answer !== null && question.features) {

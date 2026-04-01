@@ -116,6 +116,13 @@ const getReadingSlotValue = (question, userAnswer, answerIndex) => {
             return normalizeSlotValue(userAnswer[key]);
         }
 
+        case 'matching_people': {
+            if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
+            const statement = question.statements?.[answerIndex];
+            if (!statement) return EMPTY_VALUE;
+            return normalizeSlotValue(userAnswer[statement]);
+        }
+
         case 'matching_features': {
             if (!userAnswer || typeof userAnswer !== 'object') return EMPTY_VALUE;
             const feature = question.features?.[answerIndex];
@@ -238,6 +245,18 @@ const setReadingSlotValue = (question, prevAnswer, answerIndex, rawValue) => {
                 delete base[key];
             } else {
                 base[key] = val;
+            }
+            return base;
+        }
+
+        case 'matching_people': {
+            const statement = question.statements?.[answerIndex];
+            if (!statement) return typeof prevAnswer === 'object' && prevAnswer !== null ? prevAnswer : {};
+            const base = typeof prevAnswer === 'object' && prevAnswer !== null ? { ...prevAnswer } : {};
+            if (val === EMPTY_VALUE) {
+                delete base[statement];
+            } else {
+                base[statement] = val;
             }
             return base;
         }
@@ -426,6 +445,7 @@ const calculateQuestionScore = (question, userAnswer, readingId) => {
 
         case 'matching_headings':
         case 'matching_information':
+        case 'matching_people':
         case 'matching_features':
             if (typeof userAnswer !== 'object' || userAnswer === null) return 0;
             return countMatchingAnswers(userAnswer, getCorrectAnswerTextForScoring(question, readingId));

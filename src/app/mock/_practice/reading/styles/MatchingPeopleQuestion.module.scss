@@ -1,0 +1,191 @@
+@use "sass:color";
+@use "@/assets/styles/settings" as *;
+@use "@/assets/styles/mixins" as *;
+
+.matchingPeopleContainer {
+    margin-bottom: $spacing-lg;
+}
+
+.questionInstruction {
+    @include question-instruction-style;
+
+    ul,
+    ol {
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+    }
+
+    li {
+        list-style: none;
+        margin: 0 0 $spacing-xs 0;
+        padding-left: 0;
+    }
+}
+
+.tableWrap {
+    overflow-x: hidden;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-sm;
+    background: $background-primary;
+}
+
+.peopleTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    th,
+    td {
+        border: 1px solid $border-light;
+        padding: $spacing-sm;
+        vertical-align: middle;
+    }
+}
+
+.itemHeader {
+    width: 72%;
+    text-align: center;
+    background: color.adjust($primary-color, $lightness: 42%);
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+}
+
+.personHeader {
+    width: 62px;
+    text-align: center;
+    background: color.adjust($primary-color, $lightness: 42%);
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+}
+
+.statementRow {
+    &.answered {
+        background: color.adjust($primary-color, $lightness: 52%);
+    }
+
+    &.correct {
+        background: color.adjust($success-color, $lightness: 50%);
+    }
+
+    &.incorrect {
+        background: color.adjust($danger-color, $lightness: 50%);
+    }
+}
+
+.statementCell {
+    width: 72%;
+    @include font-size($font-size-sm, $line-height-relaxed);
+    color: $text-primary;
+    word-break: break-word;
+}
+
+.statementNumber {
+    margin-right: $spacing-sm;
+    font-weight: $font-weight-semibold;
+}
+
+.statementText {
+    margin-right: $spacing-sm;
+}
+
+.feedbackIcon {
+    font-weight: $font-weight-semibold;
+
+    &.correct {
+        color: $success-color;
+    }
+
+    &.incorrect {
+        color: $danger-color;
+    }
+}
+
+.optionCell {
+    text-align: center;
+}
+
+.optionButton {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid $border-light;
+    background: $background-primary;
+    color: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition-fast;
+
+    &:hover:not(:disabled) {
+        border-color: $primary-color;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.75;
+    }
+
+    &.selected {
+        border-color: $primary-color;
+        color: $primary-color;
+    }
+
+    @include focus-visible {
+        outline: none;
+        border-color: $primary-color;
+        @include box-shadow(0, 0, 0, 3px, rgba($primary-color, 0.12));
+    }
+}
+
+.peopleListBlock {
+    margin-top: $spacing-md;
+    border: 1px solid $border-light;
+    border-radius: $border-radius-xs;
+    background: $background-primary;
+    max-width: 240px;
+
+    h4 {
+        margin: 0;
+        padding: $spacing-xs $spacing-sm;
+        border-bottom: 1px solid $border-light;
+        font-weight: $font-weight-semibold;
+        @include font-size($font-size-sm, $line-height-normal);
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: $spacing-xs $spacing-sm;
+    }
+
+    li {
+        @include flex(row, flex-start, center, nowrap, $spacing-sm);
+        margin-bottom: 6px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.personLabel {
+    min-width: 16px;
+    font-weight: $font-weight-semibold;
+}
+
+.personText {
+    @include font-size($font-size-sm, $line-height-normal);
+}
+
+.errorMessage {
+    background: color.adjust($danger-color, $lightness: 95%);
+    border: 1px solid $danger-color;
+    border-radius: $border-radius-xs;
+    padding: $spacing-sm $spacing-md;
+    color: $danger-color;
+    text-align: center;
+    margin: $spacing-md 0;
+    @include font-size($font-size-sm, $line-height-normal);
+}

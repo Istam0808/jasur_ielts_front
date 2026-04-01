@@ -136,6 +136,9 @@ export const getQuestionAnswerCount = (question) => {
         case 'matching_information':
             return question.information?.length || 1;
 
+        case 'matching_people':
+            return question.statements?.length || 1;
+
         case 'matching_features':
             return question.features?.length || 1;
 
@@ -232,6 +235,7 @@ export const getProvidedAnswerCount = (answer, question) => {
 
         case 'matching_headings':
         case 'matching_information':
+        case 'matching_people':
         case 'matching_features':
         case 'matching_sentences':
         case 'sentence_completion':
@@ -278,6 +282,7 @@ export const hasValidAnswer = (answer, question) => {
 
         case 'matching_headings':
         case 'matching_information':
+        case 'matching_people':
         case 'sentence_completion':
         case 'matching_sentences':
         case 'summary_completion':
@@ -445,6 +450,15 @@ export const isSpecificSlotAnswered = (userAnswer, question, answerSlot) => {
             }
             return false;
 
+        case 'matching_people':
+            if (question.statements && typeof userAnswer === 'object') {
+                const statement = question.statements[answerIndex];
+                if (statement) {
+                    return isNonEmptyString(userAnswer[statement]);
+                }
+            }
+            return false;
+
         case 'matching_features':
             if (question.features && typeof userAnswer === 'object') {
                 const feature = question.features[answerIndex];
@@ -573,6 +587,17 @@ export const isSpecificSlotCorrect = (userAnswer, question, answerSlot, readingI
                     const qNum = (infoVal.split?.('.')?.[0] || '').trim();
                     const ans = reviewMap[String(qNum)];
                     if (ans) map[infoVal] = ans;
+                });
+                return map;
+            }
+
+            case 'matching_people': {
+                const map = {};
+                (question.statements || []).forEach((statement) => {
+                    const text = String(statement || '');
+                    const qNum = (text.split?.('.')?.[0] || '').trim();
+                    const ans = reviewMap[String(qNum)];
+                    if (ans) map[text] = ans;
                 });
                 return map;
             }
@@ -749,6 +774,21 @@ export const isSpecificSlotCorrect = (userAnswer, question, answerSlot, readingI
             }
             
             return isCorrect;
+        }
+
+        case 'matching_people': {
+            if (typeof userAnswer !== 'object' || !question.statements) return false;
+            const statement = question.statements[answerIndex];
+            if (!statement) return false;
+            const correctMap = reviewMap ? (getCorrectFromReview() || {}) : (getCorrectAnswerTextForScoring(question, readingId) || {});
+            const correctValue = correctMap[statement];
+            const userValue = userAnswer[statement];
+            if (correctValue === undefined) return false;
+
+            if (!correctValue || !userValue) return false;
+            const userLetter = String(userValue).trim().match(/[A-Za-z]$/)?.[0];
+            const correctLetter = String(correctValue).trim().match(/[A-Za-z]$/)?.[0];
+            return normalizeText(userLetter) === normalizeText(correctLetter);
         }
 
         case 'matching_features': {
