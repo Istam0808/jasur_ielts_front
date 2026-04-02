@@ -286,7 +286,21 @@ $breakpoints: (
     font-size: $font-size-base;
     line-height: $line-height-normal;
     color: $text-secondary;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-sm;
+
+    // Backend can send instruction HTML with list tags; keep plain text look.
+    ul,
+    ol {
+        margin: 0;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
 }
 
 @mixin question-texts-style {

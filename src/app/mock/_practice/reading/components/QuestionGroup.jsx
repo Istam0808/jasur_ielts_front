@@ -2,7 +2,32 @@
 
 import { memo, useMemo } from 'react';
 import { BsCheckCircle, BsCircle } from 'react-icons/bs';
+import sanitizeHtml from '@/utils/sanitizeHtml';
 import QuestionComponent from './Question';
+
+const getRenderableInstruction = (instruction) => {
+    if (instruction == null) return '';
+    const normalized = String(instruction).trim();
+    if (!normalized || normalized === '.') return '';
+    return normalized;
+};
+
+const hasHtmlTags = (value) => /<[^>]+>/.test(String(value || ''));
+
+const QUESTION_TYPES_WITH_OWN_INSTRUCTION = new Set([
+    'multiple_choice_multiple',
+    'matching_headings',
+    'matching_information',
+    'matching_people',
+    'matching_features',
+    'sentence_completion',
+    'summary_completion',
+    'table_completion',
+    'flow_chart_completion',
+    'diagram_labelling',
+    'note_completion',
+    'advanced_short_answer'
+]);
 
 const QuestionGroup = memo(({ 
     questions, 
@@ -21,6 +46,14 @@ const QuestionGroup = memo(({
     }
 
     const questionType = questions[0].type;
+    const groupInstruction = useMemo(
+        () => getRenderableInstruction(questions[0]?.instruction),
+        [questions]
+    );
+    const shouldRenderGroupInstruction = useMemo(
+        () => groupInstruction && !QUESTION_TYPES_WITH_OWN_INSTRUCTION.has(questionType),
+        [groupInstruction, questionType]
+    );
     
     // Get the question range for the entire group
     const groupRange = {
@@ -254,6 +287,16 @@ const QuestionGroup = memo(({
             </div>
 
             <div className="question-body">
+                {shouldRenderGroupInstruction && (
+                    hasHtmlTags(groupInstruction) ? (
+                        <div
+                            className="question-instruction"
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(groupInstruction) }}
+                        />
+                    ) : (
+                        <div className="question-instruction">{groupInstruction}</div>
+                    )
+                )}
                 {questions.map((question, index) => {
                     // Provide global number for single-slot items within grouped blocks
                     const isSingleSlot = ['multiple_choice', 'true_false', 'true_false_not_given', 'yes_no_not_given', 'multiple_choice_multiple'].includes(question.type);

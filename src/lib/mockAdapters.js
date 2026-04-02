@@ -494,6 +494,7 @@ export function adaptReadingMockToUi(mockDetail) {
         return sourceQuestions.map((question) => ({
           id: questionId++,
           type,
+          instruction: section?.instructions || "",
           question: question?.question_text || question?.text || "",
           statement: question?.question_text || question?.text || "",
           options: asArray(question?.options).length
